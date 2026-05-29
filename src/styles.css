@@ -1,0 +1,147 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-display: 'Space Grotesk', 'Inter', sans-serif;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+  --radius: 1rem;
+  /* Light premium theme — cream off-white base, deep ink text, vivid brand */
+  --background: oklch(0.985 0.005 280);
+  --foreground: oklch(0.18 0.03 285);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.18 0.03 285);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.18 0.03 285);
+  --primary: oklch(0.45 0.22 305);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.62 0.18 240);
+  --secondary-foreground: oklch(0.99 0 0);
+  --muted: oklch(0.95 0.01 280);
+  --muted-foreground: oklch(0.45 0.02 280);
+  --accent: oklch(0.62 0.18 240);
+  --accent-foreground: oklch(0.99 0 0);
+  --destructive: oklch(0.6 0.22 22);
+  --destructive-foreground: oklch(0.99 0 0);
+  --border: oklch(0.18 0.03 285 / 10%);
+  --input: oklch(0.18 0.03 285 / 12%);
+  --ring: oklch(0.45 0.22 305);
+  --chart-1: oklch(0.45 0.22 305);
+  --chart-2: oklch(0.62 0.18 240);
+  --chart-3: oklch(0.7 0.15 280);
+  --chart-4: oklch(0.55 0.2 295);
+  --chart-5: oklch(0.7 0.12 220);
+  --sidebar: oklch(0.985 0.005 280);
+  --sidebar-foreground: oklch(0.18 0.03 285);
+  --sidebar-primary: oklch(0.45 0.22 305);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+  --sidebar-accent: oklch(0.95 0.01 280);
+  --sidebar-accent-foreground: oklch(0.18 0.03 285);
+  --sidebar-border: oklch(0.18 0.03 285 / 10%);
+  --sidebar-ring: oklch(0.45 0.22 305);
+
+  --brand-purple: #7B2D8E;
+  --brand-blue: #2BA8E2;
+  --brand-deep: #1a0b2e;
+  --brand-gradient: linear-gradient(135deg, #7B2D8E 0%, #4d4cc4 50%, #2BA8E2 100%);
+  --brand-gradient-soft: linear-gradient(135deg, rgba(123,45,142,0.10) 0%, rgba(43,168,226,0.10) 100%);
+}
+
+@layer base {
+  * { border-color: var(--color-border); }
+  html { scroll-behavior: smooth; background: oklch(0.985 0.005 280); }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4 {
+    font-family: 'Space Grotesk', 'Inter', sans-serif;
+    letter-spacing: -0.025em;
+    font-weight: 600;
+  }
+}
+
+@layer utilities {
+  .text-brand-gradient {
+    background: var(--brand-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .bg-brand-gradient { background: var(--brand-gradient); }
+  .bg-brand-soft { background: var(--brand-gradient-soft); }
+  .ring-brand { box-shadow: 0 0 0 1px rgba(123, 45, 142, 0.15); }
+  .glow-brand { box-shadow: 0 20px 60px -20px rgba(123, 45, 142, 0.45); }
+
+  /* Dark feature sections (hero / showreel) — for visual rhythm */
+  .surface-ink {
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(123,45,142,0.45), transparent 60%),
+      radial-gradient(ellipse 70% 50% at 100% 100%, rgba(43,168,226,0.35), transparent 60%),
+      linear-gradient(180deg, #0d0719 0%, #150a2a 100%);
+    color: #f5f1ff;
+  }
+  .grain::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.08 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    opacity: 0.35; mix-blend-mode: overlay;
+  }
+
+  .fade-in { animation: fadeUp 0.9s ease-out both; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+
+  .marquee-track { animation: marquee 50s linear infinite; }
+  @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  @keyframes marquee-left { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  @keyframes marquee-right { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+  .group\/marquee:hover > div { animation-play-state: paused !important; }
+
+  /* Snap carousel */
+  .snap-x-strong { scroll-snap-type: x mandatory; }
+  .snap-start-strong { scroll-snap-align: start; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { scrollbar-width: none; }
+
+  /* Legal pages typography */
+  .legal h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.25rem; font-weight: 600; margin-top: 2rem; margin-bottom: 0.5rem; color: var(--foreground); }
+  .legal p { color: oklch(0.35 0.02 280); }
+  .legal strong { color: var(--foreground); }
+}
