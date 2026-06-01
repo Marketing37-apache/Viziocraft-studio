@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { ContactForm } from "@/components/ContactForm";
@@ -7,7 +7,6 @@ import { Faq } from "@/components/Faq";
 import { MarqueeShorts, type ShortItem } from "@/components/MarqueeShorts";
 import { ServicesShowcase } from "@/components/ServicesShowcase";
 import { ProcessTimeline } from "@/components/ProcessTimeline";
-import { DevisBuilder } from "@/components/DevisBuilder";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -26,39 +25,27 @@ const CONTACT_FRAME = `${CDN}/6999a130299153a6ec0f8c4a_Frame%201.avif`;
 const PRESENTATION_YT = "S3AOQxL4Uio";
 const YOUTUBE_PREVIEW_PARAMS = "rel=0&modestbranding=1&playsinline=1&mute=1&autoplay=1&loop=1&controls=0";
 
-// ——— Shorts split into 2 rows (left + right scrolling, no gap, no cut) ———
+// ——— Shorts: 2 rows, IDs strictly disjoint so no video appears twice ———
 const SHORTS_ROW_A: ShortItem[] = [
-  { id: "STDO3CoZ1B8", client: "Alexandre Chiabai" },
-  { id: "FkZdFfPfqc0", client: "Charles Gastaud" },
-  { id: "1194RRrMcUE", client: "Nina Voit" },
-  { id: "jdfCIJPPbZA", client: "Twiice Auto" },
-  { id: "65Q6lfhRLAg", client: "Opluo Podcast" },
-  { id: "fFhwa6ajPlE", client: "Essential Talk" },
-  { id: "zQrxTk-qulE", client: "Marvin Ndiaye" },
-  { id: "KBQdckODVo8", client: "Alexandre Chiabai" },
-  { id: "YOTxD57xchs", client: "Charles Gastaud" },
-  { id: "vi4dMM8uOys", client: "Nina Voit" },
-  { id: "5cCGAZm8Ejg", client: "Twiice Auto" },
-  { id: "xT4Ki6kyVmc", client: "Opluo Podcast" },
-  { id: "UxPdz8im8U4", client: "French Gem Hunter" },
   { id: "fYZlCGaTZZQ", client: "Lucas Lopez" },
+  { id: "5ih7ZJrXex4", client: "Charles Gastaud" },
+  { id: "35wShzz4Q3I", client: "Alexandre Chiabai" },
+  { id: "b_H7IeJACgY", client: "Lucas Lopez" },
+  { id: "GX0OZoAc3PA", client: "Charles Gastaud" },
+  { id: "Xf8aGmVyXug", client: "Alexandre Chiabai" },
+  { id: "1LWLid6Ti9k", client: "Lucas Lopez" },
+  { id: "pCLNrvOxidM", client: "Charles Gastaud" },
 ];
 
 const SHORTS_ROW_B: ShortItem[] = [
-  { id: "DUEgEWEAasg", client: "Alexandre Chiabai" },
-  { id: "rkkfYZqnLdM", client: "Charles Gastaud" },
-  { id: "YRLBqozhWsw", client: "Nina Voit" },
-  { id: "9gxlZETjKKY", client: "Twiice Auto" },
-  { id: "-8xG51E4Y6o", client: "Opluo Podcast" },
-  { id: "i-TBNjN_aQw", client: "Essential Talk" },
-  { id: "T6ws087EuiI", client: "Benoit Moget" },
-  { id: "pCLNrvOxidM", client: "Charles Gastaud" },
-  { id: "vY0iAaxEA_A", client: "Charles Gastaud" },
-  { id: "HhvO2W4Srt0", client: "Charles Gastaud" },
-  { id: "55gYp9tRL1c", client: "French Gem Hunter" },
-  { id: "Awdktu9wM5c", client: "French Gem Hunter" },
-  { id: "8mpa7elY4DQ", client: "French Gem Hunter" },
-  { id: "b7C1TC4IfqM", client: "French Gem Hunter" },
+  { id: "JeT1A74eKJg", client: "Lucas Lopez" },
+  { id: "WqHwSrR6au4", client: "Charles Gastaud" },
+  { id: "VUNMpRiNfls", client: "Alexandre Chiabai" },
+  { id: "6qo98rySnN4", client: "Charles Gastaud" },
+  { id: "9IMKEdqbsHk", client: "Alexandre Chiabai" },
+  { id: "ZwUqyHgPFFU", client: "Charles Gastaud" },
+  { id: "Y-npl-g31jI", client: "Alexandre Chiabai" },
+  { id: "BUvgiUuO0EU", client: "Charles Gastaud" },
 ];
 
 type LongVideo = {
@@ -68,97 +55,117 @@ type LongVideo = {
 };
 
 const LONGS: LongVideo[] = [
-  { id: "Tap2qqLun3c", href: "https://youtu.be/Tap2qqLun3c", title: "Format long 1" },
-  { id: "JNJIKiUQ5EU", href: "https://youtu.be/JNJIKiUQ5EU", title: "Format long 2" },
-  { id: "8uI05E19ezk", href: "https://youtu.be/8uI05E19ezk", title: "Format long 3" },
-  { id: "qrlorS0FBWY", href: "https://youtu.be/qrlorS0FBWY", title: "Format long 4" },
-  { id: "w5a3u9f3bq0", href: "https://youtu.be/w5a3u9f3bq0", title: "Format long 5" },
-  { id: "3DzzmIkyowc", href: "https://youtu.be/3DzzmIkyowc", title: "Format long 6" },
-  { id: "Q1nv33ehBJM", href: "https://youtu.be/Q1nv33ehBJM", title: "Format long 7" },
+  { id: "RAEwopIOhl4", href: "https://youtu.be/RAEwopIOhl4", title: "Charles Gastaud" },
+  { id: "UneFJeRYauM", href: "https://youtu.be/UneFJeRYauM", title: "Money Radar" },
+  { id: "H26IYt_--U4", href: "https://youtu.be/H26IYt_--U4", title: "Wintalk" },
+  { id: "OULQ8fWfWcY", href: "https://youtu.be/OULQ8fWfWcY", title: "Charles Gastaud" },
+  { id: "JYUGfNoyDKs", href: "https://youtu.be/JYUGfNoyDKs", title: "Money Radar" },
+  { id: "cpMIan0t_-g", href: "https://youtu.be/cpMIan0t_-g", title: "Wintalk" },
+  { id: "e2ikEj51qFc", href: "https://youtu.be/e2ikEj51qFc", title: "Charles Gastaud" },
+  { id: "eNTcHq-q2xc", href: "https://youtu.be/eNTcHq-q2xc", title: "Wintalk" },
+  { id: "8uI05E19ezk", href: "https://youtu.be/8uI05E19ezk", title: "Charles Gastaud" },
+  { id: "dAA3ZO3PfDw", href: "https://youtu.be/dAA3ZO3PfDw", title: "Wintalk" },
+  { id: "4w09cFQANXg", href: "https://youtu.be/4w09cFQANXg", title: "Wintalk" },
 ];
 
-function LongsCarousel({ items }: { items: LongVideo[] }) {
-  const [visible, setVisible] = useState<LongVideo[] | null>(null);
+function LongCard({ video }: { video: LongVideo }) {
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const [isInViewport, setIsInViewport] = useState(false);
 
   useEffect(() => {
-    let mounted = true;
-
-    async function runChecks() {
-      try {
-        const checks = await Promise.all(
-          items.map(async (v) => {
-            try {
-              const res = await fetch(
-                `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${v.id}&format=json`
-              );
-              if (!res.ok) return null;
-              await res.json();
-              return v;
-            } catch (_) {
-              return null;
-            }
-          })
-        );
-
-        if (!mounted) return;
-        const filtered = checks.filter(Boolean) as LongVideo[];
-        setVisible(filtered.length ? filtered : []);
-      } catch (e) {
-        if (mounted) setVisible(items);
+    if (!wrapRef.current) return;
+    const obs = new IntersectionObserver(
+      ([e]) => {
+        setIsInViewport(e.isIntersecting);
+      },
+      { 
+        rootMargin: "250px", // preload when within 250px of viewport
+        threshold: 0.01 
       }
-    }
+    );
+    obs.observe(wrapRef.current);
+    return () => obs.disconnect();
+  }, []);
 
-    runChecks();
-    return () => {
-      mounted = false;
-    };
-  }, [items]);
-
-  const available = visible === null ? items : visible;
-  if (!available || available.length === 0) return null;
-
-  const loop = [...available, ...available];
-  const duration = Math.max(40, available.length * 12);
+  const params = `autoplay=1&mute=1&loop=1&playlist=${video.id}&controls=0&modestbranding=1&playsinline=1&rel=0&showinfo=0&iv_load_policy=3`;
 
   return (
+    <div className="group block min-w-[260px] sm:min-w-[320px] md:min-w-[380px]">
+      <div
+        ref={wrapRef}
+        className="relative aspect-video overflow-hidden rounded-2xl border border-foreground/10 bg-black shadow-[0_20px_50px_-20px_rgba(0,0,0,0.4)] transition group-hover:shadow-[0_30px_80px_-20px_rgba(123,45,142,0.5)]"
+      >
+        <img
+          src={`https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`}
+          alt={video.title}
+          loading="lazy"
+          className="absolute inset-0 h-[125%] w-[125%] -left-[12.5%] -top-[12.5%] object-cover"
+        />
+        {isInViewport && (
+          <iframe
+            src={`https://www.youtube.com/embed/${video.id}?${params}`}
+            title={video.title}
+            allow="autoplay; encrypted-media; picture-in-picture"
+            loading="lazy"
+            className="absolute inset-0 h-[125%] w-[125%] -left-[12.5%] -top-[12.5%] pointer-events-none"
+          />
+        )}
+        <a
+          href={video.href}
+          target="_blank"
+          rel="noreferrer"
+          aria-label={`Voir ${video.title} sur YouTube`}
+          className="absolute inset-0 z-10"
+        />
+      </div>
+    </div>
+  );
+}
+
+function LongsCarousel({ items }: { items: LongVideo[] }) {
+  const loop = [...items, ...items, ...items];
+  const duration = Math.max(80, items.length * 18);
+  return (
     <div
-      className="relative overflow-hidden"
-      style={{ maskImage: "linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent)" }}
+      className="group/marquee relative mx-auto max-w-6xl overflow-hidden px-4 sm:px-8 lg:px-12"
+      style={{ maskImage: "linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent)" }}
     >
-      <div className="flex gap-5 w-max animate-marquee-left" style={{ animationDuration: `${duration}s` }}>
+      <div
+        className="flex gap-4 sm:gap-5 w-max group-hover/marquee:[animation-play-state:paused]"
+        style={{ animation: `marquee-left-long ${duration}s linear infinite`, willChange: "transform" }}
+      >
         {loop.map((video, index) => (
-          <a
-            key={`${video.id}-${index}`}
-            href={video.href}
-            target="_blank"
-            rel="noreferrer"
-            aria-label={`Voir ${video.title}`}
-            className="group block min-w-[280px] sm:min-w-[320px] md:min-w-[360px]"
-          >
-            <div className="relative aspect-video overflow-hidden rounded-2xl border border-foreground/10 bg-black ring-brand shadow-[0_20px_50px_-20px_rgba(0,0,0,0.4)] transition group-hover:shadow-[0_30px_80px_-20px_rgba(123,45,142,0.5)]">
-              <iframe
-                src={`https://www.youtube.com/embed/${video.id}?${YOUTUBE_PREVIEW_PARAMS}&playlist=${video.id}`}
-                title={video.title}
-                allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
-                allowFullScreen
-                loading="lazy"
-                className="absolute inset-0 h-full w-full"
-              />
-            </div>
-          </a>
+          <LongCard key={`${video.id}-${index}`} video={video} />
         ))}
       </div>
       <style>{`
-        @keyframes marquee-left {
-          from { transform: translateX(0); }
-          to { transform: translateX(-50%); }
-        }
-        .animate-marquee-left {
-          animation: marquee-left linear infinite;
-        }
-        .animate-marquee-left:hover {
-          animation-play-state: paused;
-        }
+        @keyframes marquee-left-long { from { transform: translateX(0); } to { transform: translateX(-33.333%); } }
+      `}</style>
+    </div>
+  );
+}
+
+// Formats marquee — replaces the static trust band
+const FORMAT_TAGS = ["Reels", "YouTube", "TikTok", "Ads", "Podcasts", "Motion design", "Corporate", "Shorts", "Branding", "Documentaire"];
+
+function FormatsMarquee() {
+  const loop = [...FORMAT_TAGS, ...FORMAT_TAGS, ...FORMAT_TAGS];
+  return (
+    <div
+      className="relative overflow-hidden border-y border-foreground/5 bg-muted/30 py-5"
+      style={{ maskImage: "linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent)" }}
+    >
+      <div className="flex w-max gap-10 animate-fmtmarquee">
+        {loop.map((tag, i) => (
+          <span key={i} className="flex items-center gap-10 text-xs uppercase tracking-[0.24em] text-muted-foreground">
+            {tag}
+            <span className="h-1 w-1 rounded-full bg-foreground/30" />
+          </span>
+        ))}
+      </div>
+      <style>{`
+        @keyframes fmtmarquee { from { transform: translateX(0); } to { transform: translateX(-33.333%); } }
+        .animate-fmtmarquee { animation: fmtmarquee 50s linear infinite; }
       `}</style>
     </div>
   );
@@ -208,14 +215,6 @@ const FAQS = [
 ];
 
 function Index() {
-  const [openDevis, setOpenDevis] = useState(false);
-  const [devisVariant, setDevisVariant] = useState<"essentiel" | "surmesure">("essentiel");
-
-  const openBuilder = (variant: "essentiel" | "surmesure") => {
-    setDevisVariant(variant);
-    setOpenDevis(true);
-  };
-
   return (
     <main className="overflow-x-hidden">
       <Nav />
@@ -272,15 +271,11 @@ function Index() {
         </div>
       </section>
 
-      {/* Trust band */}
-      <section className="border-y border-foreground/5 bg-muted/30 py-6">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-12 gap-y-3 px-6 text-xs uppercase tracking-[0.2em] text-muted-foreground lg:px-10">
-          <span>Reels</span><Dot /><span>YouTube</span><Dot /><span>TikTok</span><Dot /><span>Ads</span><Dot /><span>Podcasts</span><Dot /><span>Motion design</span><Dot /><span>Corporate</span>
-        </div>
-      </section>
+      {/* Formats marquee — auto-scroll */}
+      <FormatsMarquee />
 
       {/* SHOWREEL — auto-scrolling marquees */}
-      <section id="showreel" className="relative py-24 lg:py-32">
+      <section id="showreel" className="relative py-20 sm:py-24 lg:py-32">
         <div className="mx-auto max-w-7xl px-6 lg:px-10">
           <div className="max-w-3xl">
             <Eyebrow>Réalisations récentes</Eyebrow>
@@ -288,32 +283,55 @@ function Index() {
               Le travail parle <span className="text-brand-gradient">pour nous.</span>
             </h2>
             <p className="mt-3 max-w-xl text-muted-foreground">
-              Une sélection de shorts produits pour des créateurs et marques. Survolez pour mettre en pause.
+              Une sélection de shorts et de formats longs produits pour nos créateurs et marques. Survolez pour mettre en pause.
             </p>
           </div>
         </div>
 
-        <div className="mt-12 space-y-5">
-          <MarqueeShorts items={SHORTS_ROW_A} direction="left" speed={90} />
-          <MarqueeShorts items={SHORTS_ROW_B} direction="right" speed={100} />
-        </div>
-
-        {/* Long-form formats */}
-        <div className="mx-auto mt-20 max-w-7xl px-6 lg:px-10">
-          <div className="flex items-end justify-between gap-6">
-            <div>
-              <span className="text-xs uppercase tracking-[0.24em] text-muted-foreground">Formats longs</span>
-              <h3 className="mt-3 font-display text-3xl tracking-tight sm:text-4xl">Des formats longs qui captent jusqu’au dernier plan.</h3>
-              <p className="mt-2 max-w-2xl text-muted-foreground">
-                Des formats longuement pensés pour maintenir l’attention, avec des b-rolls cohérents, une DA forte et une narration qui reste en mémoire.
+          {/* Shorts — verticaux */}
+          <div className="mx-auto max-w-7xl px-6 lg:px-10">
+            <div className="mt-10 flex items-end justify-between gap-4">
+              <div>
+                <span className="inline-flex items-center gap-2 rounded-full bg-brand-soft px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-primary">
+                  <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                  Shorts · Reels · TikTok
+                </span>
+                <h3 className="mt-3 font-display text-2xl sm:text-3xl tracking-tight">
+                  Verticaux qui captent <span className="text-brand-gradient">en 3 secondes.</span>
+                </h3>
+              </div>
+              <p className="hidden max-w-xs text-sm text-muted-foreground sm:block">
+                Hook fort, sous-titres millimétrés, rythme natif 9:16.
               </p>
             </div>
           </div>
-          <div className="mt-8">
+          <div className="mt-6 sm:mt-8 space-y-4 sm:space-y-5">
+            <MarqueeShorts items={SHORTS_ROW_A} direction="left" speed={90} />
+            <MarqueeShorts items={SHORTS_ROW_B} direction="right" speed={100} />
+          </div>
+
+          {/* Longs — horizontaux */}
+          <div className="mx-auto mt-20 max-w-7xl px-6 lg:px-10 sm:mt-24">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <span className="inline-flex items-center gap-2 rounded-full bg-brand-soft px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-primary">
+                  <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                  Formats longs · YouTube · Podcasts
+                </span>
+                <h3 className="mt-3 font-display text-2xl sm:text-3xl tracking-tight">
+                  Des vidéos longues qui <span className="text-brand-gradient">tiennent l'attention.</span>
+                </h3>
+              </div>
+              <p className="hidden max-w-xs text-sm text-muted-foreground sm:block">
+                Storytelling structuré, b-rolls travaillés, étalonnage premium.
+              </p>
+            </div>
+          </div>
+          <div className="mt-6 sm:mt-8">
             <LongsCarousel items={LONGS} />
           </div>
-        </div>
       </section>
+
 
       {/* SERVICES — floating cards */}
       <section id="services" className="relative bg-muted/40 py-24 lg:py-32">
@@ -378,12 +396,13 @@ function Index() {
                   <li key={f} className="flex items-start gap-3"><Check /> {f}</li>
                 ))}
               </ul>
-              <button
-                onClick={() => openBuilder("essentiel")}
+              <Link
+                to="/devis/$variant"
+                params={{ variant: "essentiel" }}
                 className="mt-8 inline-flex items-center justify-center gap-2 rounded-full border border-foreground/15 bg-transparent px-5 py-3 text-sm font-semibold transition hover:border-primary hover:bg-brand-soft hover:text-primary"
               >
                 Créer mon devis →
-              </button>
+              </Link>
             </div>
 
             {/* Continu — populaire, dark */}
@@ -428,17 +447,15 @@ function Index() {
                   <li key={f} className="flex items-start gap-3"><Check /> {f}</li>
                 ))}
               </ul>
-              <button
-                onClick={() => openBuilder("surmesure")}
+              <Link
+                to="/devis/$variant"
+                params={{ variant: "surmesure" }}
                 className="mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-brand-gradient px-5 py-3 text-sm font-semibold text-white glow-brand hover:opacity-95"
               >
                 Configurer →
-              </button>
+              </Link>
             </div>
           </div>
-
-          {/* Hidden builder */}
-          <DevisBuilder open={openDevis} variant={devisVariant} onClose={() => setOpenDevis(false)} />
         </div>
       </section>
 

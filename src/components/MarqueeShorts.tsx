@@ -2,30 +2,61 @@ import { useEffect, useRef, useState } from "react";
 
 export type ShortItem = { id: string; client: string };
 
-function ShortCard({ id, client, active }: ShortItem & { active: boolean }) {
-  // Autoplay muted loop YouTube short — params keep it minimal/clean
-  const params = `autoplay=${active ? 1 : 0}&mute=1&loop=1&playlist=${id}&controls=0&modestbranding=1&playsinline=1&rel=0&showinfo=0`;
+/* Geometry note — make the 16:9 iframe perfectly fill a 9:16 container.
+ * Container W × H where H/W = 16/9. The iframe (16:9 player) holds a 9:16
+ * video letterboxed inside it. To fill the container with the inner video:
+ *   iframe height  = 100% (player height = container height)
+ *   iframe width   = ~316% (player width = container height × 16/9 ÷ video w/h)
+ *   left offset    = ~-108%  (= (316 − 100) / 2 to center)
+ * Result: no black bars, YouTube chrome cropped off-screen. */
+const SHORT_IFRAME = "absolute top-0 h-full w-[316%] left-[-108%] pointer-events-none";
+
+function ShortCard({ id, client }: ShortItem) {
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const [isInViewport, setIsInViewport] = useState(false);
+
+  useEffect(() => {
+    if (!wrapRef.current) return;
+    const obs = new IntersectionObserver(
+      ([e]) => {
+        setIsInViewport(e.isIntersecting);
+      },
+      { 
+        rootMargin: "250px", // preload when within 250px of viewport
+        threshold: 0.01 
+      }
+    );
+    obs.observe(wrapRef.current);
+    return () => obs.disconnect();
+  }, []);
+
+  const params =
+    "autoplay=1&mute=1&loop=1&playlist=" + id +
+    "&controls=0&modestbranding=1&playsinline=1&rel=0&showinfo=0&iv_load_policy=3";
+
   return (
-    <div className="group relative shrink-0 w-[180px] sm:w-[200px]">
-      <div className="relative aspect-[9/16] overflow-hidden rounded-2xl bg-black ring-1 ring-white/10 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.6)] transition duration-500 group-hover:scale-[1.04] group-hover:ring-white/40">
-        <iframe
-          src={`https://www.youtube.com/embed/${id}?${params}`}
-          title={`Short ${client}`}
-          allow="autoplay; encrypted-media; picture-in-picture"
+    <div className="group relative shrink-0 w-[165px] sm:w-[210px] md:w-[230px]">
+      <div
+        ref={wrapRef}
+        className="relative aspect-[9/16] overflow-hidden rounded-2xl bg-black ring-1 ring-white/10 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.6)] transition duration-500 group-hover:scale-[1.04] group-hover:ring-white/40"
+      >
+        {/* Thumbnail fallback — scaled to fill (vi.jpg is 16:9, crop to 9:16) */}
+        <img
+          src={`https://i.ytimg.com/vi/${id}/hqdefault.jpg`}
+          alt={`Short ${client}`}
           loading="lazy"
-          className="absolute inset-0 h-full w-full pointer-events-none"
+          className="absolute top-0 h-full w-[316%] left-[-108%] object-cover"
         />
-        {/* clickable overlay → open original on YouTube */}
-        <a
-          href={`https://www.youtube.com/shorts/${id}`}
-          target="_blank"
-          rel="noreferrer"
-          className="absolute inset-0 z-10"
-          aria-label={`Voir le short ${client} sur YouTube`}
-        />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent p-3">
-          <p className="text-[11px] font-medium text-white/95 truncate">{client}</p>
-        </div>
+        {isInViewport && (
+          <iframe
+            src={`https://www.youtube.com/embed/${id}?${params}`}
+            title={`Short ${client}`}
+            allow="autoplay; encrypted-media; picture-in-picture"
+            loading="lazy"
+            className={SHORT_IFRAME}
+          />
+        )}
+        <span className="absolute inset-0 z-10" aria-hidden />
       </div>
     </div>
   );
@@ -38,50 +69,27 @@ export function MarqueeShorts({
 }: {
   items: ShortItem[];
   direction?: "left" | "right";
-  speed?: number; // seconds for full loop
+  speed?: number;
 }) {
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const [active, setActive] = useState(false);
-
-  // Only mount iframes when this row is near the viewport (saves CPU)
-  useEffect(() => {
-    if (!wrapRef.current) return;
-    const obs = new IntersectionObserver(
-      ([e]) => setActive(e.isIntersecting),
-      { rootMargin: "200px" }
-    );
-    obs.observe(wrapRef.current);
-    return () => obs.disconnect();
-  }, []);
-
-  // Duplicate to make a seamless loop
-  const loop = [...items, ...items];
+  // Triple so the strip is wide enough for ultra-wide screens
+  const loop = [...items, ...items, ...items];
 
   return (
     <div
-      ref={wrapRef}
-      className="group/marquee relative overflow-hidden"
+      className="group/marquee relative mx-auto max-w-[100rem] overflow-hidden px-4 sm:px-8 lg:px-12"
       style={{ maskImage: "linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent)" }}
     >
       <div
-        className="flex gap-4 w-max group-hover/marquee:[animation-play-state:paused]"
-        style={{
-          animation: `marquee-${direction} ${speed}s linear infinite`,
-        }}
+        className="flex gap-3 sm:gap-4 w-max group-hover/marquee:[animation-play-state:paused]"
+        style={{ animation: `marquee-${direction} ${speed}s linear infinite`, willChange: "transform" }}
       >
         {loop.map((s, i) => (
-          <ShortCard key={`${s.id}-${i}`} {...s} active={active} />
+          <ShortCard key={`${s.id}-${i}`} {...s} />
         ))}
       </div>
       <style>{`
-        @keyframes marquee-left {
-          from { transform: translateX(0); }
-          to { transform: translateX(-50%); }
-        }
-        @keyframes marquee-right {
-          from { transform: translateX(-50%); }
-          to { transform: translateX(0); }
-        }
+        @keyframes marquee-left { from { transform: translateX(0); } to { transform: translateX(-33.333%); } }
+        @keyframes marquee-right { from { transform: translateX(-33.333%); } to { transform: translateX(0); } }
       `}</style>
     </div>
   );

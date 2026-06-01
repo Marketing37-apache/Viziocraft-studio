@@ -14,7 +14,9 @@ import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
 import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as CgvRouteImport } from './routes/cgv'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as UniversSlugRouteImport } from './routes/univers.$slug'
 import { Route as EtapesSlugRouteImport } from './routes/etapes.$slug'
+import { Route as DevisVariantRouteImport } from './routes/devis.$variant'
 
 const PolitiqueConfidentialiteRoute =
   PolitiqueConfidentialiteRouteImport.update({
@@ -42,9 +44,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UniversSlugRoute = UniversSlugRouteImport.update({
+  id: '/univers/$slug',
+  path: '/univers/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EtapesSlugRoute = EtapesSlugRouteImport.update({
   id: '/etapes/$slug',
   path: '/etapes/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DevisVariantRoute = DevisVariantRouteImport.update({
+  id: '/devis/$variant',
+  path: '/devis/$variant',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -54,7 +66,9 @@ export interface FileRoutesByFullPath {
   '/cookies': typeof CookiesRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/politique-confidentialite': typeof PolitiqueConfidentialiteRoute
+  '/devis/$variant': typeof DevisVariantRoute
   '/etapes/$slug': typeof EtapesSlugRoute
+  '/univers/$slug': typeof UniversSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -62,7 +76,9 @@ export interface FileRoutesByTo {
   '/cookies': typeof CookiesRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/politique-confidentialite': typeof PolitiqueConfidentialiteRoute
+  '/devis/$variant': typeof DevisVariantRoute
   '/etapes/$slug': typeof EtapesSlugRoute
+  '/univers/$slug': typeof UniversSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -71,7 +87,9 @@ export interface FileRoutesById {
   '/cookies': typeof CookiesRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/politique-confidentialite': typeof PolitiqueConfidentialiteRoute
+  '/devis/$variant': typeof DevisVariantRoute
   '/etapes/$slug': typeof EtapesSlugRoute
+  '/univers/$slug': typeof UniversSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -81,7 +99,9 @@ export interface FileRouteTypes {
     | '/cookies'
     | '/mentions-legales'
     | '/politique-confidentialite'
+    | '/devis/$variant'
     | '/etapes/$slug'
+    | '/univers/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -89,7 +109,9 @@ export interface FileRouteTypes {
     | '/cookies'
     | '/mentions-legales'
     | '/politique-confidentialite'
+    | '/devis/$variant'
     | '/etapes/$slug'
+    | '/univers/$slug'
   id:
     | '__root__'
     | '/'
@@ -97,7 +119,9 @@ export interface FileRouteTypes {
     | '/cookies'
     | '/mentions-legales'
     | '/politique-confidentialite'
+    | '/devis/$variant'
     | '/etapes/$slug'
+    | '/univers/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -106,7 +130,9 @@ export interface RootRouteChildren {
   CookiesRoute: typeof CookiesRoute
   MentionsLegalesRoute: typeof MentionsLegalesRoute
   PolitiqueConfidentialiteRoute: typeof PolitiqueConfidentialiteRoute
+  DevisVariantRoute: typeof DevisVariantRoute
   EtapesSlugRoute: typeof EtapesSlugRoute
+  UniversSlugRoute: typeof UniversSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -146,11 +172,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/univers/$slug': {
+      id: '/univers/$slug'
+      path: '/univers/$slug'
+      fullPath: '/univers/$slug'
+      preLoaderRoute: typeof UniversSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/etapes/$slug': {
       id: '/etapes/$slug'
       path: '/etapes/$slug'
       fullPath: '/etapes/$slug'
       preLoaderRoute: typeof EtapesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/devis/$variant': {
+      id: '/devis/$variant'
+      path: '/devis/$variant'
+      fullPath: '/devis/$variant'
+      preLoaderRoute: typeof DevisVariantRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -162,7 +202,9 @@ const rootRouteChildren: RootRouteChildren = {
   CookiesRoute: CookiesRoute,
   MentionsLegalesRoute: MentionsLegalesRoute,
   PolitiqueConfidentialiteRoute: PolitiqueConfidentialiteRoute,
+  DevisVariantRoute: DevisVariantRoute,
   EtapesSlugRoute: EtapesSlugRoute,
+  UniversSlugRoute: UniversSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
