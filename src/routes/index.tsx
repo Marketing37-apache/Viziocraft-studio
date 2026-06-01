@@ -13,7 +13,7 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "VizioCraft — Agence de montage vidéo premium" },
-      { name: "description", content: "Votre équipe vidéo dédiée. Shorts, ads, podcasts, motion design. +35 clients, +1000 vidéos produites." },
+      { name: "description", content: "Votre équipe vidéo dédiée. Shorts, ads, podcasts, motion design. +100 clients, +5000 vidéos produites." },
       { property: "og:title", content: "VizioCraft — Agence de montage vidéo premium" },
       { property: "og:description", content: "Votre équipe vidéo dédiée. Production scalable, qualité constante." },
     ],
@@ -190,7 +190,7 @@ const FAQS = [
   },
   {
     q: "Vous travaillez avec qui ? Des créateurs, des marques ?",
-    a: "Les deux. On a aujourd'hui +35 clients actifs : créateurs de contenu, podcasteurs, marques B2B, agences. Plus de 1000 vidéos produites au total. On adapte notre process à chaque profil — pas la même approche pour un YouTubeur que pour une agence de pub.",
+    a: "Les deux. On a aujourd'hui +100 clients actifs : créateurs de contenu, podcasteurs, marques B2B, agences. Plus de 5000 vidéos produites au total. On adapte notre process à chaque profil — pas la même approche pour une YouTubeur que pour une agence de pub.",
   },
   {
     q: "Au quotidien, comment on communique ? J'ai pas envie d'une chaîne d'emails interminable.",
@@ -245,8 +245,8 @@ function Index() {
                 </a>
               </div>
               <dl className="mt-14 grid grid-cols-3 gap-6 border-t border-white/10 pt-8">
-                <Stat k="+35" v="Clients satisfaits" />
-                <Stat k="+1000" v="Vidéos produites" />
+                <Stat k="+100" v="Clients satisfaits" />
+                <Stat k="+5000" v="Vidéos produites" />
                 <Stat k="7j/7" v="Production en continu" />
               </dl>
             </div>
@@ -496,8 +496,8 @@ function Index() {
               </p>
 
               <div className="mt-8 grid grid-cols-2 gap-4">
-                <BigStat k="+35" v="Clients satisfaits" />
-                <BigStat k="+1000" v="Vidéos produites" />
+                <BigStat k="+100" v="Clients satisfaits" />
+                <BigStat k="+5000" v="Vidéos produites" />
               </div>
 
               <div className="relative mt-8 flex-1">
