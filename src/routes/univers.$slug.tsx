@@ -1,6 +1,8 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
+import { useState, useEffect } from "react";
+import { X, ChevronLeft, ChevronRight } from "lucide-react";
 
 const CDN = "https://cdn.prod.website-files.com/6996b2b29f614702ad210f72";
 
@@ -83,11 +85,11 @@ const UNIVERS: Record<string, Univers> = {
     ],
     gallery: [
       { src: `${CDN}/699ab9aed3c37eb93d817327_image4.jpeg`, alt: "Ad campagne 1", wide: true },
-      { src: `${CDN}/699ab9aed3c37eb93d817315_image16.jpeg`, alt: "Ad 2" },
+      { src: `${CDN}/699ab9aed3c37eb93d81732a_image8.jpeg`, alt: "Ad 2" },
       { src: `${CDN}/699ab9aed3c37eb93d81735e_image11.jpeg`, alt: "Ad 3" },
       { src: `${CDN}/699ab9aed3c37eb93d81734c_image5.jpeg`, alt: "Ad 4", tall: true },
       { src: `${CDN}/699ab9aed3c37eb93d81731b_image20.jpeg`, alt: "Ad 5" },
-      { src: `${CDN}/699ab9aed3c37eb93d81733d_image6.jpeg`, alt: "Ad 6" },
+      { src: `${CDN}/699ab9aed3c37eb93d81733d_image6.jpeg`, alt: "Ad 6", wide: true },
     ],
     stats: [
       { k: "×3.1", v: "CTR moyen vs. baseline client" },
@@ -169,7 +171,7 @@ const UNIVERS: Record<string, Univers> = {
       { src: `${CDN}/699ab9aed3c37eb93d81731b_image20.jpeg`, alt: "Podcast 3", tall: true },
       { src: `${CDN}/699ab9aed3c37eb93d817327_image4.jpeg`, alt: "Podcast 4" },
       { src: `${CDN}/699ab9aed3c37eb93d81734c_image5.jpeg`, alt: "Podcast 5" },
-      { src: `${CDN}/699ab9aed3c37eb93d81735e_image11.jpeg`, alt: "Podcast 6" },
+      { src: `${CDN}/699ab9aed3c37eb93d81735e_image11.jpeg`, alt: "Podcast 6", wide: true },
     ],
     stats: [
       { k: "4 cams", v: "Synchro audio/vidéo native" },
@@ -250,9 +252,9 @@ const UNIVERS: Record<string, Univers> = {
       { src: `${CDN}/699ab9aed3c37eb93d81733d_image6.jpeg`, alt: "Corporate 1", wide: true },
       { src: `${CDN}/699ab9aed3c37eb93d81734c_image5.jpeg`, alt: "Corporate 2", tall: true },
       { src: `${CDN}/699ab9aed3c37eb93d81735e_image11.jpeg`, alt: "Corporate 3" },
-      { src: `${CDN}/699ab9aed3c37eb93d817315_image16.jpeg`, alt: "Corporate 4" },
+      { src: `${CDN}/699ab9aed3c37eb93d81732a_image8.jpeg`, alt: "Corporate 4" },
       { src: `${CDN}/699ab9aed3c37eb93d817327_image4.jpeg`, alt: "Corporate 5" },
-      { src: `${CDN}/699ab9aed3c37eb93d81731b_image20.jpeg`, alt: "Corporate 6" },
+      { src: `${CDN}/699ab9aed3c37eb93d81731b_image20.jpeg`, alt: "Corporate 6", wide: true },
     ],
     stats: [
       { k: "+35", v: "Marques accompagnées" },
@@ -333,9 +335,9 @@ const UNIVERS: Record<string, Univers> = {
       { src: `${CDN}/699ab9aed3c37eb93d81734c_image5.jpeg`, alt: "Motion 1", wide: true },
       { src: `${CDN}/699ab9aed3c37eb93d81735e_image11.jpeg`, alt: "Motion 2" },
       { src: `${CDN}/699ab9aed3c37eb93d81733d_image6.jpeg`, alt: "Motion 3", tall: true },
-      { src: `${CDN}/699ab9aed3c37eb93d817315_image16.jpeg`, alt: "Motion 4" },
+      { src: `${CDN}/699ab9aed3c37eb93d817327_image4.jpeg`, alt: "Motion 4" },
       { src: `${CDN}/699ab9aed3c37eb93d81731b_image20.jpeg`, alt: "Motion 5" },
-      { src: `${CDN}/699ab9aed3c37eb93d81732a_image8.jpeg`, alt: "Motion 6" },
+      { src: `${CDN}/699ab9aed3c37eb93d81732a_image8.jpeg`, alt: "Motion 6", wide: true },
     ],
     stats: [
       { k: "+500", v: "Animations produites" },
@@ -418,7 +420,7 @@ const UNIVERS: Record<string, Univers> = {
       { src: `${CDN}/699ab9aed3c37eb93d81732a_image8.jpeg`, alt: "Edu 3", tall: true },
       { src: `${CDN}/699ab9aed3c37eb93d81733d_image6.jpeg`, alt: "Edu 4" },
       { src: `${CDN}/699ab9aed3c37eb93d817327_image4.jpeg`, alt: "Edu 5" },
-      { src: `${CDN}/699ab9aed3c37eb93d81731b_image20.jpeg`, alt: "Edu 6" },
+      { src: `${CDN}/699ab9aed3c37eb93d81731b_image20.jpeg`, alt: "Edu 6", wide: true },
     ],
     stats: [
       { k: "+250", v: "Vidéos pédagogiques produites" },
@@ -491,12 +493,63 @@ export const Route = createFileRoute("/univers/$slug")({
 
 /* ——————————————————————————— RENDER ——————————————————————————— */
 
+function GalleryTile({ g, theme, onClick }: { g: Tile; theme: Univers["theme"]; onClick: () => void }) {
+  const [error, setError] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+
+  if (error) return null;
+
+  return (
+    <div
+      onClick={onClick}
+      className={`group relative overflow-hidden rounded-2xl border ${theme.cardBorder} ${
+        g.wide ? "col-span-2 sm:col-span-2 lg:col-span-2" : ""
+      } cursor-zoom-in transition-all duration-300 ${!loaded ? "animate-pulse bg-current/5 min-h-[150px]" : ""}`}
+    >
+      <img
+        src={g.src}
+        alt={g.alt}
+        loading="lazy"
+        onLoad={() => setLoaded(true)}
+        onError={() => setError(true)}
+        className={`w-full h-auto block transition duration-700 group-hover:scale-105 ${
+          loaded ? "opacity-100" : "opacity-0"
+        }`}
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 transition group-hover:opacity-100" />
+    </div>
+  );
+}
+
 function UniversPage() {
   const { u } = Route.useLoaderData() as { u: Univers };
   const idx = ORDER.indexOf(u.slug);
   const next = idx >= 0 && idx < ORDER.length - 1 ? UNIVERS[ORDER[idx + 1]] : null;
   const prev = idx > 0 ? UNIVERS[ORDER[idx - 1]] : null;
   const t = u.theme;
+
+  const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (activeImageIndex === null) return;
+    document.body.style.overflow = "hidden";
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setActiveImageIndex(null);
+      if (e.key === "ArrowRight") {
+        setActiveImageIndex((prevIdx) => (prevIdx !== null ? (prevIdx + 1) % u.gallery.length : null));
+      }
+      if (e.key === "ArrowLeft") {
+        setActiveImageIndex((prevIdx) => (prevIdx !== null ? (prevIdx - 1 + u.gallery.length) % u.gallery.length : null));
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [activeImageIndex, u.gallery.length]);
 
   return (
     <main className={`${t.pageBg} ${t.pageInk} min-h-screen`}>
@@ -610,32 +663,19 @@ function UniversPage() {
         </div>
       </section>
 
-      {/* GALLERY — broken bento grid */}
+      {/* GALLERY — adaptive layout */}
       <section className="py-20 lg:py-28">
         <div className="mx-auto max-w-7xl px-6 lg:px-10">
-          <div className="mb-10 flex items-end justify-between gap-4">
-            <div>
-              <span className={`text-xs font-semibold uppercase tracking-[0.22em] ${t.eyebrowColor}`}>Galerie</span>
-              <h2 className="mt-3 font-display text-3xl tracking-tight sm:text-4xl">Quelques pièces de l'univers.</h2>
-            </div>
-            <p className="hidden max-w-xs text-sm opacity-70 sm:block">
-              Chaque image renvoie à un projet produit pour un client réel.
+          <div className="mb-12 max-w-2xl">
+            <span className={`text-xs font-semibold uppercase tracking-[0.22em] ${t.eyebrowColor}`}>Galerie</span>
+            <h2 className="mt-3 font-display text-3xl tracking-tight sm:text-4xl">L'empreinte visuelle.</h2>
+            <p className="mt-4 text-base leading-relaxed opacity-70">
+              L'harmonie des formes, du rythme et de la lumière au service d'une narration singulière.
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4 items-start">
             {u.gallery.map((g, i) => (
-              <div
-                key={i}
-                className={`group relative overflow-hidden rounded-2xl border ${t.cardBorder} ${g.wide ? "col-span-2 sm:col-span-2 lg:col-span-2" : ""} ${g.tall ? "row-span-2 lg:row-span-2" : ""}`}
-              >
-                <img
-                  src={g.src}
-                  alt={g.alt}
-                  loading="lazy"
-                  className={`w-full object-cover transition duration-700 group-hover:scale-105 ${g.tall ? "aspect-[3/4]" : g.wide ? "aspect-[16/10]" : "aspect-square"}`}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 transition group-hover:opacity-100" />
-              </div>
+              <GalleryTile key={i} g={g} theme={t} onClick={() => setActiveImageIndex(i)} />
             ))}
           </div>
         </div>
@@ -724,6 +764,62 @@ function UniversPage() {
       </section>
 
       <Footer />
+
+      {/* LIGHTBOX MODAL */}
+      {activeImageIndex !== null && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-xl transition-all duration-300"
+          onClick={() => setActiveImageIndex(null)}
+        >
+          {/* Close button */}
+          <button
+            className="absolute right-6 top-6 z-55 text-white/70 hover:text-white transition p-2.5 rounded-full hover:bg-white/10 cursor-pointer"
+            onClick={() => setActiveImageIndex(null)}
+            aria-label="Fermer la galerie"
+          >
+            <X size={26} />
+          </button>
+
+          {/* Prev button */}
+          <button
+            className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 z-55 text-white/70 hover:text-white transition p-3.5 rounded-full hover:bg-white/10 cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              setActiveImageIndex((prevIdx) => (prevIdx !== null ? (prevIdx - 1 + u.gallery.length) % u.gallery.length : null));
+            }}
+            aria-label="Image précédente"
+          >
+            <ChevronLeft size={36} />
+          </button>
+
+          {/* Next button */}
+          <button
+            className="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 z-55 text-white/70 hover:text-white transition p-3.5 rounded-full hover:bg-white/10 cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              setActiveImageIndex((prevIdx) => (prevIdx !== null ? (prevIdx + 1) % u.gallery.length : null));
+            }}
+            aria-label="Image suivante"
+          >
+            <ChevronRight size={36} />
+          </button>
+
+          {/* Image Container */}
+          <div
+            className="relative flex flex-col items-center max-w-[90vw] max-h-[85vh] p-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={u.gallery[activeImageIndex].src}
+              alt={u.gallery[activeImageIndex].alt}
+              className="max-w-full max-h-[75vh] object-contain rounded-xl shadow-2xl animate-in fade-in-0 zoom-in-95 duration-300"
+            />
+            <p className="mt-5 text-center text-sm font-semibold tracking-[0.1em] uppercase text-white/80">
+              {u.gallery[activeImageIndex].alt}
+            </p>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
