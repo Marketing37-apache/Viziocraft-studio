@@ -484,9 +484,9 @@ export const Route = createFileRoute("/univers/$slug")({
   head: ({ loaderData }) => ({
     meta: loaderData
       ? [
-          { title: `${loaderData.u.title.trim()} ${loaderData.u.highlight} — VizioCraft` },
-          { name: "description", content: loaderData.u.baseline },
-        ]
+        { title: `${loaderData.u.title.trim()} ${loaderData.u.highlight} — VizioCraft` },
+        { name: "description", content: loaderData.u.baseline },
+      ]
       : [],
   }),
 });
@@ -502,9 +502,8 @@ function GalleryTile({ g, theme, onClick }: { g: Tile; theme: Univers["theme"]; 
   return (
     <div
       onClick={onClick}
-      className={`group relative overflow-hidden rounded-2xl border ${theme.cardBorder} ${
-        g.wide ? "col-span-2 sm:col-span-2 lg:col-span-2" : ""
-      } cursor-zoom-in transition-all duration-300 ${!loaded ? "animate-pulse bg-current/5 min-h-[150px]" : ""}`}
+      className={`group relative overflow-hidden rounded-2xl border ${theme.cardBorder} ${g.wide ? "col-span-2 sm:col-span-2 lg:col-span-2" : ""
+        } cursor-zoom-in transition-all duration-300 ${!loaded ? "animate-pulse bg-current/5 min-h-[150px]" : ""}`}
     >
       <img
         src={g.src}
@@ -512,9 +511,8 @@ function GalleryTile({ g, theme, onClick }: { g: Tile; theme: Univers["theme"]; 
         loading="lazy"
         onLoad={() => setLoaded(true)}
         onError={() => setError(true)}
-        className={`w-full h-auto block transition duration-700 group-hover:scale-105 ${
-          loaded ? "opacity-100" : "opacity-0"
-        }`}
+        className={`w-full h-auto block transition duration-700 group-hover:scale-105 ${loaded ? "opacity-100" : "opacity-0"
+          }`}
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 transition group-hover:opacity-100" />
     </div>

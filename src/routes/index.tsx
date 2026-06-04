@@ -387,12 +387,12 @@ function Index() {
               <h3 className="mt-4 font-display text-2xl">Montage essentiel</h3>
               <p className="mt-1 text-sm text-muted-foreground">Pour tester sans engagement</p>
               <div className="mt-6 flex items-baseline gap-1">
-                <span className="font-display text-4xl">12–25€</span>
-                <span className="text-sm text-muted-foreground">/ short</span>
+                <span className="font-display text-4xl">30–250€</span>
+                <span className="text-sm text-muted-foreground">/ vidéo</span>
               </div>
-              <p className="text-xs text-muted-foreground">40–90€ / long format</p>
+              <p className="text-xs text-muted-foreground">Selon type et durée</p>
               <ul className="mt-6 space-y-2.5 text-sm">
-                {["Short ou long format au choix", "Sous-titres disponibles", "B-roll & effets possibles", "Révisions incluses", "Livraison en 48h"].map((f) => (
+                {["Short, long format, podcast, pub", "Niveau de montage au choix", "Options à la carte", "Révisions incluses"].map((f) => (
                   <li key={f} className="flex items-start gap-3"><Check /> {f}</li>
                 ))}
               </ul>
@@ -420,7 +420,7 @@ function Index() {
               </div>
               <p className="text-xs text-white/65">Jusqu'à 20 shorts + 4 longs formats</p>
               <ul className="mt-6 space-y-2.5 text-sm">
-                {["Shorts ET longs formats inclus", "Support prioritaire", "Révisions illimitées", "Livraison continue", "Au-delà : tarif préférentiel"].map((f) => (
+                {["Tous formats inclus", "Support prioritaire", "Révisions illimitées", "Livraison continue", "Au-delà : tarif préférentiel"].map((f) => (
                   <li key={f} className="flex items-start gap-3"><CheckLight /> {f}</li>
                 ))}
               </ul>
@@ -441,9 +441,9 @@ function Index() {
                 <span className="font-display text-4xl">Prix</span>
                 <span className="text-sm text-muted-foreground">calculé live</span>
               </div>
-              <p className="text-xs text-muted-foreground">Shorts, longs ou les deux</p>
+              <p className="text-xs text-muted-foreground">One shot ou multishoot mensuel</p>
               <ul className="mt-6 space-y-2.5 text-sm">
-                {["Vous choisissez chaque option", "Mix shorts + longs possible", "Devis détaillé par mail", "Réduction 1re commande"].map((f) => (
+                {["Chaque type + quantité au choix", "Réduction multishoot disponible", "Devis détaillé par mail"].map((f) => (
                   <li key={f} className="flex items-start gap-3"><Check /> {f}</li>
                 ))}
               </ul>
