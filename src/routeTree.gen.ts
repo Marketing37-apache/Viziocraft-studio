@@ -16,6 +16,7 @@ import { Route as CgvRouteImport } from './routes/cgv'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UniversSlugRouteImport } from './routes/univers.$slug'
 import { Route as EtapesSlugRouteImport } from './routes/etapes.$slug'
+import { Route as DevisStandardRouteImport } from './routes/devis.standard'
 import { Route as DevisVariantRouteImport } from './routes/devis.$variant'
 
 const PolitiqueConfidentialiteRoute =
@@ -54,6 +55,11 @@ const EtapesSlugRoute = EtapesSlugRouteImport.update({
   path: '/etapes/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DevisStandardRoute = DevisStandardRouteImport.update({
+  id: '/devis/standard',
+  path: '/devis/standard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DevisVariantRoute = DevisVariantRouteImport.update({
   id: '/devis/$variant',
   path: '/devis/$variant',
@@ -67,6 +73,7 @@ export interface FileRoutesByFullPath {
   '/mentions-legales': typeof MentionsLegalesRoute
   '/politique-confidentialite': typeof PolitiqueConfidentialiteRoute
   '/devis/$variant': typeof DevisVariantRoute
+  '/devis/standard': typeof DevisStandardRoute
   '/etapes/$slug': typeof EtapesSlugRoute
   '/univers/$slug': typeof UniversSlugRoute
 }
@@ -77,6 +84,7 @@ export interface FileRoutesByTo {
   '/mentions-legales': typeof MentionsLegalesRoute
   '/politique-confidentialite': typeof PolitiqueConfidentialiteRoute
   '/devis/$variant': typeof DevisVariantRoute
+  '/devis/standard': typeof DevisStandardRoute
   '/etapes/$slug': typeof EtapesSlugRoute
   '/univers/$slug': typeof UniversSlugRoute
 }
@@ -88,6 +96,7 @@ export interface FileRoutesById {
   '/mentions-legales': typeof MentionsLegalesRoute
   '/politique-confidentialite': typeof PolitiqueConfidentialiteRoute
   '/devis/$variant': typeof DevisVariantRoute
+  '/devis/standard': typeof DevisStandardRoute
   '/etapes/$slug': typeof EtapesSlugRoute
   '/univers/$slug': typeof UniversSlugRoute
 }
@@ -100,6 +109,7 @@ export interface FileRouteTypes {
     | '/mentions-legales'
     | '/politique-confidentialite'
     | '/devis/$variant'
+    | '/devis/standard'
     | '/etapes/$slug'
     | '/univers/$slug'
   fileRoutesByTo: FileRoutesByTo
@@ -110,6 +120,7 @@ export interface FileRouteTypes {
     | '/mentions-legales'
     | '/politique-confidentialite'
     | '/devis/$variant'
+    | '/devis/standard'
     | '/etapes/$slug'
     | '/univers/$slug'
   id:
@@ -120,6 +131,7 @@ export interface FileRouteTypes {
     | '/mentions-legales'
     | '/politique-confidentialite'
     | '/devis/$variant'
+    | '/devis/standard'
     | '/etapes/$slug'
     | '/univers/$slug'
   fileRoutesById: FileRoutesById
@@ -131,6 +143,7 @@ export interface RootRouteChildren {
   MentionsLegalesRoute: typeof MentionsLegalesRoute
   PolitiqueConfidentialiteRoute: typeof PolitiqueConfidentialiteRoute
   DevisVariantRoute: typeof DevisVariantRoute
+  DevisStandardRoute: typeof DevisStandardRoute
   EtapesSlugRoute: typeof EtapesSlugRoute
   UniversSlugRoute: typeof UniversSlugRoute
 }
@@ -186,6 +199,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EtapesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/devis/standard': {
+      id: '/devis/standard'
+      path: '/devis/standard'
+      fullPath: '/devis/standard'
+      preLoaderRoute: typeof DevisStandardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/devis/$variant': {
       id: '/devis/$variant'
       path: '/devis/$variant'
@@ -203,6 +223,7 @@ const rootRouteChildren: RootRouteChildren = {
   MentionsLegalesRoute: MentionsLegalesRoute,
   PolitiqueConfidentialiteRoute: PolitiqueConfidentialiteRoute,
   DevisVariantRoute: DevisVariantRoute,
+  DevisStandardRoute: DevisStandardRoute,
   EtapesSlugRoute: EtapesSlugRoute,
   UniversSlugRoute: UniversSlugRoute,
 }

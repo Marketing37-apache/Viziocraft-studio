@@ -215,13 +215,25 @@ function formatLabel(key: string): string {
   return key;
 }
 
+// ── Per-format hints (typographic only, no icons) ────────────────────────────
+const FORMAT_HINTS: Record<string, string> = {
+  s1: "Facecam · UGC · cut dynamique",
+  s2: "Storytelling vertical développé",
+  pb: "Spot pub · hook fort · CTA",
+  l1: "Capsules · tutos courts · review",
+  l2: "Vlog dense · entretien · docu court",
+  l3: "Documentaire · masterclass · marque",
+  pd: "Multi-cam · sync audio · chapitrage",
+};
+
 function FormatCard({
   fmt,
   qty,
   onAdd,
   onSub,
   theme,
-  variant
+  variant,
+  solo = false,
 }: {
   fmt: any;
   qty: number;
@@ -229,64 +241,98 @@ function FormatCard({
   onSub: () => void;
   theme: any;
   variant: string;
+  solo?: boolean;
 }) {
   const active = qty > 0;
+  const hint = FORMAT_HINTS[fmt.key as string] ?? "";
 
-  const badgeStyle = active
-    ? variant === "surmesure"
-      ? "bg-[#a78bfa]/25 border-[#a78bfa]/40 text-[#c4b5fd]"
-      : "bg-[#a8632d]/10 border-[#a8632d]/25 text-[#a8632d]"
-    : theme.isDark
-      ? "bg-white/5 border-white/10 text-white/60"
-      : "bg-foreground/5 border-foreground/10 text-[#1a1410]/60";
+  const activeAccent = variant === "surmesure" ? "text-[#c4b5fd]" : "text-[#a8632d]";
+  const activeDurBadge = variant === "surmesure"
+    ? "bg-[#a78bfa]/20 border-[#a78bfa]/35 text-[#c4b5fd]"
+    : "bg-[#a8632d]/10 border-[#a8632d]/25 text-[#a8632d]";
+  const inactiveDurBadge = theme.isDark
+    ? "bg-white/5 border-white/10 text-white/45"
+    : "bg-foreground/5 border-foreground/10 text-[#1a1410]/45";
 
+  const durBadge = active ? activeDurBadge : inactiveDurBadge;
+
+  // ── Podcast solo — wide feature layout ────────────────────────────────────
+  if (solo) {
+    return (
+      <div className={`flex flex-col sm:flex-row sm:items-center gap-6 rounded-2xl border p-6 transition-all duration-300 ${getCardStyle(active, theme.isDark)}`}>
+        {/* Left — title block */}
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-2.5 mb-2">
+            <h4 className={`text-base font-bold font-display ${theme.textPrimary}`}>{fmt.name}</h4>
+            <span className={`rounded-full px-2.5 py-0.5 text-[9px] font-bold border whitespace-nowrap ${durBadge}`}>
+              {fmt.dur}
+            </span>
+          </div>
+          <p className={`text-xs leading-relaxed mb-3 ${theme.textSecondary}`}>{fmt.desc}</p>
+          <p className={`text-[10px] font-semibold tracking-wide ${active ? activeAccent : theme.textMuted}`}>{hint}</p>
+          {/* Feature tags */}
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {["Multi-cam", "Sync audio", "Chapitrage", "Long format"].map((tag) => (
+              <span key={tag} className={`rounded-full border px-2.5 py-0.5 text-[10px] font-medium ${
+                theme.isDark ? "border-white/10 text-white/50" : "border-foreground/12 text-foreground/50"
+              }`}>{tag}</span>
+            ))}
+          </div>
+        </div>
+
+        {/* Right — stepper */}
+        <div className={`flex flex-col items-center gap-2 shrink-0 pt-4 sm:pt-0 sm:pl-6 border-t sm:border-t-0 sm:border-l ${
+          theme.isDark ? "border-white/[0.07]" : "border-foreground/8"
+        }`}>
+          <span className={`text-[10px] uppercase tracking-wider font-bold ${theme.textMuted}`}>
+            {"unitLabel" in fmt && fmt.unitLabel ? fmt.unitLabel : "Quantité"}
+          </span>
+          <div className={`flex items-center gap-2 rounded-full p-1 border ${theme.isDark ? "bg-white/5 border-white/5" : "bg-foreground/[0.03] border-foreground/5"}`}>
+            <button type="button" onClick={onSub} disabled={qty === 0}
+              className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-bold transition disabled:opacity-20 cursor-pointer ${theme.isDark ? "bg-white/5 text-white hover:bg-white/10" : "bg-white border border-foreground/10 text-[#1a1410] hover:bg-foreground/5 shadow-xs"}`}>
+              −
+            </button>
+            <span className={`w-7 text-center font-display text-base font-bold tabular-nums ${active ? theme.textPrimary : theme.textMuted}`}>{qty}</span>
+            <button type="button" onClick={onAdd}
+              className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-bold transition cursor-pointer ${theme.isDark ? "bg-white/10 text-white hover:bg-white/20" : "bg-white border border-foreground/10 text-[#1a1410] hover:bg-foreground/5 shadow-xs"}`}>
+              +
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Standard card — typographic, no icon ─────────────────────────────────
   return (
-    <div
-      className={`flex flex-col justify-between rounded-2xl border p-5 transition-all duration-300 ${getCardStyle(active, theme.isDark)
-        }`}
-    >
-      <div className="space-y-3.5">
+    <div className={`flex flex-col justify-between rounded-2xl border p-5 transition-all duration-300 ${getCardStyle(active, theme.isDark)}`}>
+      <div className="space-y-2.5">
+        {/* Header row */}
         <div className="flex items-start justify-between gap-3">
           <h4 className={`text-sm font-bold leading-tight font-display ${theme.textPrimary}`}>{fmt.name}</h4>
-          <span className={`shrink-0 rounded-full px-2 py-0.5 text-[9px] font-bold border whitespace-nowrap ${badgeStyle}`}>
+          <span className={`shrink-0 rounded-full px-2 py-0.5 text-[9px] font-bold border whitespace-nowrap ${durBadge}`}>
             {fmt.dur}
           </span>
         </div>
-        <p className={`text-[11px] leading-relaxed ${theme.textSecondary}`}>
-          {fmt.desc}
-        </p>
+        {/* Hint — usage label */}
+        <p className={`text-[10px] font-semibold tracking-wide ${active ? activeAccent : theme.textMuted}`}>{hint}</p>
+        {/* Description */}
+        <p className={`text-[11px] leading-relaxed ${theme.textSecondary}`}>{fmt.desc}</p>
       </div>
 
-      <div className="mt-5 flex items-center justify-between border-t border-foreground/5 pt-4">
+      {/* Stepper */}
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-foreground/5 pt-4">
         <span className={`text-[10px] uppercase tracking-wider font-bold ${theme.textMuted}`}>
           {"unitLabel" in fmt && fmt.unitLabel ? fmt.unitLabel : "Quantité"}
         </span>
-        <div className={`flex items-center gap-2 rounded-full p-1 border ${theme.isDark ? "bg-white/5 border-white/5" : "bg-foreground/[0.03] border-foreground/5"
-          }`}>
-          <button
-            type="button"
-            onClick={onSub}
-            disabled={qty === 0}
-            className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold transition disabled:opacity-20 cursor-pointer ${theme.isDark
-                ? "bg-white/5 text-white hover:bg-white/10"
-                : "bg-white border border-foreground/10 text-[#1a1410] hover:bg-foreground/5 shadow-xs"
-              }`}
-          >
+        <div className={`flex items-center gap-2 rounded-full p-1 border shrink-0 ${theme.isDark ? "bg-white/5 border-white/5" : "bg-foreground/[0.03] border-foreground/5"}`}>
+          <button type="button" onClick={onSub} disabled={qty === 0}
+            className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold transition disabled:opacity-20 cursor-pointer ${theme.isDark ? "bg-white/5 text-white hover:bg-white/10" : "bg-white border border-foreground/10 text-[#1a1410] hover:bg-foreground/5 shadow-xs"}`}>
             −
           </button>
-          <span
-            className={`w-6 text-center font-display text-sm font-bold tabular-nums ${active ? theme.textPrimary : theme.textMuted}`}
-          >
-            {qty}
-          </span>
-          <button
-            type="button"
-            onClick={onAdd}
-            className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold transition cursor-pointer ${theme.isDark
-                ? "bg-white/10 text-white hover:bg-white/20"
-                : "bg-white border border-foreground/10 text-[#1a1410] hover:bg-foreground/5 shadow-xs"
-              }`}
-          >
+          <span className={`w-6 text-center font-display text-sm font-bold tabular-nums ${active ? theme.textPrimary : theme.textMuted}`}>{qty}</span>
+          <button type="button" onClick={onAdd}
+            className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold transition cursor-pointer ${theme.isDark ? "bg-white/10 text-white hover:bg-white/20" : "bg-white border border-foreground/10 text-[#1a1410] hover:bg-foreground/5 shadow-xs"}`}>
             +
           </button>
         </div>
@@ -567,10 +613,10 @@ export function DevisBuilder({
                 const activeCategory = FORMAT_CATEGORIES.find((c) => c.id === activeTab);
                 if (!activeCategory) return null;
 
-                const gridCols =
-                  activeCategory.formats.length === 1
-                    ? "grid-cols-1 max-w-md"
-                    : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3";
+                const isSolo = activeCategory.formats.length === 1;
+                const gridCols = isSolo
+                    ? "grid-cols-1"
+                    : "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3";
 
                 return (
                   <div key={activeTab}>
@@ -587,6 +633,7 @@ export function DevisBuilder({
                           onSub={() => setQty(fmt.key, -1)}
                           theme={theme}
                           variant={variant}
+                          solo={isSolo}
                         />
                       );
                     })}

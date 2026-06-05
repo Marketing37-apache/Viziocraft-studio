@@ -297,7 +297,7 @@ function Index() {
                   Shorts · Reels · TikTok
                 </span>
                 <h3 className="mt-3 font-display text-2xl sm:text-3xl tracking-tight">
-                  Verticaux qui captent <span className="text-brand-gradient">en 3 secondes.</span>
+                  Scroll stoppé. <span className="text-brand-gradient">Attention capturée.</span>
                 </h3>
               </div>
               <p className="hidden max-w-xs text-sm text-muted-foreground sm:block">
@@ -383,7 +383,7 @@ function Index() {
           <div className="mt-12 grid gap-6 lg:grid-cols-3">
             {/* Essentiel — léger */}
             <div className="relative flex flex-col rounded-3xl border border-foreground/10 bg-card p-8 transition hover:-translate-y-1 hover:shadow-[0_30px_60px_-25px_rgba(123,45,142,0.25)]">
-              <span className="inline-flex w-fit items-center rounded-full bg-brand-soft px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary">À la vidéo</span>
+              <span className="inline-flex w-fit items-center rounded-full bg-amber-100 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-amber-700">À la vidéo</span>
               <h3 className="mt-4 font-display text-2xl">Montage essentiel</h3>
               <p className="mt-1 text-sm text-muted-foreground">Pour tester sans engagement</p>
               <div className="mt-6 flex items-baseline gap-1">
@@ -434,7 +434,7 @@ function Index() {
 
             {/* Sur mesure */}
             <div className="relative flex flex-col rounded-3xl border border-foreground/10 bg-card p-8 transition hover:-translate-y-1 hover:shadow-[0_30px_60px_-25px_rgba(123,45,142,0.25)]">
-              <span className="inline-flex w-fit items-center rounded-full bg-amber-100 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-amber-700">Sur mesure</span>
+              <span className="inline-flex w-fit items-center rounded-full bg-brand-soft px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary">Sur mesure</span>
               <h3 className="mt-4 font-display text-2xl">Production personnalisée</h3>
               <p className="mt-1 text-sm text-muted-foreground">Entièrement à la carte</p>
               <div className="mt-6 flex items-baseline gap-1">

@@ -52,12 +52,24 @@ export function Nav() {
           ))}
         </ul>
 
-        <a
-          href="/#contact"
-          className="hidden md:inline-flex items-center gap-2 rounded-full bg-brand-gradient px-5 py-2.5 text-sm font-semibold text-white glow-brand hover:opacity-95 transition"
-        >
-          Démarrer un projet →
-        </a>
+        <div className="hidden md:flex items-center gap-2">
+          <a
+            href="/#contact"
+            className={`inline-flex items-center gap-1.5 rounded-full border px-4 py-2.5 text-sm font-semibold transition ${
+              scrolled
+                ? "border-foreground/15 text-foreground hover:bg-foreground/5"
+                : "border-white/25 text-white hover:bg-white/10"
+            }`}
+          >
+            Contact
+          </a>
+          <a
+            href="/devis/standard"
+            className="inline-flex items-center gap-2 rounded-full bg-brand-gradient px-5 py-2.5 text-sm font-semibold text-white glow-brand hover:opacity-95 transition"
+          >
+            Devis →
+          </a>
+        </div>
 
         <button
           onClick={() => setOpen((o) => !o)}
@@ -82,13 +94,20 @@ export function Nav() {
                 </a>
               </li>
             ))}
-            <li className="pt-3">
+            <li className="pt-3 flex flex-col gap-2">
               <a
                 href="/#contact"
                 onClick={() => setOpen(false)}
+                className="block text-center rounded-full border border-foreground/20 px-5 py-3 text-sm font-semibold text-foreground"
+              >
+                Contact
+              </a>
+              <a
+                href="/devis/standard"
+                onClick={() => setOpen(false)}
                 className="block text-center rounded-full bg-brand-gradient px-5 py-3 text-sm font-semibold text-white"
               >
-                Démarrer un projet
+                Devis →
               </a>
             </li>
           </ul>
