@@ -53,34 +53,34 @@ const UNIVERS: Record<string, Univers> = {
     slug: "publicites-video",
     eyebrow: "Univers · Publicités vidéo",
     title: "Des ads qui ne se zappent pas. ",
-    highlight: "Performance × esthétique.",
+    highlight: "Montées pour convertir.",
     baseline:
-      "Hook chirurgical, rythme serré, variantes prêtes pour Meta, TikTok, YouTube. La pub vidéo qui aligne la créa sur le ROI.",
+      "Un hook qui accroche, un rythme qui retient, un format adapté à chaque plateforme. La pub vidéo pensée pour performer.",
     hero: `${CDN}/699ab9aed3c37eb93d817327_image4.jpeg`,
     introTitle: "L'attention coûte cher. Nous la rentabilisons.",
     intro:
-      "Sur les feeds, vous avez 1.7 seconde pour exister. Au-delà, votre CPM s'envole. Notre travail commence là — un hook qui interrompt, une promesse qui retient, un call-to-action qui convertit. Tout le reste est secondaire.",
+      "Sur les feeds, vous disposez de moins de deux secondes avant que le viewer passe à autre chose. Notre travail commence à ce moment précis — construire un hook qui arrête le scroll, une promesse qui crédibilise, un call-to-action qui déclenche l'action. Chaque coupe, chaque sous-titre, chaque seconde est au service de votre objectif.",
     manifesto: [
-      "Le brief commence par l'objectif business, pas par la créa.",
-      "On livre 3 variantes par ad. Vous testez, on itère sur la gagnante.",
+      "Le brief commence par l'objectif de conversion, pas par la direction artistique.",
+      "On itère sur chaque pub jusqu'à ce qu'elle délivre les résultats attendus.",
       "Le motion sert le message, jamais l'inverse.",
     ],
     blocks: [
       {
-        h: "Hook craft",
-        p: "Pattern interrupt, question forte, claim contre-intuitif. Nos hooks sont travaillés en amont avec vos analytics — ce qui scrolle, ce qui retient, ce qui convertit chez VOTRE audience.",
+        h: "Un hook qui stoppe le scroll",
+        p: "L'ouverture est le seul moment où vous pouvez encore perdre votre audience. On travaille chaque première seconde — image d'accroche, rythme initial, promesse implicite — pour qu'elle soit impossible à ignorer.",
       },
       {
-        h: "Variantes A/B natives",
-        p: "Une ad, trois hooks, trois fins. Vous lancez en parallèle sur Ads Manager, vous identifiez le winner en 48h. On itère sur la variante gagnante jusqu'au seuil de rentabilité.",
+        h: "Formats adaptés à chaque plateforme",
+        p: "9:16 pour Reels et TikTok, 1:1 pour le feed Meta, 16:9 pour YouTube — un seul brief, tous les formats livrés, chacun optimisé pour son contexte. Pas de recadrage approximatif, une vraie adaptation.",
       },
       {
-        h: "Multi-format en un seul brief",
-        p: "9:16 Reels, 1:1 feed, 16:9 YouTube, vertical TikTok — un seul devis, tous les ratios livrés. Plus de double frais, plus de désynchronisation entre plateformes.",
+        h: "Montage orienté conversion",
+        p: "Chaque coupe, chaque sous-titre et chaque transition est calibré pour maintenir l'attention et guider le viewer vers l'action. On monte avec l'objectif en tête, pas avec l'esthétique comme priorité.",
       },
       {
-        h: "Sound design qui conclut",
-        p: "Une bonne pub se finit dans la tête du viewer. Stinger sonore, voix-off mixée à la perfection, silences calculés. Le son fait 50% de la conversion.",
+        h: "Disponibles pour itérer",
+        p: "Une pub lancée, des données remontées, une nouvelle version livrée. On reste disponibles après la livraison initiale pour affiner en fonction des performances réelles.",
       },
     ],
     gallery: [
@@ -92,26 +92,25 @@ const UNIVERS: Record<string, Univers> = {
       { src: `${CDN}/699ab9aed3c37eb93d81733d_image6.jpeg`, alt: "Ad 6", wide: true },
     ],
     stats: [
-      { k: "×3.1", v: "CTR moyen vs. baseline client" },
-      { k: "48h", v: "Délai de livraison d'un set de variantes" },
-      { k: "−42%", v: "CPA observé après itération" },
+      { k: "×3", v: "Taux de clic supérieur après optimisation" },
+      { k: "48h", v: "Délai de livraison standard" },
+      { k: "−40%", v: "Coût par résultat observé après itération" },
     ],
     process: [
-      { n: "01", t: "Audit funnel", p: "On lit vos chiffres avant de toucher à un calque. Quel est le drop, où, pourquoi." },
-      { n: "02", t: "Hook lab", p: "5 hooks scriptés, 2 sélectionnés, tournage / montage immédiat." },
-      { n: "03", t: "Première salve", p: "3 variantes livrées, déployées sur petit budget de test." },
-      { n: "04", t: "Itération data-driven", p: "On garde la winner, on déstructure ce qui marche, on reconstruit la suite." },
+      { n: "01", t: "Brief", p: "Vous transmettez vos fichiers sources, l'objectif de la campagne et la cible visée. On part de là, pas d'un template." },
+      { n: "02", t: "Montage", p: "On construit la pub avec le hook, le rythme et le format adaptés à la plateforme de diffusion." },
+      { n: "03", t: "Livraison", p: "Vous recevez les exports finaux, prêts à diffuser, dans chaque format demandé." },
+      { n: "04", t: "Ajustements", p: "Vos retours sont intégrés rapidement. On ajuste jusqu'à validation complète." },
     ],
-    tools: ["Meta Ads", "TikTok Ads", "YouTube Ads", "After Effects", "Premiere Pro", "DaVinci"],
+    tools: ["After Effects", "Premiere Pro", "DaVinci Resolve"],
     deliverables: [
-      "Master 4K + exports 9:16 / 1:1 / 16:9",
-      "3 hooks alternatifs par ad",
-      "Sous-titres SRT + burned-in",
-      "Bumper logo + outro CTA",
-      "Pack thumbnails statiques pour A/B test",
+      "Exports dans tous les formats demandés — 9:16, 1:1, 16:9",
+      "Sous-titres incrustés et synchronisés",
+      "Intro ou outro avec votre logo",
+      "Miniatures statiques pour vos campagnes",
     ],
     quote: {
-      q: "On a coupé deux agences pour ne garder que VizioCraft. La fluidité est dingue, et le ROAS suit.",
+      q: "On a consolidé notre production chez VizioCraft après avoir testé deux autres agences. La réactivité et les résultats ne sont pas comparables.",
       a: "— Direction acquisition, marque SaaS B2B",
     },
     theme: {
@@ -137,32 +136,32 @@ const UNIVERS: Record<string, Univers> = {
     title: "Une conversation devient ",
     highlight: "un univers visuel.",
     baseline:
-      "Multi-cam synchro, étalonnage cohérent, clips courts dérivés. Le podcast vidéo qui transforme chaque épisode en machine à contenu.",
+      "Synchro multi-caméra, étalonnage cohérent, clips courts dérivés. Chaque épisode devient une source de contenu sur toutes les plateformes.",
     hero: `${CDN}/699ab9aed3c37eb93d81732a_image8.jpeg`,
-    introTitle: "Un épisode = un long, dix shorts, trois carrousels.",
+    introTitle: "Un tournage, plusieurs semaines de contenu.",
     intro:
-      "Vous tournez 90 minutes. La plupart en sortent une vidéo. Nous en sortons une saison de contenu. Long format YouTube, shorts viraux, snippets LinkedIn, visuels Instagram — tout vit du même tournage.",
+      "Vous enregistrez un épisode. La plupart des équipes en sortent une vidéo. Nous en sortons un long format YouTube structuré, des clips courts reformatés pour les réseaux, et des visuels prêts à publier — le tout issu du même tournage, sans charge supplémentaire de votre côté.",
     manifesto: [
-      "Le multi-cam, c'est la liberté. Plus jamais coincé sur un seul plan.",
-      "Chaque clip court a une mini-narration : début, twist, punchline.",
+      "Plusieurs caméras, une émission cohérente et bien montée.",
+      "Chaque moment fort devient un clip court autonome avec sa propre logique narrative.",
       "L'identité visuelle reste constante d'un épisode à l'autre.",
     ],
     blocks: [
       {
-        h: "Sync multi-cam à la milliseconde",
-        p: "Deux, trois, quatre caméras + micros lavalier dédiés. Synchro audio à la frame, étalonnage homogène, gestion des hots-mics. Vous fournissez le tournage, on fournit une émission.",
+        h: "Synchronisation multi-caméra",
+        p: "Une caméra par intervenant, complétée d'un plan d'ensemble si le tournage s'y prête. On synchronise toutes les sources, on corrige les niveaux audio, on livre une émission finalisée — pas un assemblage brut.",
       },
       {
-        h: "Clips viraux extraits",
-        p: "8 à 15 shorts par épisode, identifiés sur les pics d'attention. Hook restructuré, contexte minimum, fin punchy. Spécifiquement coupés pour TikTok, Reels, YouTube Shorts.",
+        h: "Clips courts extraits de chaque épisode",
+        p: "On identifie les séquences à fort potentiel et on les reformate en clips verticaux optimisés pour TikTok, Reels et YouTube Shorts. Le volume livré dépend de la durée et de la densité du contenu.",
       },
       {
-        h: "Chapitrage SEO",
-        p: "Chapitres YouTube optimisés sémantiquement pour booster la visibilité et l'écoute. Description SEO friendly, tags, miniatures A/B.",
+        h: "Chapitrage et éléments de publication",
+        p: "Chapitres YouTube pour structurer la navigation, description rédigée, miniatures livrées. Votre épisode est prêt à être publié dès réception, sans étape supplémentaire.",
       },
       {
-        h: "Habillage signature",
-        p: "Lower-thirds, transitions de chapitres, motion typography sur les phrases fortes. Une identité reconnaissable épisode après épisode.",
+        h: "Habillage visuel homogène",
+        p: "Nom des intervenants à l'écran, animations sur les phrases clés, transitions soignées. Un style visuel cohérent qui renforce la reconnaissance de votre émission épisode après épisode.",
       },
     ],
     gallery: [
@@ -174,28 +173,27 @@ const UNIVERS: Record<string, Univers> = {
       { src: `${CDN}/699ab9aed3c37eb93d81735e_image11.jpeg`, alt: "Podcast 6", wide: true },
     ],
     stats: [
-      { k: "4 cams", v: "Synchro audio/vidéo native" },
-      { k: "10+", v: "Shorts extraits par épisode" },
+      { k: "Multi-cam", v: "Synchronisation native audio et vidéo" },
+      { k: "Clips dérivés", v: "Volume adapté au contenu de chaque épisode" },
       { k: "72h", v: "Délai de livraison standard" },
     ],
     process: [
-      { n: "01", t: "Brief éditorial", p: "Pitch épisode, axes forts, moments à valoriser dans les shorts." },
-      { n: "02", t: "Réception & sync", p: "Upload rushes, on synchronise le multi-cam, on cale les niveaux." },
-      { n: "03", t: "Long format", p: "Cut narratif, b-rolls, lower-thirds, étalonnage, mixage." },
-      { n: "04", t: "Shorts dérivés", p: "On isole les pépites, on les reformate verticalement avec hook." },
-      { n: "05", t: "Pack publication", p: "Long + shorts + descriptions + tags + thumbs prêtes à publier." },
+      { n: "01", t: "Brief", p: "Vous nous transmettez le contexte de l'épisode et les séquences à valoriser en priorité." },
+      { n: "02", t: "Réception des rushes", p: "Vous uploadez vos fichiers. On synchronise les sources et on calibre les niveaux audio." },
+      { n: "03", t: "Montage long format", p: "Découpage narratif, habillage, étalonnage colorimétrique, mixage audio." },
+      { n: "04", t: "Clips dérivés", p: "On extrait les séquences à fort potentiel et on les reformate en clips verticaux." },
+      { n: "05", t: "Livraison", p: "Long format, clips courts, miniatures et descriptions — tout livré en une seule passe." },
     ],
-    tools: ["Premiere Pro", "DaVinci Resolve", "PluralEyes", "Auphonic", "After Effects"],
+    tools: ["Premiere Pro", "DaVinci Resolve", "After Effects"],
     deliverables: [
-      "Long format master en 4K",
-      "10–15 shorts verticaux",
-      "Pack thumbnails (3 variantes)",
-      "Description + chapitres + tags SEO",
-      "Audio podcast nettoyé (mp3 + wav)",
+      "Long format en haute qualité, prêt à publier",
+      "Clips verticaux extraits selon le contenu",
+      "Miniatures livrées",
+      "Description et chapitres rédigés",
     ],
     quote: {
-      q: "Le ratio temps de tournage / contenu publié a triplé. Mon podcast est devenu un système.",
-      a: "— Animateur d'un podcast B2B, 25k abonnés YouTube",
+      q: "Le volume de contenu publié a triplé à partir du même temps de tournage. Le podcast est devenu une vraie machine à distribution.",
+      a: "— Podcasteur, créateur de contenu B2B",
     },
     theme: {
       pageBg: "bg-[#fdfaf3]",
@@ -216,69 +214,67 @@ const UNIVERS: Record<string, Univers> = {
 
   "corporate-evenementiel": {
     slug: "corporate-evenementiel",
-    eyebrow: "Univers · Corporate & Événementiel",
-    title: "L'image que votre marque ",
-    highlight: "mérite vraiment.",
+    eyebrow: "Univers · Shorts & Reels",
+    title: "Du scroll stoppé, ",
+    highlight: "tous les jours.",
     baseline:
-      "Films institutionnels, témoignages clients, aftermovies. Une production qui parle aux décideurs sans jamais ennuyer.",
+      "Shorts, Reels, TikToks — montés pour capter l'attention dès la première seconde et convertir en abonnés ou en clients.",
     hero: `${CDN}/699ab9aed3c37eb93d81733d_image6.jpeg`,
-    introTitle: "Le corporate n'est pas synonyme d'ennui.",
+    introTitle: "Le format court est le plus exigeant à maîtriser.",
     intro:
-      "Trop d'agences confondent « sérieux » et « plat ». Nous croyons l'inverse : un film d'entreprise réussi raconte une vraie histoire, met en valeur de vrais visages, et donne envie d'en savoir plus. Pas une slide animée de plus.",
+      "En 30 à 60 secondes, chaque choix de montage est visible. Le premier plan, l'enchaînement des coupes, le placement des sous-titres, la dernière image — tout se voit. On monte vos shorts avec le même niveau d'exigence qu'un long format, parce que votre audience, elle, ne fait pas la différence.",
     manifesto: [
-      "Une caméra qui sait quand se taire. Une voix-off qui sait quand parler.",
-      "L'étalonnage est un acte stratégique, pas une étape technique.",
-      "Le sound design fait passer un message corporate de tiède à mémorable.",
+      "Un short mal monté réduit votre crédibilité avant même que le contenu soit vu.",
+      "Le rythme est le résultat d'un travail technique, pas d'une intuition.",
+      "Les sous-titres sont partie intégrante du montage, pas un ajout de dernière minute.",
     ],
     blocks: [
       {
-        h: "Films institutionnels",
-        p: "Court (90s) ou long (5-8min), nous structurons un récit qui aligne mission, valeurs et différenciation. On évite les clichés visuels et les slogans creux. On vise l'émotion utile.",
+        h: "Montage natif 9:16",
+        p: "On ne recadre pas une vidéo horizontale en vertical. Chaque short est monté directement dans le bon format, avec un cadrage, un rythme et une hiérarchie visuelle pensés pour le mobile et le scroll.",
       },
       {
-        h: "Témoignages clients",
-        p: "Une interview bien menée vaut dix études de cas écrites. Préparation des questions, direction du témoignant, montage qui garde l'authenticité tout en virant les hésitations.",
+        h: "Sous-titres intégrés au montage",
+        p: "Police, couleurs, taille, position, timing — les sous-titres sont traités comme un élément de mise en scène. Ils guident le regard et maintiennent l'engagement, même en lecture silencieuse.",
       },
       {
-        h: "Aftermovies & événements",
-        p: "Un événement bien filmé est un actif marketing pour 12 mois. Energy cut, recap stratégique 90s, version longue 4-6min, plus des shorts immédiats pour le j+1.",
+        h: "Accroche dès la première image",
+        p: "Chaque short s'ouvre sur une séquence travaillée pour retenir l'attention immédiatement. Pas de générique, pas d'introduction — on entre dans le sujet avant que le viewer ait le temps de scroller.",
       },
       {
-        h: "Direction artistique signature",
-        p: "Charte vidéo posée dès le premier projet : LUT signature, typographie, transitions, sound design. Cohérence garantie sur l'ensemble de votre production corporate.",
+        h: "Volume soutenu, qualité constante",
+        p: "Qu'il s'agisse de cinq ou trente shorts par mois, on maintient la même cohérence d'exécution. Un style validé une fois, appliqué systématiquement à chaque livraison.",
       },
     ],
     gallery: [
-      { src: `${CDN}/699ab9aed3c37eb93d81733d_image6.jpeg`, alt: "Corporate 1", wide: true },
-      { src: `${CDN}/699ab9aed3c37eb93d81734c_image5.jpeg`, alt: "Corporate 2", tall: true },
-      { src: `${CDN}/699ab9aed3c37eb93d81735e_image11.jpeg`, alt: "Corporate 3" },
-      { src: `${CDN}/699ab9aed3c37eb93d81732a_image8.jpeg`, alt: "Corporate 4" },
-      { src: `${CDN}/699ab9aed3c37eb93d817327_image4.jpeg`, alt: "Corporate 5" },
-      { src: `${CDN}/699ab9aed3c37eb93d81731b_image20.jpeg`, alt: "Corporate 6", wide: true },
+      { src: `${CDN}/699ab9aed3c37eb93d81733d_image6.jpeg`, alt: "Short 1", wide: true },
+      { src: `${CDN}/699ab9aed3c37eb93d81734c_image5.jpeg`, alt: "Short 2", tall: true },
+      { src: `${CDN}/699ab9aed3c37eb93d81735e_image11.jpeg`, alt: "Short 3" },
+      { src: `${CDN}/699ab9aed3c37eb93d81732a_image8.jpeg`, alt: "Short 4" },
+      { src: `${CDN}/699ab9aed3c37eb93d817327_image4.jpeg`, alt: "Short 5" },
+      { src: `${CDN}/699ab9aed3c37eb93d81731b_image20.jpeg`, alt: "Short 6", wide: true },
     ],
     stats: [
-      { k: "+35", v: "Marques accompagnées" },
-      { k: "8 min", v: "Format institutionnel typique" },
-      { k: "12 mois", v: "Durée de vie marketing moyenne" },
+      { k: "+5000", v: "Shorts produits pour nos clients" },
+      { k: "24h", v: "Option de livraison express disponible" },
+      { k: "30+", v: "Shorts mensuels pour certains clients actifs" },
     ],
     process: [
-      { n: "01", t: "Discovery stratégique", p: "Qui parle, à qui, pourquoi maintenant. Avant tout choix créatif." },
-      { n: "02", t: "Pré-production", p: "Storyboard, casting des prises de parole, repérage." },
-      { n: "03", t: "Tournage encadré", p: "Plan de tournage millimétré, plusieurs angles, prise son pro." },
-      { n: "04", t: "Post-production premium", p: "Cut narratif, étalonnage cinématique, mixage 5.1." },
-      { n: "05", t: "Versionning", p: "Master + déclinaisons réseaux + version sous-titrée pour silent autoplay." },
+      { n: "01", t: "Brief", p: "Vous transmettez vos rushes et vos références visuelles. On définit ensemble le style à appliquer." },
+      { n: "02", t: "Cadrage du style", p: "On livre un premier short. Vous le validez, on verrouille la direction visuelle pour la suite." },
+      { n: "03", t: "Production régulière", p: "On livre selon votre rythme de publication — quotidien, hebdomadaire ou à la demande." },
+      { n: "04", t: "Ajustements", p: "Vos retours sont intégrés rapidement, sans remettre le style en question à chaque fois." },
     ],
-    tools: ["Premiere Pro", "DaVinci Resolve", "After Effects", "Pro Tools", "Sony / RED"],
+    tools: ["Premiere Pro", "After Effects", "DaVinci Resolve"],
     deliverables: [
-      "Master cinéma 4K H.264 + ProRes",
-      "Versions réseaux (9:16, 1:1, 16:9)",
-      "Version sous-titrée français + anglais",
-      "Pack b-rolls bonus pour vos réseaux",
-      "Photos extraites HD",
+      "Shorts en 9:16, prêts à publier",
+      "Sous-titres animés incrustés",
+      "Exports adaptés à chaque plateforme",
+      "Miniatures fournies si nécessaire",
     ],
     quote: {
-      q: "C'est la première fois que notre film d'entreprise n'embarrasse pas l'équipe quand on le montre.",
-      a: "— Directrice communication, groupe industriel 400 personnes",
+      q: "Pour la première fois, je publie tous les jours sans m'impliquer dans le montage. La régularité a changé mes résultats.",
+      a: "— Créateur de contenu, 80k abonnés",
     },
     theme: {
       pageBg: "bg-[#f4f1eb]",
@@ -300,35 +296,35 @@ const UNIVERS: Record<string, Univers> = {
   "motion-design": {
     slug: "motion-design",
     eyebrow: "Univers · Motion Design",
-    title: "Le pixel qui bouge, ",
-    highlight: "avec intention.",
+    title: "L'animation au service ",
+    highlight: "de votre message.",
     baseline:
-      "Logos animés, typographie cinétique, transitions sur-mesure, explainer animés. Le motion qui structure votre récit visuel.",
+      "Logos animés, textes en mouvement, intros et transitions sur-mesure. Le motion design qui renforce votre identité vidéo.",
     hero: `${CDN}/699ab9aed3c37eb93d81734c_image5.jpeg`,
-    introTitle: "Un bon motion ne se voit pas. Il guide.",
+    introTitle: "Un bon motion design ne se remarque pas. Il guide.",
     intro:
-      "Quand l'animation est mal calibrée, on la subit. Quand elle est juste, on ne la remarque même pas — on comprend, on retient, on agit. Notre motion design sert le message, jamais l'inverse.",
+      "Quand l'animation est précisément calibrée, elle devient transparente — on retient l'information, on comprend le propos, on reste attentif. Quand elle ne l'est pas, on ne voit plus que l'animation. Notre rôle est de faire en sorte que chaque élément en mouvement serve votre contenu, et rien d'autre.",
     manifesto: [
-      "L'easing est plus important que le keyframe.",
-      "Une animation existe pour faire passer une info, pas pour épater.",
-      "Le silence visuel est aussi puissant qu'un mouvement.",
+      "Chaque élément animé a une fonction précise. S'il n'en a pas, il disparaît.",
+      "La cohérence visuelle sur l'ensemble d'une production vaut plus qu'un effet ponctuel.",
+      "Un style défini dès le premier projet, réutilisable sur toute votre production.",
     ],
     blocks: [
       {
-        h: "Logo intros & branding motion",
-        p: "Vous avez investi dans une identité forte. Donnez-lui sa version animée — intro vidéo, bumper, logo loop pour fin de vidéo. Cohérence garantie avec votre charte.",
+        h: "Intro et logo animé",
+        p: "Votre identité visuelle mise en mouvement pour ouvrir chaque vidéo. Court, propre, à votre image. On crée un élément réutilisable sur tous vos formats — YouTube, Reels, publicités, podcasts.",
       },
       {
-        h: "Kinetic typography",
-        p: "Quand l'image manque et que la voix porte, la typographie animée prend le relais. Punchlines, citations, données chiffrées — chaque mot rythmé pour maximiser la mémorisation.",
+        h: "Typographie et textes animés",
+        p: "Titres, statistiques, phrases clés — mis en scène avec du mouvement pour renforcer la mémorisation. Particulièrement efficace sur les séquences où l'image seule ne suffit pas à porter le message.",
       },
       {
-        h: "Explainer & infographies",
-        p: "Vous avez un concept complexe à vulgariser. On le décompose visuellement, étape par étape, avec une économie graphique qui respecte le viewer.",
+        h: "Habillage et éléments récurrents",
+        p: "Nom des intervenants, annotations, indicateurs de chapitre — les éléments graphiques qui assoient le niveau de finition de vos vidéos et renforcent la cohérence de votre image.",
       },
       {
-        h: "Transitions signature",
-        p: "Une transition réussie est invisible. Nous construisons votre toolkit de transitions sur-mesure, réutilisable sur tous vos projets futurs — vous n'aurez plus à payer la roue à chaque fois.",
+        h: "Transitions et kit réutilisable",
+        p: "Un ensemble de transitions et d'éléments graphiques à votre image, applicable sur l'ensemble de vos projets futurs. Vous n'avez pas à redéfinir votre style à chaque nouvelle production.",
       },
     ],
     gallery: [
@@ -340,28 +336,26 @@ const UNIVERS: Record<string, Univers> = {
       { src: `${CDN}/699ab9aed3c37eb93d81732a_image8.jpeg`, alt: "Motion 6", wide: true },
     ],
     stats: [
-      { k: "+500", v: "Animations produites" },
-      { k: "60fps", v: "Standard de livraison" },
-      { k: "After Effects", v: "Pipeline natif" },
+      { k: "+500", v: "Éléments animés produits" },
+      { k: "After Effects", v: "Notre outil de production principal" },
+      { k: "Réutilisable", v: "Chaque élément livré avec ses fichiers sources" },
     ],
     process: [
-      { n: "01", t: "Storyboard", p: "Frames clés, intentions de mouvement, mood visuel — validés avant production." },
-      { n: "02", t: "Style frames", p: "3 styles graphiques poussés, vous choisissez la direction." },
-      { n: "03", t: "Animation", p: "Production frame par frame, courbes d'easing chirurgicales." },
-      { n: "04", t: "Sound design", p: "Synchronisation audio, whooshes, impacts, ambiance." },
-      { n: "05", t: "Livraison", p: "Master + versions transparentes, alphas, loops, déclinaisons." },
+      { n: "01", t: "Brief visuel", p: "Vous partagez vos références, votre charte graphique existante et vos contraintes." },
+      { n: "02", t: "Direction artistique", p: "On vous soumet une orientation visuelle avant de lancer la production." },
+      { n: "03", t: "Production", p: "Animation cadre par cadre, timing soigné, rendu final propre." },
+      { n: "04", t: "Livraison", p: "Fichiers exportés prêts à intégrer dans vos vidéos. Fichiers sources fournis sur demande." },
     ],
-    tools: ["After Effects", "Cinema 4D", "Illustrator", "Figma", "Plexus", "Trapcode"],
+    tools: ["After Effects", "Premiere Pro", "DaVinci Resolve"],
     deliverables: [
-      "Master vidéo 4K H.264",
-      "Version alpha (transparente) pour overlay",
-      "Boucles parfaites (perfect loops)",
-      "Source After Effects (sur demande)",
-      "Variations courtes pour réseaux",
+      "Éléments animés exportés en MP4",
+      "Version fond transparent disponible pour incrustation",
+      "Fichiers sources After Effects sur demande",
+      "Déclinaisons adaptées aux différents formats",
     ],
     quote: {
-      q: "Nos vidéos avaient besoin d'âme. Le motion VizioCraft les a transformées en signature.",
-      a: "— Brand lead, startup fintech",
+      q: "Nos vidéos ont désormais une identité visuelle reconnaissable et cohérente. Le motion design a structuré toute notre production.",
+      a: "— Responsable contenu, marque lifestyle",
     },
     theme: {
       pageBg: "bg-[#06061a]",
@@ -382,69 +376,67 @@ const UNIVERS: Record<string, Univers> = {
 
   "contenu-educatif": {
     slug: "contenu-educatif",
-    eyebrow: "Univers · Contenu éducatif",
-    title: "Apprendre devient ",
-    highlight: "un plaisir visuel.",
+    eyebrow: "Univers · Formats longs",
+    title: "Des vidéos longues qui ",
+    highlight: "tiennent l'attention.",
     baseline:
-      "Tutoriels, modules de formation, vidéos explicatives. La pédagogie qui retient l'attention jusqu'au dernier chapitre.",
+      "YouTube, interviews, vlogs, formats documentaires — montés pour que vos viewers restent jusqu'à la fin.",
     hero: `${CDN}/699ab9aed3c37eb93d81735e_image11.jpeg`,
-    introTitle: "Une bonne formation, c'est 70% montage.",
+    introTitle: "Un long format bien construit, c'est de la fidélisation.",
     intro:
-      "Vous pouvez avoir le meilleur contenu pédagogique du monde — si le rythme est mauvais, personne ne finira. Notre travail : transformer votre savoir en expérience d'apprentissage qui se regarde, jusqu'au bout.",
+      "Une vidéo longue dont le rythme n'est pas maîtrisé perd son audience après deux minutes. Une vidéo bien montée la retient jusqu'à la fin et la fait revenir la semaine suivante. On prend en charge la structure, le rythme et les finitions — pour que chaque minute de votre contenu soit justifiée.",
     manifesto: [
-      "Une notion = un chapitre = une accroche visuelle.",
-      "Les schémas animés font ce que les mots ne peuvent pas.",
-      "Le silence est un outil pédagogique — on laisse respirer.",
+      "Un bon montage s'efface. Une coupe mal placée, jamais.",
+      "Le rythme d'un long format se construit dès les premières décisions de découpage.",
+      "Les b-rolls, les transitions et la colorimétrie sont des outils narratifs, pas des options.",
     ],
     blocks: [
       {
-        h: "Modules de formation",
-        p: "Découpage par compétence, chapitrage clair, transitions identifiables. Chaque module est conçu pour être consommé seul ou en parcours complet — flexibilité maximale pour vos apprenants.",
+        h: "Montage narratif",
+        p: "On structure votre contenu pour maintenir l'engagement de bout en bout : introduction qui accroche, progression maîtrisée, conclusion mémorable. Le montage raconte autant que le contenu lui-même.",
       },
       {
-        h: "Vidéos explicatives",
-        p: "Concept complexe expliqué en 90 secondes. Schémas animés, voix-off claire, métaphores visuelles fortes. Le format viral de la pédagogie moderne.",
+        h: "B-rolls et visuels d'appui",
+        p: "On intègre vos rushes secondaires aux moments où ils renforcent le propos et aèrent la vidéo. Si vous n'en disposez pas, on identifie et propose des alternatives adaptées.",
       },
       {
-        h: "Tutoriels & démos produit",
-        p: "Screen recording propre, zooms intelligents sur les actions clés, sous-titres incrustés. L'utilisateur reproduit chaque étape sans avoir à pauser.",
+        h: "Étalonnage et cohérence visuelle",
+        p: "Correction colorimétrique, homogénéité de l'exposition, rendu visuel soigné. Votre vidéo présente le même niveau de finition du début à la fin, quelle que soit la source.",
       },
       {
-        h: "Pack pédagogique modulaire",
-        p: "Une formation = 1 long format + des shorts chapitres + des fiches récap visuelles + une intro standardisée. Tout votre contenu pédago vit dans un même langage visuel.",
+        h: "Habillage et finitions",
+        p: "Sous-titres, annotations, transitions, intro et outro. L'ensemble des éléments qui confèrent à votre vidéo un rendu professionnel et une identité visuelle identifiable.",
       },
     ],
     gallery: [
-      { src: `${CDN}/699ab9aed3c37eb93d81735e_image11.jpeg`, alt: "Edu 1", wide: true },
-      { src: `${CDN}/699ab9aed3c37eb93d81734c_image5.jpeg`, alt: "Edu 2" },
-      { src: `${CDN}/699ab9aed3c37eb93d81732a_image8.jpeg`, alt: "Edu 3", tall: true },
-      { src: `${CDN}/699ab9aed3c37eb93d81733d_image6.jpeg`, alt: "Edu 4" },
-      { src: `${CDN}/699ab9aed3c37eb93d817327_image4.jpeg`, alt: "Edu 5" },
-      { src: `${CDN}/699ab9aed3c37eb93d81731b_image20.jpeg`, alt: "Edu 6", wide: true },
+      { src: `${CDN}/699ab9aed3c37eb93d81735e_image11.jpeg`, alt: "Long format 1", wide: true },
+      { src: `${CDN}/699ab9aed3c37eb93d81734c_image5.jpeg`, alt: "Long format 2" },
+      { src: `${CDN}/699ab9aed3c37eb93d81732a_image8.jpeg`, alt: "Long format 3", tall: true },
+      { src: `${CDN}/699ab9aed3c37eb93d81733d_image6.jpeg`, alt: "Long format 4" },
+      { src: `${CDN}/699ab9aed3c37eb93d817327_image4.jpeg`, alt: "Long format 5" },
+      { src: `${CDN}/699ab9aed3c37eb93d81731b_image20.jpeg`, alt: "Long format 6", wide: true },
     ],
     stats: [
-      { k: "+250", v: "Vidéos pédagogiques produites" },
-      { k: "92%", v: "Taux de complétion moyen client" },
-      { k: "5 langues", v: "Sous-titrage multilingue" },
+      { k: "+1000", v: "Formats longs produits" },
+      { k: "72h", v: "Délai de livraison standard" },
+      { k: "7j/7", v: "Production en continu" },
     ],
     process: [
-      { n: "01", t: "Architecture pédagogique", p: "Carte des notions, ordre d'apprentissage, points de friction anticipés." },
-      { n: "02", t: "Scripts & storyboards", p: "Rédaction des voix-off, schémas annotés, validation pédago." },
-      { n: "03", t: "Animation & enregistrement", p: "Voix-off pro, motion design didactique, screen capture HD." },
-      { n: "04", t: "Mix & accessibilité", p: "Sous-titres FR + langues cibles, descriptions alt, formats accessibles." },
-      { n: "05", t: "Pack final", p: "Long format + chapitres + fiches récap + pack relances réseaux." },
+      { n: "01", t: "Brief", p: "Vous transmettez vos rushes, vos références stylistiques et vos attentes de rendu." },
+      { n: "02", t: "Montage", p: "On structure et monte votre vidéo selon le rythme et l'habillage définis en amont." },
+      { n: "03", t: "Livraison", p: "Vous recevez la vidéo finalisée, prête à publier, dans le format convenu." },
+      { n: "04", t: "Ajustements", p: "Vos retours sont intégrés jusqu'à validation complète de votre part." },
     ],
-    tools: ["After Effects", "Camtasia", "Premiere Pro", "Notion (scripts)", "Articulate"],
+    tools: ["Premiere Pro", "DaVinci Resolve", "After Effects"],
     deliverables: [
-      "Modules vidéo MP4 HD/4K",
-      "Sous-titres FR + EN (.srt + burned-in)",
-      "Fiches récap PDF par chapitre",
-      "Quiz embarqués (sur demande)",
-      "Master sans habillage pour LMS",
+      "Vidéo montée en haute qualité, prête à publier",
+      "Sous-titres incrustés et synchronisés",
+      "Habillage et éléments graphiques intégrés",
+      "Exports dans les formats demandés",
     ],
     quote: {
-      q: "Notre taux de complétion est passé de 38% à 89% en refondant les modules avec VizioCraft.",
-      a: "— Responsable formation, école en ligne 12k apprenants",
+      q: "La durée de visionnage de mes vidéos a doublé depuis qu'on travaille ensemble. Le montage change vraiment tout.",
+      a: "— Créateur YouTube, communauté tech",
     },
     theme: {
       pageBg: "bg-[#eef4ff]",
@@ -737,27 +729,42 @@ function UniversPage() {
 
       {/* NAV NEXT/PREV */}
       <section className="px-6 pb-24 lg:px-10">
-        <div className="mx-auto max-w-6xl grid gap-4 sm:grid-cols-2">
-          {prev ? (
-            <Link
-              to="/univers/$slug"
-              params={{ slug: prev.slug }}
-              className={`group rounded-2xl border ${t.cardBorder} ${t.cardBg} p-6 transition hover:-translate-y-0.5 hover:shadow-xl`}
-            >
-              <p className={`text-[11px] uppercase tracking-[0.22em] ${t.eyebrowColor}`}>← Univers précédent</p>
-              <p className="mt-2 font-display text-xl group-hover:opacity-80">{prev.title} {prev.highlight}</p>
-            </Link>
-          ) : <div />}
-          {next ? (
-            <Link
-              to="/univers/$slug"
-              params={{ slug: next.slug }}
-              className={`group rounded-2xl border ${t.cardBorder} ${t.cardBg} p-6 text-right transition hover:-translate-y-0.5 hover:shadow-xl`}
-            >
-              <p className={`text-[11px] uppercase tracking-[0.22em] ${t.eyebrowColor}`}>Univers suivant →</p>
-              <p className="mt-2 font-display text-xl group-hover:opacity-80">{next.title} {next.highlight}</p>
-            </Link>
-          ) : <div />}
+        <div className="mx-auto max-w-6xl">
+          <p className={`mb-5 text-center text-xs font-semibold uppercase tracking-[0.22em] opacity-50 ${t.pageInk}`}>
+            Explorer nos autres services
+          </p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {prev ? (
+              <Link
+                to="/univers/$slug"
+                params={{ slug: prev.slug }}
+                className={`group flex items-center gap-4 rounded-2xl border-2 ${t.cardBorder} ${t.cardBg} px-6 py-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:border-current/30 cursor-pointer`}
+              >
+                <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${t.accentBg} text-white text-lg font-bold transition group-hover:scale-110`}>
+                  ←
+                </span>
+                <div className="min-w-0">
+                  <p className={`text-[10px] font-semibold uppercase tracking-[0.2em] ${t.eyebrowColor}`}>Service précédent</p>
+                  <p className="mt-0.5 font-display text-base leading-tight truncate">{prev.title}{prev.highlight}</p>
+                </div>
+              </Link>
+            ) : <div />}
+            {next ? (
+              <Link
+                to="/univers/$slug"
+                params={{ slug: next.slug }}
+                className={`group flex items-center justify-between gap-4 rounded-2xl border-2 ${t.cardBorder} ${t.cardBg} px-6 py-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:border-current/30 cursor-pointer sm:flex-row-reverse sm:text-right`}
+              >
+                <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${t.accentBg} text-white text-lg font-bold transition group-hover:scale-110`}>
+                  →
+                </span>
+                <div className="min-w-0">
+                  <p className={`text-[10px] font-semibold uppercase tracking-[0.2em] ${t.eyebrowColor}`}>Service suivant</p>
+                  <p className="mt-0.5 font-display text-base leading-tight truncate">{next.title}{next.highlight}</p>
+                </div>
+              </Link>
+            ) : <div />}
+          </div>
         </div>
       </section>
 
