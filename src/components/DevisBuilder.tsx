@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const FORMSPREE = "https://formspree.io/f/maqkaznd";
 
@@ -12,20 +12,79 @@ const BASE_PRICES: Record<string, number> = {
   pd: 250,
 };
 
-/** Neuro = 1 · Cinetic = ×1.4 · Domination = ×2.24 (Cinetic ×1.6) */
+/** Neuro = 1 · Cinetic = ×1.4 · Domination = ×2.24 */
 const LEVEL_MULT = [1, 1.4, 2.24] as const;
 const EXPRESS_RATE = 0.35;
 
-/** 3 familles distinctes — podcast ≠ long YouTube +15 min (tarif dédié, travail différent) */
+/**
+ * Prix unitaire des shorts selon la quantité totale commandée (s1 + s2 + pb).
+ * Ces seuils s'appliquent silencieusement — aucun % n'est affiché au client.
+ * La valeur retournée est le prix BASE avant multiplication par le niveau.
+ */
+function getShortUnitPrice(basePrice: number, totalShorts: number): number {
+  // Ratio de réduction selon le volume (appliqué au prix de base de chaque short)
+  let ratio = 1;
+  if (totalShorts >= 150) ratio = 19 / 27;       // ≈ −30%
+  else if (totalShorts >= 100) ratio = 20 / 27;  // ≈ −26%
+  else if (totalShorts >= 80) ratio = 21 / 27;   // ≈ −22%
+  else if (totalShorts >= 50) ratio = 22 / 27;   // ≈ −19%
+  else if (totalShorts >= 30) ratio = 23 / 27;   // ≈ −15%
+  else if (totalShorts >= 20) ratio = 25 / 27;   // ≈ −7%
+  else if (totalShorts >= 10) ratio = 27 / 27;   // ≈ base (27 ref sur s1 de 30€)
+  // < 10 : prix normal
+
+  // On applique la même proportion à tous les shorts (s1=30, s2=35, pb=50)
+  // On ancre la grille sur s1=30€ comme référence :
+  // à 10 shorts : s1→27, s2→31.5, pb→45  (×0.9)
+  // à 20 shorts : s1→25, s2→29.2, pb→41.7 (×0.833)
+  // à 30 shorts : s1→23, …  etc.
+  if (totalShorts >= 10) {
+    const refBase = 30; // s1 de référence
+    const targetRef =
+      totalShorts >= 150 ? 19 :
+      totalShorts >= 100 ? 20 :
+      totalShorts >= 80  ? 21 :
+      totalShorts >= 50  ? 22 :
+      totalShorts >= 30  ? 23 :
+      totalShorts >= 20  ? 25 :
+      27;
+    ratio = targetRef / refBase;
+  }
+  return basePrice * ratio;
+}
+
+/**
+ * Prix unitaire des longs formats selon la quantité totale commandée (l1+l2+l3).
+ * Paliers discrets — non affiché au client.
+ */
+function getLongUnitPrice(basePrice: number, totalLongs: number): number {
+  let ratio = 1;
+  if (totalLongs >= 8) ratio = 0.88;        // −12%
+  else if (totalLongs >= 5) ratio = 0.92;   // −8%
+  else if (totalLongs >= 3) ratio = 0.95;   // −5%
+  return basePrice * ratio;
+}
+
+/**
+ * Prix unitaire du podcast selon le nombre d'épisodes.
+ * −3% par épisode supplémentaire, plafonné à −20%.
+ */
+function getPodUnitPrice(basePrice: number, episodes: number): number {
+  if (episodes <= 1) return basePrice;
+  const disc = Math.min((episodes - 1) * 0.03, 0.20);
+  return basePrice * (1 - disc);
+}
+
+/** 3 familles distinctes */
 const FORMAT_CATEGORIES = [
   {
     id: "short",
     title: "Short / Reel",
     subtitle: "Reels, TikTok, facecam, UGC, pub",
     formats: [
-      { key: "s1", name: "Short Classique", desc: "Inclut facecam & UGC — cut dynamique, sous-titres", dur: "−45s" },
+      { key: "s1", name: "Short Classique", desc: "Facecam & UGC — cut dynamique, sous-titres", dur: "−45s" },
       { key: "s2", name: "Short Développé", desc: "Storytelling vertical plus développé", dur: "+45s" },
-      { key: "pb", name: "Short Publicitaire", desc: "Spot publicitaire — hook, CTA, rythme serré", dur: "−60s" },
+      { key: "pb", name: "Short Publicitaire", desc: "Spot publicitaire — hook, CTA, rythme serré" },
     ],
   },
   {
@@ -53,14 +112,6 @@ const FORMAT_CATEGORIES = [
     ],
   },
 ] as const;
-
-const MULTISHOOT_PERIODS = [
-  { label: "1 semaine", disc: 0 },
-  { label: "2 semaines", disc: 5 },
-  { label: "3 semaines", disc: 10 },
-  { label: "1 mois complet", disc: 15 },
-  { label: "Période à définir ensemble", disc: 0 },
-];
 
 const MULTISHOOT_FREQUENCIES = [
   "Continue au fil du montage",
@@ -97,14 +148,73 @@ const LEVELS = [
 
 const OPTIONS = [
   { k: "Sous-titres animés", p: 8 },
-  { k: "Sound design", p: 10 },
-  { k: "Script IA optimisé", p: 12 },
-  { k: "Multi-format export", p: 15 },
-  { k: "Voix-off / narration", p: 20 },
+  { k: "Sound design", p: 5 },
+  { k: "Multi-format export", p: 8 },
+  { k: "Voix-off / narration", p: 15 },
 ];
 
 const ALL_KEYS = Object.keys(BASE_PRICES);
 const EMPTY_QTY = Object.fromEntries(ALL_KEYS.map((k) => [k, 0]));
+
+/* ─── useHoldCounter — incrément continu au maintien ─────────────────────── */
+function useHoldCounter(
+  onTick: (delta: number) => void,
+  delta: number,
+): {
+  start: () => void;
+  stop: () => void;
+} {
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const stop = useCallback(() => {
+    if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
+    if (timeoutRef.current) { clearTimeout(timeoutRef.current); timeoutRef.current = null; }
+  }, []);
+
+  const start = useCallback(() => {
+    onTick(delta); // tick immédiat
+    timeoutRef.current = setTimeout(() => {
+      intervalRef.current = setInterval(() => onTick(delta), 80);
+    }, 400); // délai avant accélération
+  }, [delta, onTick]);
+
+  // Nettoyage au démontage
+  useEffect(() => () => stop(), [stop]);
+
+  return { start, stop };
+}
+
+/* ─── StepperButton — bouton + / − avec long-press ──────────────────────── */
+function StepperButton({
+  delta,
+  onTick,
+  disabled = false,
+  className,
+  children,
+}: {
+  delta: number;
+  onTick: (d: number) => void;
+  disabled?: boolean;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  const { start, stop } = useHoldCounter(onTick, delta);
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onMouseDown={start}
+      onMouseUp={stop}
+      onMouseLeave={stop}
+      onTouchStart={start}
+      onTouchEnd={stop}
+      className={className}
+    >
+      {children}
+    </button>
+  );
+}
 
 const CatIcon = ({ id, className }: { id: string; className?: string }) => {
   if (id === "short") {
@@ -199,23 +309,33 @@ function catIconClass(theme: Theme, catId: string): string {
   return theme.iconPod;
 }
 
-function calcDeliveryLabel(n: number): string {
-  if (n <= 0) return "92h";
-  if (n <= 3) return "92h ouvrées";
-  if (n <= 6) return "4–5 jours";
-  if (n <= 10) return "5–7 jours";
-  return `~${Math.ceil(n / 3)} jours`;
+function calcDeliveryDays(totalVideos: number, isExpress: boolean): string {
+  if (totalVideos <= 0) return "—";
+  // Base standard
+  let days: number;
+  if (totalVideos <= 3) days = 4;
+  else if (totalVideos <= 6) days = 5;
+  else if (totalVideos <= 10) days = 7;
+  else days = Math.ceil(totalVideos / 3);
+
+  if (isExpress) {
+    // Express = environ la moitié, minimum 1j
+    days = Math.max(1, Math.round(days * 0.45));
+  }
+
+  if (days === 1) return "24h";
+  if (days <= 2) return "48h";
+  return `${days} jours`;
 }
 
 function formatLabel(key: string): string {
   for (const cat of FORMAT_CATEGORIES) {
     const f = cat.formats.find((x) => x.key === key);
-    if (f) return `${f.name} (${f.dur})`;
+    if (f) return `${f.name}${"dur" in f && f.dur ? ` (${f.dur})` : ""}`;
   }
   return key;
 }
 
-// ── Per-format hints (typographic only, no icons) ────────────────────────────
 const FORMAT_HINTS: Record<string, string> = {
   s1: "Facecam · UGC · cut dynamique",
   s2: "Storytelling vertical développé",
@@ -226,19 +346,18 @@ const FORMAT_HINTS: Record<string, string> = {
   pd: "Multi-cam · sync audio · chapitrage",
 };
 
+/* ─── FormatCard ──────────────────────────────────────────────────────────── */
 function FormatCard({
   fmt,
   qty,
-  onAdd,
-  onSub,
+  onTick,
   theme,
   variant,
   solo = false,
 }: {
   fmt: any;
   qty: number;
-  onAdd: () => void;
-  onSub: () => void;
+  onTick: (d: number) => void;
   theme: any;
   variant: string;
   solo?: boolean;
@@ -256,21 +375,66 @@ function FormatCard({
 
   const durBadge = active ? activeDurBadge : inactiveDurBadge;
 
-  // ── Podcast solo — wide feature layout ────────────────────────────────────
+  const stepperBtnBase = theme.isDark
+    ? "bg-white/5 text-white hover:bg-white/10"
+    : "bg-white border border-foreground/10 text-[#1a1410] hover:bg-foreground/5 shadow-xs";
+  const stepperBtnPlus = theme.isDark
+    ? "bg-white/10 text-white hover:bg-white/20"
+    : "bg-white border border-foreground/10 text-[#1a1410] hover:bg-foreground/5 shadow-xs";
+
+  function Stepper({ size }: { size: "sm" | "lg" }) {
+    const h = size === "lg" ? "h-9 w-9" : "h-8 w-8";
+    const textSz = size === "lg" ? "text-sm" : "text-xs";
+    const numW = size === "lg" ? "w-7 text-base" : "w-6 text-sm";
+    return (
+      <div className={`flex items-center gap-2 rounded-full p-1 border ${theme.isDark ? "bg-white/5 border-white/5" : "bg-foreground/[0.03] border-foreground/5"}`}>
+        <StepperButton
+          delta={-1}
+          onTick={onTick}
+          disabled={qty === 0}
+          className={`${h} rounded-full flex items-center justify-center ${textSz} font-bold transition disabled:opacity-20 cursor-pointer select-none ${stepperBtnBase}`}
+        >
+          −
+        </StepperButton>
+        <input
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          min={0}
+          value={qty}
+          onChange={(e) => {
+            const v = parseInt(e.target.value.replace(/\D/g, ""), 10);
+            if (!isNaN(v) && v >= 0) onTick(v - qty);
+            else if (e.target.value === "") onTick(-qty);
+          }}
+          className={`${numW} text-center font-display font-bold tabular-nums bg-transparent border-none outline-none [appearance:textfield] ${active ? theme.textPrimary : theme.textMuted}`}
+          aria-label="Quantité"
+        />
+        <StepperButton
+          delta={1}
+          onTick={onTick}
+          className={`${h} rounded-full flex items-center justify-center ${textSz} font-bold transition cursor-pointer select-none ${stepperBtnPlus}`}
+        >
+          +
+        </StepperButton>
+      </div>
+    );
+  }
+
   if (solo) {
     return (
       <div className={`flex flex-col sm:flex-row sm:items-center gap-6 rounded-2xl border p-6 transition-all duration-300 ${getCardStyle(active, theme.isDark)}`}>
-        {/* Left — title block */}
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2.5 mb-2">
             <h4 className={`text-base font-bold font-display ${theme.textPrimary}`}>{fmt.name}</h4>
-            <span className={`rounded-full px-2.5 py-0.5 text-[9px] font-bold border whitespace-nowrap ${durBadge}`}>
-              {fmt.dur}
-            </span>
+            {"dur" in fmt && fmt.dur && (
+              <span className={`rounded-full px-2.5 py-0.5 text-[9px] font-bold border whitespace-nowrap ${durBadge}`}>
+                {fmt.dur}
+              </span>
+            )}
           </div>
           <p className={`text-xs leading-relaxed mb-3 ${theme.textSecondary}`}>{fmt.desc}</p>
           <p className={`text-[10px] font-semibold tracking-wide ${active ? activeAccent : theme.textMuted}`}>{hint}</p>
-          {/* Feature tags */}
           <div className="mt-3 flex flex-wrap gap-1.5">
             {["Multi-cam", "Sync audio", "Chapitrage", "Long format"].map((tag) => (
               <span key={tag} className={`rounded-full border px-2.5 py-0.5 text-[10px] font-medium ${
@@ -279,68 +443,122 @@ function FormatCard({
             ))}
           </div>
         </div>
-
-        {/* Right — stepper */}
         <div className={`flex flex-col items-center gap-2 shrink-0 pt-4 sm:pt-0 sm:pl-6 border-t sm:border-t-0 sm:border-l ${
           theme.isDark ? "border-white/[0.07]" : "border-foreground/8"
         }`}>
           <span className={`text-[10px] uppercase tracking-wider font-bold ${theme.textMuted}`}>
             {"unitLabel" in fmt && fmt.unitLabel ? fmt.unitLabel : "Quantité"}
           </span>
-          <div className={`flex items-center gap-2 rounded-full p-1 border ${theme.isDark ? "bg-white/5 border-white/5" : "bg-foreground/[0.03] border-foreground/5"}`}>
-            <button type="button" onClick={onSub} disabled={qty === 0}
-              className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-bold transition disabled:opacity-20 cursor-pointer ${theme.isDark ? "bg-white/5 text-white hover:bg-white/10" : "bg-white border border-foreground/10 text-[#1a1410] hover:bg-foreground/5 shadow-xs"}`}>
-              −
-            </button>
-            <span className={`w-7 text-center font-display text-base font-bold tabular-nums ${active ? theme.textPrimary : theme.textMuted}`}>{qty}</span>
-            <button type="button" onClick={onAdd}
-              className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-bold transition cursor-pointer ${theme.isDark ? "bg-white/10 text-white hover:bg-white/20" : "bg-white border border-foreground/10 text-[#1a1410] hover:bg-foreground/5 shadow-xs"}`}>
-              +
-            </button>
-          </div>
+          <Stepper size="lg" />
         </div>
       </div>
     );
   }
 
-  // ── Standard card — typographic, no icon ─────────────────────────────────
   return (
     <div className={`flex flex-col justify-between rounded-2xl border p-5 transition-all duration-300 ${getCardStyle(active, theme.isDark)}`}>
       <div className="space-y-2.5">
-        {/* Header row */}
         <div className="flex items-start justify-between gap-3">
           <h4 className={`text-sm font-bold leading-tight font-display ${theme.textPrimary}`}>{fmt.name}</h4>
-          <span className={`shrink-0 rounded-full px-2 py-0.5 text-[9px] font-bold border whitespace-nowrap ${durBadge}`}>
-            {fmt.dur}
-          </span>
+          {"dur" in fmt && fmt.dur && (
+            <span className={`shrink-0 rounded-full px-2 py-0.5 text-[9px] font-bold border whitespace-nowrap ${durBadge}`}>
+              {fmt.dur}
+            </span>
+          )}
         </div>
-        {/* Hint — usage label */}
         <p className={`text-[10px] font-semibold tracking-wide ${active ? activeAccent : theme.textMuted}`}>{hint}</p>
-        {/* Description */}
         <p className={`text-[11px] leading-relaxed ${theme.textSecondary}`}>{fmt.desc}</p>
       </div>
-
-      {/* Stepper */}
       <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-foreground/5 pt-4">
         <span className={`text-[10px] uppercase tracking-wider font-bold ${theme.textMuted}`}>
           {"unitLabel" in fmt && fmt.unitLabel ? fmt.unitLabel : "Quantité"}
         </span>
-        <div className={`flex items-center gap-2 rounded-full p-1 border shrink-0 ${theme.isDark ? "bg-white/5 border-white/5" : "bg-foreground/[0.03] border-foreground/5"}`}>
-          <button type="button" onClick={onSub} disabled={qty === 0}
-            className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold transition disabled:opacity-20 cursor-pointer ${theme.isDark ? "bg-white/5 text-white hover:bg-white/10" : "bg-white border border-foreground/10 text-[#1a1410] hover:bg-foreground/5 shadow-xs"}`}>
-            −
-          </button>
-          <span className={`w-6 text-center font-display text-sm font-bold tabular-nums ${active ? theme.textPrimary : theme.textMuted}`}>{qty}</span>
-          <button type="button" onClick={onAdd}
-            className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold transition cursor-pointer ${theme.isDark ? "bg-white/10 text-white hover:bg-white/20" : "bg-white border border-foreground/10 text-[#1a1410] hover:bg-foreground/5 shadow-xs"}`}>
-            +
-          </button>
+        <Stepper size="sm" />
+      </div>
+    </div>
+  );
+}
+
+/* ─── PodcastShortsSection — shorts dérivés du podcast ───────────────────── */
+function PodcastShortsSection({
+  qty,
+  onTick,
+  theme,
+  variant,
+}: {
+  qty: number;
+  onTick: (d: number) => void;
+  theme: Theme;
+  variant: string;
+}) {
+  const active = qty > 0;
+  const stepperBtnBase = theme.isDark
+    ? "bg-white/5 text-white hover:bg-white/10"
+    : "bg-white border border-foreground/10 text-[#1a1410] hover:bg-foreground/5 shadow-xs";
+  const stepperBtnPlus = theme.isDark
+    ? "bg-white/10 text-white hover:bg-white/20"
+    : "bg-white border border-foreground/10 text-[#1a1410] hover:bg-foreground/5 shadow-xs";
+
+  return (
+    <div className={`mt-5 rounded-2xl border p-5 transition-all duration-300 ${getCardStyle(active, theme.isDark)}`}>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1.5">
+            <h4 className={`text-sm font-bold font-display ${theme.textPrimary}`}>Shorts tirés du podcast</h4>
+            <span className={`rounded-full px-2 py-0.5 text-[9px] font-bold border ${
+              active
+                ? variant === "surmesure" ? "bg-[#a78bfa]/20 border-[#a78bfa]/35 text-[#c4b5fd]" : "bg-[#a8632d]/10 border-[#a8632d]/25 text-[#a8632d]"
+                : theme.isDark ? "bg-white/5 border-white/10 text-white/45" : "bg-foreground/5 border-foreground/10 text-[#1a1410]/45"
+            }`}>
+              10€ / clip
+            </span>
+          </div>
+          <p className={`mt-1.5 text-xs leading-relaxed ${theme.textSecondary}`}>
+            Clips verticaux extraits et reformatés depuis vos épisodes — prêts pour TikTok, Reels et YouTube Shorts.
+          </p>
+        </div>
+        <div className={`flex flex-col items-center gap-2 shrink-0 pt-4 sm:pt-0 sm:pl-5 border-t sm:border-t-0 sm:border-l ${
+          theme.isDark ? "border-white/[0.07]" : "border-foreground/8"
+        }`}>
+          <span className={`text-[10px] uppercase tracking-wider font-bold ${theme.textMuted}`}>Nombre de clips</span>
+          <div className={`flex items-center gap-2 rounded-full p-1 border ${theme.isDark ? "bg-white/5 border-white/5" : "bg-foreground/[0.03] border-foreground/5"}`}>
+            <StepperButton
+              delta={-1}
+              onTick={onTick}
+              disabled={qty === 0}
+              className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-bold transition disabled:opacity-20 cursor-pointer select-none ${stepperBtnBase}`}
+            >
+              −
+            </StepperButton>
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              min={0}
+              value={qty}
+              onChange={(e) => {
+                const v = parseInt(e.target.value.replace(/\D/g, ""), 10);
+                if (!isNaN(v) && v >= 0) onTick(v - qty);
+                else if (e.target.value === "") onTick(-qty);
+              }}
+              className={`w-7 text-center font-display text-base font-bold tabular-nums bg-transparent border-none outline-none [appearance:textfield] ${active ? theme.textPrimary : theme.textMuted}`}
+              aria-label="Nombre de clips podcast"
+            />
+            <StepperButton
+              delta={1}
+              onTick={onTick}
+              className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-bold transition cursor-pointer select-none ${stepperBtnPlus}`}
+            >
+              +
+            </StepperButton>
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
+/* ─── Main component ──────────────────────────────────────────────────────── */
 export function DevisBuilder({
   open,
   variant = "essentiel",
@@ -355,19 +573,20 @@ export function DevisBuilder({
     initial["s1"] = variant === "surmesure" ? 4 : 1;
     return initial;
   });
+  // Shorts dérivés du podcast (section spéciale)
+  const [podShorts, setPodShorts] = useState(0);
+
   const [activeTab, setActiveTab] = useState<string>("short");
   const [lvl, setLvl] = useState(0);
   const [opts, setOpts] = useState<Record<string, boolean>>({});
   const [express, setExpress] = useState(false);
   const [duration, setDuration] = useState<"one-shot" | "multishoot">("one-shot");
-  const [periodIdx, setPeriodIdx] = useState(3);
   const [frequency, setFrequency] = useState(MULTISHOOT_FREQUENCIES[0]);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
-  const [pricePulse, setPricePulse] = useState(0);
 
   useEffect(() => {
     if (open) {
@@ -377,34 +596,68 @@ export function DevisBuilder({
   }, [open]);
 
   const theme = useMemo(() => buildTheme(variant === "surmesure"), [variant]);
-  const period = MULTISHOOT_PERIODS[periodIdx];
 
   const pricing = useMemo(() => {
     const mult = LEVEL_MULT[lvl];
+
+    // Totaux par famille pour les remises de volume
+    const totalShorts = (quantities["s1"] ?? 0) + (quantities["s2"] ?? 0) + (quantities["pb"] ?? 0);
+    const totalLongs = (quantities["l1"] ?? 0) + (quantities["l2"] ?? 0) + (quantities["l3"] ?? 0);
+    const totalPod = quantities["pd"] ?? 0;
+
     const lineItems = ALL_KEYS.filter((k) => quantities[k] > 0).map((key) => {
       const qty = quantities[key];
-      const unitBase = BASE_PRICES[key];
-      const unitFinal = Math.round(unitBase * mult);
+      const basePrice = BASE_PRICES[key];
+
+      // Prix de base ajusté selon le volume (remise discrète)
+      let adjustedBase: number;
+      if (key === "s1" || key === "s2" || key === "pb") {
+        adjustedBase = getShortUnitPrice(basePrice, totalShorts);
+      } else if (key === "l1" || key === "l2" || key === "l3") {
+        adjustedBase = getLongUnitPrice(basePrice, totalLongs);
+      } else if (key === "pd") {
+        adjustedBase = getPodUnitPrice(basePrice, totalPod);
+      } else {
+        adjustedBase = basePrice;
+      }
+
+      const unitFinal = Math.round(adjustedBase * mult);
       const total = unitFinal * qty;
-      return { key, label: formatLabel(key), qty, unitBase, unitFinal, total };
+      return { key, label: formatLabel(key), qty, unitBase: basePrice, unitFinal, total };
     });
 
-    const totalVideos = lineItems.reduce((s, l) => s + l.qty, 0);
-    const videoTotal = lineItems.reduce((s, l) => s + l.total, 0);
+    // Shorts dérivés du podcast (10€ base, mêmes paliers que les shorts classiques)
+    const podShortItems = podShorts > 0
+      ? [{
+          key: "pod-short",
+          label: `Clips courts (podcast)`,
+          qty: podShorts,
+          unitBase: 10,
+          unitFinal: Math.round(getShortUnitPrice(10, podShorts) * mult),
+          total: Math.round(getShortUnitPrice(10, podShorts) * mult) * podShorts,
+        }]
+      : [];
+
+    const allItems = [...lineItems, ...podShortItems];
+    const totalVideos = allItems.reduce((s, l) => s + l.qty, 0);
+    const videoTotal = allItems.reduce((s, l) => s + l.total, 0);
+
     const optPerVid = OPTIONS.reduce((s, o) => (opts[o.k] ? s + o.p : s), 0);
     const optionTotal = optPerVid * totalVideos;
     const subtotal = videoTotal + optionTotal;
 
-    const multiDisc = duration === "multishoot" ? period.disc / 100 : 0;
+    // Multishoot : −15% fixe si collaboration mensuelle enchaînée
+    const multiDisc = duration === "multishoot" ? 0.15 : 0;
     const discAmt = multiDisc > 0 ? Math.round(subtotal * multiDisc) : 0;
     const afterDisc = subtotal - discAmt;
     const expressAdd = express ? Math.round(afterDisc * EXPRESS_RATE) : 0;
     const total = afterDisc + expressAdd;
 
     const selectedOptions = OPTIONS.filter((o) => opts[o.k]);
+    const delivery = calcDeliveryDays(totalVideos, express);
 
     return {
-      lineItems,
+      lineItems: allItems,
       totalVideos,
       videoTotal,
       optionTotal,
@@ -416,19 +669,28 @@ export function DevisBuilder({
       expressAdd,
       total,
       selectedOptions,
-      delivery: calcDeliveryLabel(totalVideos),
+      delivery,
     };
-  }, [quantities, lvl, opts, express, duration, period]);
-
-  useEffect(() => {
-    setPricePulse((p) => p + 1);
-  }, [pricing.total, pricing.totalVideos, lvl, express, duration, periodIdx]);
+  }, [quantities, podShorts, lvl, opts, express, duration]);
 
   function setQty(key: string, delta: number) {
     setQuantities((prev) => ({
       ...prev,
       [key]: Math.max(0, (prev[key] ?? 0) + delta),
     }));
+  }
+
+  // Quand on passe podcast à 0, on remet aussi podShorts à 0
+  function setQtyPod(delta: number) {
+    setQuantities((prev) => {
+      const next = Math.max(0, (prev["pd"] ?? 0) + delta);
+      if (next === 0) setPodShorts(0);
+      return { ...prev, pd: next };
+    });
+  }
+
+  function setPodShortsDelta(delta: number) {
+    setPodShorts((prev) => Math.max(0, prev + delta));
   }
 
   function buildEmailBody(): string {
@@ -448,7 +710,7 @@ export function DevisBuilder({
       lineItems.forEach((l) => {
         lines.push(
           `  • ${l.qty}× ${l.label}`,
-          `    Base ${l.unitBase}€ × ${LEVEL_MULT[lvl]} (${LEVELS[lvl].name}) = ${l.unitFinal}€/u → ${l.total}€`
+          `    ${l.unitFinal}€/u → ${l.total}€`
         );
       });
     }
@@ -460,21 +722,19 @@ export function DevisBuilder({
       });
     }
 
-    lines.push("", "── COLLABORATION ──", `  Mode: ${duration === "multishoot" ? "Multishoot" : "One shot"}`);
+    lines.push("", "── COLLABORATION ──", `  Mode: ${duration === "multishoot" ? "Multishoot mensuel (−15%)" : "One shot"}`);
     if (duration === "multishoot") {
-      lines.push(`  Période: ${period.label}`, `  Fréquence: ${frequency}`);
-      if (discAmt > 0) {
-        lines.push(`  Réduction multishoot: −${period.disc}% = −${discAmt}€`);
-      }
+      lines.push(`  Fréquence: ${frequency}`);
+      if (discAmt > 0) lines.push(`  Réduction mensuelle: −15% = −${discAmt}€`);
     }
 
     lines.push(
       "",
       "── LIVRAISON ──",
-      `  ${express ? `Express 24h (+${Math.round(EXPRESS_RATE * 100)}%) = +${expressAdd}€` : `Standard (${pricing.delivery})`}`,
+      `  ${express ? `Express prioritaire (+${Math.round(EXPRESS_RATE * 100)}%) = +${expressAdd}€` : `Standard (${pricing.delivery})`}`,
       "",
       "── TOTAL ──",
-      `  Sous-total vidéos + options: ${subtotal}€`
+      `  Sous-total: ${subtotal}€`
     );
     if (discAmt > 0) lines.push(`  Après réduction multishoot: ${subtotal - discAmt}€`);
     if (expressAdd > 0) lines.push(`  Majoration express: +${expressAdd}€`);
@@ -510,12 +770,12 @@ export function DevisBuilder({
     fd.append(
       "Collaboration",
       duration === "multishoot"
-        ? `Multishoot — ${period.label} — ${frequency}${period.disc > 0 ? ` (−${period.disc}% sur le total)` : ""}`
+        ? `Multishoot mensuel — ${frequency} — −15% appliqué`
         : "One shot — commande unique"
     );
     fd.append(
       "Livraison",
-      express ? `Express 24h (+${Math.round(EXPRESS_RATE * 100)}%)` : `Standard (${pricing.delivery})`
+      express ? `Express prioritaire (+${Math.round(EXPRESS_RATE * 100)}%)` : `Standard (${pricing.delivery})`
     );
     fd.append("Récapitulatif complet", buildEmailBody());
     fd.append("Total estimé", `${pricing.total}€`);
@@ -534,8 +794,10 @@ export function DevisBuilder({
     pricing.totalVideos === 0
       ? "Sélectionnez vos formats ci-dessus."
       : `${pricing.totalVideos} vidéo${pricing.totalVideos > 1 ? "s" : ""} — ${LEVELS[lvl].name}${
-          duration === "multishoot" ? ` — Multishoot (${period.label})` : " — One shot"
-        }${express ? " — Express 24h" : ` — ${pricing.delivery}`}`;
+          duration === "multishoot" ? " — Multishoot mensuel" : " — One shot"
+        }${express ? " — Express" : ` — ${pricing.delivery}`}`;
+
+  const podQty = quantities["pd"] ?? 0;
 
   return (
     <div id="devis-builder" className="w-full">
@@ -564,42 +826,44 @@ export function DevisBuilder({
           </header>
 
           <div className="space-y-10 border-t border-foreground/10 pt-8">
+
+            {/* ── STEP 1 : Formats & quantités ── */}
             <Step n="1" title="Formats & quantités" theme={theme}>
               <p className={`text-xs mb-5 ${theme.mutedText}`}>
-                Sélectionnez la catégorie de format, puis ajustez le nombre de vidéos souhaitées.
+                Sélectionnez la catégorie, ajustez la quantité. Maintenez le bouton + ou − pour aller vite, ou saisissez directement.
               </p>
 
-              {/* 3 onglets : Short · Long · Podcast */}
-              <div
-                className={`flex p-1 rounded-full border mb-6 ${theme.isDark ? "bg-white/5 border-white/10" : "bg-foreground/[0.03] border-foreground/5"}`}
-              >
+              {/* Onglets */}
+              <div className={`flex p-1 rounded-full border mb-6 ${theme.isDark ? "bg-white/5 border-white/10" : "bg-foreground/[0.03] border-foreground/5"}`}>
                 {FORMAT_CATEGORIES.map((cat) => {
                   const isActive = activeTab === cat.id;
-                  const count = cat.formats.reduce((s, f) => s + (quantities[f.key] ?? 0), 0);
-
+                  const count = cat.formats.reduce((s, f) => s + (quantities[f.key] ?? 0), 0)
+                    + (cat.id === "pod" ? podShorts : 0);
                   return (
                     <button
                       type="button"
                       key={cat.id}
                       onClick={() => setActiveTab(cat.id)}
-                      className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer ${isActive
+                      className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer ${
+                        isActive
                           ? variant === "surmesure"
                             ? "bg-gradient-to-r from-[#a78bfa] to-[#ec4899] text-white shadow-sm"
                             : "bg-[#a8632d] text-white shadow-sm"
                           : theme.isDark
                             ? "text-white/60 hover:text-white"
                             : "text-[#1a1410]/60 hover:text-[#1a1410]"
-                        }`}
+                      }`}
                     >
                       <CatIcon id={cat.id} className="w-3.5 h-3.5 shrink-0" />
                       <span>{cat.title}</span>
                       {count > 0 && (
-                        <span className={`flex h-4.5 w-4.5 items-center justify-center rounded-full text-[9px] font-extrabold ${isActive
+                        <span className={`flex h-4.5 w-4.5 items-center justify-center rounded-full text-[9px] font-extrabold ${
+                          isActive
                             ? "bg-white text-black"
                             : variant === "surmesure"
                               ? "bg-[#a78bfa]/20 text-[#c4b5fd]"
                               : "bg-[#a8632d]/10 text-[#a8632d]"
-                          }`}>
+                        }`}>
                           {count}
                         </span>
                       )}
@@ -608,41 +872,56 @@ export function DevisBuilder({
                 })}
               </div>
 
-              {/* 3-column Card Grid */}
+              {/* Grille de cartes */}
               {(() => {
                 const activeCategory = FORMAT_CATEGORIES.find((c) => c.id === activeTab);
                 if (!activeCategory) return null;
-
                 const isSolo = activeCategory.formats.length === 1;
-                const gridCols = isSolo
-                    ? "grid-cols-1"
-                    : "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3";
+                const gridCols = isSolo ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3";
+                const isPodTab = activeTab === "pod";
 
                 return (
                   <div key={activeTab}>
                     <p className={`text-sm mb-4 ${theme.mutedText}`}>{activeCategory.subtitle}</p>
                     <div className={`grid ${gridCols} gap-4`}>
-                    {activeCategory.formats.map((fmt) => {
-                      const qty = quantities[fmt.key] ?? 0;
-                      return (
-                        <FormatCard
-                          key={fmt.key}
-                          fmt={fmt}
-                          qty={qty}
-                          onAdd={() => setQty(fmt.key, 1)}
-                          onSub={() => setQty(fmt.key, -1)}
+                      {activeCategory.formats.map((fmt) => {
+                        const qty = quantities[fmt.key] ?? 0;
+                        const tickFn = fmt.key === "pd"
+                          ? (d: number) => setQtyPod(d)
+                          : (d: number) => setQty(fmt.key, d);
+                        return (
+                          <FormatCard
+                            key={fmt.key}
+                            fmt={fmt}
+                            qty={qty}
+                            onTick={tickFn}
+                            theme={theme}
+                            variant={variant}
+                            solo={isSolo}
+                          />
+                        );
+                      })}
+                    </div>
+
+                    {/* Section shorts podcast — animée selon podQty */}
+                    {isPodTab && (
+                      <div className={`overflow-hidden transition-all duration-400 ease-in-out ${
+                        podQty > 0 ? "max-h-[300px] opacity-100 mt-5" : "max-h-0 opacity-0 mt-0 pointer-events-none"
+                      }`}>
+                        <PodcastShortsSection
+                          qty={podShorts}
+                          onTick={setPodShortsDelta}
                           theme={theme}
                           variant={variant}
-                          solo={isSolo}
                         />
-                      );
-                    })}
-                    </div>
+                      </div>
+                    )}
                   </div>
                 );
               })()}
             </Step>
 
+            {/* ── STEP 2 : Niveau de montage ── */}
             <Step n="2" title="Niveau de montage" theme={theme}>
               <div className="grid gap-4 sm:grid-cols-3">
                 {LEVELS.map((l, idx) => {
@@ -652,9 +931,7 @@ export function DevisBuilder({
                       type="button"
                       key={l.name}
                       onClick={() => setLvl(idx)}
-                      className={`rounded-xl border p-4 text-left transition-all duration-200 ${
-                        on ? theme.btnActive : theme.btnInactive
-                      }`}
+                      className={`rounded-xl border p-4 text-left transition-all duration-200 ${on ? theme.btnActive : theme.btnInactive}`}
                     >
                       <h4 className={`font-display text-sm font-bold ${theme.textPrimary}`}>{l.name}</h4>
                       <p className={`text-[11px] mt-0.5 ${theme.textSecondary}`}>{l.multLabel}</p>
@@ -665,10 +942,7 @@ export function DevisBuilder({
                       )}
                       <ul className="mt-3 space-y-0.5">
                         {l.bullets.map((b) => (
-                          <li
-                            key={b}
-                            className={`text-[10px] pl-2.5 relative before:content-['·'] before:absolute before:left-0 ${theme.textSecondary}`}
-                          >
+                          <li key={b} className={`text-[10px] pl-2.5 relative before:content-['·'] before:absolute before:left-0 ${theme.textSecondary}`}>
                             {b}
                           </li>
                         ))}
@@ -679,6 +953,7 @@ export function DevisBuilder({
               </div>
             </Step>
 
+            {/* ── STEP 3 : Options ── */}
             <Step n="3" title="Options complémentaires" hint="par vidéo · optionnel" theme={theme}>
               <div className="grid gap-2 sm:grid-cols-2">
                 {OPTIONS.map((o) => {
@@ -688,13 +963,13 @@ export function DevisBuilder({
                       type="button"
                       key={o.k}
                       onClick={() => setOpts((p) => ({ ...p, [o.k]: !p[o.k] }))}
-                      className={`flex items-center gap-3 rounded-xl border px-3.5 py-3 text-left transition duration-300 ${getCardStyle(on, theme.isDark)
-                        }`}
+                      className={`flex items-center gap-3 rounded-xl border px-3.5 py-3 text-left transition duration-300 ${getCardStyle(on, theme.isDark)}`}
                     >
-                      <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border text-[9px] ${on
+                      <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border text-[9px] ${
+                        on
                           ? theme.isDark ? "bg-[#a78bfa] border-[#a78bfa] text-[#110922]" : "bg-[#a8632d] border-[#a8632d] text-white"
                           : "border-foreground/25"
-                        }`}>
+                      }`}>
                         {on ? "✓" : ""}
                       </span>
                       <span className={`flex-1 text-xs font-semibold ${theme.textPrimary}`}>{o.k}</span>
@@ -707,6 +982,7 @@ export function DevisBuilder({
               </div>
             </Step>
 
+            {/* ── STEP 4 : Durée de collaboration ── */}
             <Step n="4" title="Durée de collaboration" theme={theme}>
               <div className="grid gap-4 sm:grid-cols-2">
                 {[
@@ -717,8 +993,8 @@ export function DevisBuilder({
                   },
                   {
                     key: "multishoot" as const,
-                    label: "Multishoot",
-                    hint: "Collaboration sur plusieurs semaines. Réduction progressive sur le total.",
+                    label: "Multishoot mensuel",
+                    hint: "Collaboration enchaînée chaque mois. Réduction de 15% appliquée sur chaque commande.",
                   },
                 ].map((d) => (
                   <button
@@ -728,74 +1004,58 @@ export function DevisBuilder({
                     className={`rounded-xl border p-4 text-left transition-all ${duration === d.key ? theme.btnActive : theme.btnInactive}`}
                   >
                     <h4 className={`font-semibold text-sm ${theme.textPrimary}`}>{d.label}</h4>
+                    {duration === d.key && d.key === "multishoot" && (
+                      <span className="mt-1 inline-block rounded-full bg-emerald-500/15 px-2 py-0.5 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400">
+                        −15% sur le total
+                      </span>
+                    )}
                     <p className={`text-xs mt-2 leading-relaxed ${theme.textSecondary}`}>{d.hint}</p>
                   </button>
                 ))}
               </div>
 
-              <div
-                className={`overflow-hidden transition-all duration-300 ${
-                  duration === "multishoot" ? "max-h-[420px] opacity-100 mt-5" : "max-h-0 opacity-0"
-                }`}
-              >
-                <div className={`rounded-xl border ${theme.nestedBorder} p-4 sm:p-5 space-y-5`}>
-                  <div>
-                    <p className={`text-[10px] font-bold uppercase tracking-wider mb-3 ${theme.textMuted}`}>
-                      Durée souhaitée
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {MULTISHOOT_PERIODS.map((p, i) => (
-                        <button
-                          type="button"
-                          key={p.label}
-                          onClick={() => setPeriodIdx(i)}
-                          className={`rounded-full border px-3 py-1.5 text-xs transition ${
-                            periodIdx === i ? theme.btnActive : theme.btnInactive
-                          }`}
-                        >
-                          {p.label}
-                          {p.disc > 0 && (
-                            <span className="ml-1 text-emerald-600 dark:text-emerald-400 font-semibold">
-                              −{p.disc}%
-                            </span>
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                    {period.disc > 0 && (
-                      <p className="mt-2 text-[11px] text-emerald-600 dark:text-emerald-400">
-                        Réduction −{period.disc}% appliquée sur le total
-                      </p>
-                    )}
-                  </div>
-                  <div>
-                    <p className={`text-[10px] font-bold uppercase tracking-wider mb-3 ${theme.textMuted}`}>
-                      Fréquence des livraisons
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {MULTISHOOT_FREQUENCIES.map((label) => (
-                        <button
-                          type="button"
-                          key={label}
-                          onClick={() => setFrequency(label)}
-                          className={`rounded-full border px-3 py-1.5 text-xs transition ${
-                            frequency === label ? theme.btnActive : theme.btnInactive
-                          }`}
-                        >
-                          {label}
-                        </button>
-                      ))}
-                    </div>
+              {/* Fréquence de livraison (multishoot seulement) */}
+              <div className={`overflow-hidden transition-all duration-300 ${
+                duration === "multishoot" ? "max-h-[200px] opacity-100 mt-5" : "max-h-0 opacity-0"
+              }`}>
+                <div className={`rounded-xl border ${theme.nestedBorder} p-4 sm:p-5`}>
+                  <p className={`text-[10px] font-bold uppercase tracking-wider mb-3 ${theme.textMuted}`}>
+                    Fréquence des livraisons
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {MULTISHOOT_FREQUENCIES.map((label) => (
+                      <button
+                        type="button"
+                        key={label}
+                        onClick={() => setFrequency(label)}
+                        className={`rounded-full border px-3 py-1.5 text-xs transition ${
+                          frequency === label ? theme.btnActive : theme.btnInactive
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
                   </div>
                 </div>
               </div>
             </Step>
 
+            {/* ── STEP 5 : Délai de livraison ── */}
             <Step n="5" title="Délai de livraison" theme={theme}>
               <div className="grid gap-3 sm:grid-cols-2">
                 {[
-                  { e: false, t: "Standard", s: pricing.delivery, sub: "Inclus" },
-                  { e: true, t: "Express 24h", s: "Priorité maximale", sub: `+${Math.round(EXPRESS_RATE * 100)}% du total` },
+                  {
+                    e: false,
+                    t: "Standard",
+                    s: pricing.delivery,
+                    sub: "Inclus",
+                  },
+                  {
+                    e: true,
+                    t: "Express prioritaire",
+                    s: calcDeliveryDays(pricing.totalVideos, true),
+                    sub: `+${Math.round(EXPRESS_RATE * 100)}% du total`,
+                  },
                 ].map((d) => {
                   const on = express === d.e;
                   return (
@@ -803,8 +1063,7 @@ export function DevisBuilder({
                       type="button"
                       key={d.t}
                       onClick={() => setExpress(d.e)}
-                      className={`rounded-2xl border p-4 text-left transition-all duration-300 ${getCardStyle(on, theme.isDark)
-                        }`}
+                      className={`rounded-2xl border p-4 text-left transition-all duration-300 ${getCardStyle(on, theme.isDark)}`}
                     >
                       <div className={`font-semibold text-sm ${theme.textPrimary}`}>{d.t}</div>
                       <div className={`text-sm mt-1 font-semibold ${theme.textPrimary}`}>{d.s}</div>
@@ -817,6 +1076,7 @@ export function DevisBuilder({
           </div>
         </div>
 
+        {/* ── PANNEAU RÉCAP ── */}
         <div className={`rounded-[2rem] border ${theme.containerBg} p-6 sm:p-8 space-y-5 shadow-xl lg:sticky lg:top-28 ${theme.panelGlow}`}>
           <div>
             <h4 className={`font-display text-xl sm:text-2xl font-bold ${theme.textPrimary}`}>Votre estimation</h4>
@@ -850,14 +1110,14 @@ export function DevisBuilder({
                   ))}
                   {pricing.discAmt > 0 && (
                     <RecapRow
-                      label={`Réduction multishoot (${period.label})`}
+                      label="Réduction multishoot mensuel"
                       value={`−${pricing.discAmt}€`}
                       accent="disc"
                       theme={theme}
                     />
                   )}
                   {pricing.expressAdd > 0 && (
-                    <RecapRow label="Supplément express 24h" value={`+${pricing.expressAdd}€`} accent="warn" theme={theme} />
+                    <RecapRow label="Supplément express prioritaire" value={`+${pricing.expressAdd}€`} accent="warn" theme={theme} />
                   )}
                 </>
               )}
@@ -877,11 +1137,9 @@ export function DevisBuilder({
                 {(pricing.discAmt > 0 || pricing.expressAdd > 0) && pricing.subtotal > 0 && (
                   <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mb-0.5 font-medium">
                     {[
-                      pricing.discAmt > 0 ? `Collab −${period.disc}%` : "",
+                      pricing.discAmt > 0 ? "Collab −15%" : "",
                       pricing.expressAdd > 0 ? "Express +35%" : "",
-                    ]
-                      .filter(Boolean)
-                      .join(" · ")}
+                    ].filter(Boolean).join(" · ")}
                   </p>
                 )}
                 <AnimatedPrice total={pricing.total} />
