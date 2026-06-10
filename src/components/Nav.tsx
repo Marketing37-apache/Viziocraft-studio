@@ -7,7 +7,7 @@ export function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const { location } = useRouterState();
-  const onDevisPage = location.pathname.startsWith("/devis/");
+  const onDevisPage = location.pathname.startsWith("/devis/surmesure");
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
@@ -24,15 +24,22 @@ export function Nav() {
     { href: "/#faq", label: "FAQ" },
   ];
 
-  const textColor = scrolled ? "text-foreground" : "text-white";
-  const subColor = scrolled ? "text-foreground/70 hover:text-foreground" : "text-white/80 hover:text-white";
+  // Sur la page devis surmesure, la navbar ne réagit jamais au scroll
+  // (fond toujours transparent, texte toujours blanc)
+  const frozenForDevis = onDevisPage;
+  const isScrolled = frozenForDevis ? false : scrolled;
+
+  const textColor = isScrolled ? "text-foreground" : "text-white";
+  const subColor = isScrolled ? "text-foreground/70 hover:text-foreground" : "text-white/80 hover:text-white";
 
   return (
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
-        scrolled
-          ? "backdrop-blur-xl bg-background/85 border-b border-foreground/10 shadow-[0_1px_30px_-10px_rgba(123,45,142,0.15)]"
-          : "bg-transparent"
+        frozenForDevis
+          ? "backdrop-blur-xl bg-[#0b0716]/70 border-b border-white/[0.07]"
+          : isScrolled
+            ? "backdrop-blur-xl bg-background/85 border-b border-foreground/10 shadow-[0_1px_30px_-10px_rgba(123,45,142,0.15)]"
+            : "backdrop-blur-md bg-black/40 border-b border-white/5 md:bg-transparent md:backdrop-blur-none md:border-transparent"
       }`}
     >
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-10">
@@ -57,7 +64,7 @@ export function Nav() {
           <a
             href="/#contact"
             className={`inline-flex items-center gap-1.5 rounded-full border px-4 py-2.5 text-sm font-semibold transition ${
-              scrolled
+              isScrolled
                 ? "border-foreground/15 text-foreground hover:bg-foreground/5"
                 : "border-white/25 text-white hover:bg-white/10"
             }`}
@@ -66,7 +73,7 @@ export function Nav() {
           </a>
           {!onDevisPage && (
             <a
-              href="/devis/standard"
+              href="/devis/surmesure"
               className="inline-flex items-center gap-2 rounded-full bg-brand-gradient px-5 py-2.5 text-sm font-semibold text-white glow-brand hover:opacity-95 transition"
             >
               Devis →
@@ -107,7 +114,7 @@ export function Nav() {
               </a>
               {!onDevisPage && (
                 <a
-                  href="/devis/standard"
+                  href="/devis/surmesure"
                   onClick={() => setOpen(false)}
                   className="block text-center rounded-full bg-brand-gradient px-5 py-3 text-sm font-semibold text-white"
                 >

@@ -949,18 +949,12 @@ export function DevisBuilder({
               {variant === "surmesure" ? "Production sur mesure" : "Montage essentiel"}
             </span>
             <h3 className="mt-2 font-display text-2xl sm:text-3xl font-bold">Configurez votre production</h3>
-            <p className={`mt-1.5 text-sm ${theme.mutedText}`}>
-              Bibliothèque de formats, niveaux de montage différenciés, devis ligne par ligne.
-            </p>
           </header>
 
           <div className="space-y-10 border-t border-foreground/10 pt-8">
 
             {/* ── STEP 1 : Formats & quantités ── */}
             <Step n="1" title="Formats & quantités" theme={theme}>
-              <p className={`text-xs mb-5 ${theme.mutedText}`}>
-                Sélectionnez la catégorie, ajustez la quantité. Maintenez le bouton + ou − pour aller vite, ou saisissez directement.
-              </p>
 
               {/* Onglets */}
               <div className={`flex p-1 rounded-full border mb-6 ${theme.isDark ? "bg-white/5 border-white/10" : "bg-foreground/[0.03] border-foreground/5"}`}>

@@ -230,18 +230,19 @@ function Index() {
                 Agence de montage vidéo · Disponibles 7j/7
               </span>
               <h1 className="mt-6 font-display text-5xl leading-[1.02] tracking-tight sm:text-6xl lg:text-7xl text-white">
-                Votre équipe vidéo<br /><span className="text-brand-gradient">dédiée.</span>
+                Votre équipe monteur<br />vidéo <span className="text-brand-gradient">dédiée.</span>
               </h1>
               <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/75">
                 Shorts, publicités, podcasts et branding vidéo produits avec rapidité,
-                cohérence et exigence — pensés pour scaler votre contenu sans compromis.
+                cohérence et exigence, pensés pour scaler votre contenu sans compromis.
               </p>
               <div className="mt-9 flex flex-wrap gap-3">
                 <a href="#showreel" className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-4 text-sm font-semibold text-[#1a0b2e] hover:opacity-90 transition">
                   Voir nos réalisations
                 </a>
-                <a href="#contact" className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-7 py-4 text-sm font-semibold text-white backdrop-blur hover:bg-white/10 transition">
-                  Démarrer un projet →
+                <a href="/devis/surmesure" className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-7 py-4 text-sm font-semibold text-white backdrop-blur hover:bg-white/10 transition">
+                  <span>Calculer mon devis</span>
+                  <span className="hidden sm:inline text-white/50 text-xs font-normal">· Estimer mon projet en 2 min</span>
                 </a>
               </div>
               <dl className="mt-14 grid grid-cols-3 gap-6 border-t border-white/10 pt-8">
@@ -283,7 +284,7 @@ function Index() {
               Le travail parle <span className="text-brand-gradient">pour nous.</span>
             </h2>
             <p className="mt-3 max-w-xl text-muted-foreground">
-              Une sélection de shorts et de formats longs produits pour nos créateurs et marques. Survolez pour mettre en pause.
+              Une sélection de shorts et de formats longs produits pour nos créateurs et marques.
             </p>
           </div>
         </div>
@@ -296,18 +297,11 @@ function Index() {
                   <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                   Shorts · Reels · TikTok
                 </span>
-                <h3 className="mt-3 font-display text-2xl sm:text-3xl tracking-tight">
-                  Scroll stoppé. <span className="text-brand-gradient">Attention capturée.</span>
-                </h3>
               </div>
-              <p className="hidden max-w-xs text-sm text-muted-foreground sm:block">
-                Hook fort, sous-titres millimétrés, rythme natif 9:16.
-              </p>
             </div>
           </div>
           <div className="mt-6 sm:mt-8 space-y-4 sm:space-y-5">
             <MarqueeShorts items={SHORTS_ROW_A} direction="left" speed={90} />
-            <MarqueeShorts items={SHORTS_ROW_B} direction="right" speed={100} />
           </div>
 
           {/* Longs — horizontaux */}
@@ -322,9 +316,6 @@ function Index() {
                   Des vidéos longues qui <span className="text-brand-gradient">tiennent l'attention.</span>
                 </h3>
               </div>
-              <p className="hidden max-w-xs text-sm text-muted-foreground sm:block">
-                Storytelling structuré, b-rolls travaillés, étalonnage premium.
-              </p>
             </div>
           </div>
           <div className="mt-6 sm:mt-8">
@@ -342,7 +333,7 @@ function Index() {
               Une production vidéo pensée<br />pour <span className="text-brand-gradient">scaler votre contenu.</span>
             </h2>
             <p className="mt-5 text-lg text-muted-foreground">
-              Sous-titres, b-rolls, animations, IA — quelle que soit votre DA, nous adaptons
+              Sous-titres, b-rolls, animations, IA, quelle que soit votre DA, nous adaptons
               chaque contenu à votre identité et à votre audience. Survolez chaque format pour découvrir le détail.
             </p>
           </div>
@@ -359,7 +350,7 @@ function Index() {
               Un workflow rapide,<br />structuré, et <span className="text-brand-gradient">fiable.</span>
             </h2>
             <p className="mt-5 text-muted-foreground">
-              Une méthode éprouvée en 4 étapes — pensée pour garantir cohérence et qualité constante,
+              Une méthode éprouvée en 4 étapes, pensée pour garantir cohérence et qualité constante,
               projet après projet.
             </p>
           </div>
@@ -398,10 +389,10 @@ function Index() {
               </ul>
               <Link
                 to="/devis/$variant"
-                params={{ variant: "essentiel" }}
+                params={{ variant: "surmesure" }}
                 className="mt-8 inline-flex items-center justify-center gap-2 rounded-full border border-foreground/15 bg-transparent px-5 py-3 text-sm font-semibold transition hover:border-primary hover:bg-brand-soft hover:text-primary"
               >
-                Créer mon devis →
+                Calculer mon devis →
               </Link>
             </div>
 
@@ -452,7 +443,7 @@ function Index() {
                 params={{ variant: "surmesure" }}
                 className="mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-brand-gradient px-5 py-3 text-sm font-semibold text-white glow-brand hover:opacity-95"
               >
-                Configurer →
+                Calculer mon devis →
               </Link>
             </div>
           </div>
