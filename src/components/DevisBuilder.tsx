@@ -6,51 +6,43 @@ const BASE_PRICES: Record<string, number> = {
   s1: 30,
   s2: 35,
   pb: 50,
-  l1: 180,
-  l2: 200,
+  l1: 200,
+  l2: 220,
   l3: 250,
   pd: 250,
 };
 
-/** Neuro = 1 · Cinetic = ×1.4 · Domination = ×2.24 */
-const LEVEL_MULT = [1, 1.4, 2.24] as const;
+/** Neuro = ×1 · Cinetic = ×1.25 · Domination = ×1.875 (Cinetic ×1.5) */
+const LEVEL_MULT = [1, 1.25, 1.875] as const;
 const EXPRESS_RATE = 0.35;
 
 /**
  * Prix unitaire des shorts selon la quantité totale commandée (s1 + s2 + pb).
  * Ces seuils s'appliquent silencieusement — aucun % n'est affiché au client.
  * La valeur retournée est le prix BASE avant multiplication par le niveau.
+ *
+ * Grille ancrée sur s1=30€ comme référence :
+ *   1-9    → 30€   (prix plein)
+ *  10-19   → 27€   (−10%)
+ *  20-29   → 25€   (−17%)
+ *  30-49   → 20€   (−33%) → 30 × 20 = 600€ pour s1 Neuro
+ *  50-79   → 19€   (−37%)
+ *  80-99   → 18€   (−40%)
+ * 100-149  → 17€   (−43%)
+ *  150+    → 16€   (−47%)
  */
 function getShortUnitPrice(basePrice: number, totalShorts: number): number {
-  // Ratio de réduction selon le volume (appliqué au prix de base de chaque short)
-  let ratio = 1;
-  if (totalShorts >= 150) ratio = 19 / 27;       // ≈ −30%
-  else if (totalShorts >= 100) ratio = 20 / 27;  // ≈ −26%
-  else if (totalShorts >= 80) ratio = 21 / 27;   // ≈ −22%
-  else if (totalShorts >= 50) ratio = 22 / 27;   // ≈ −19%
-  else if (totalShorts >= 30) ratio = 23 / 27;   // ≈ −15%
-  else if (totalShorts >= 20) ratio = 25 / 27;   // ≈ −7%
-  else if (totalShorts >= 10) ratio = 27 / 27;   // ≈ base (27 ref sur s1 de 30€)
-  // < 10 : prix normal
-
-  // On applique la même proportion à tous les shorts (s1=30, s2=35, pb=50)
-  // On ancre la grille sur s1=30€ comme référence :
-  // à 10 shorts : s1→27, s2→31.5, pb→45  (×0.9)
-  // à 20 shorts : s1→25, s2→29.2, pb→41.7 (×0.833)
-  // à 30 shorts : s1→23, …  etc.
-  if (totalShorts >= 10) {
-    const refBase = 30; // s1 de référence
-    const targetRef =
-      totalShorts >= 150 ? 19 :
-      totalShorts >= 100 ? 20 :
-      totalShorts >= 80  ? 21 :
-      totalShorts >= 50  ? 22 :
-      totalShorts >= 30  ? 23 :
-      totalShorts >= 20  ? 25 :
-      27;
-    ratio = targetRef / refBase;
-  }
-  return basePrice * ratio;
+  const refBase = 30; // s1 de référence
+  const targetRef =
+    totalShorts >= 150 ? 16 :
+    totalShorts >= 100 ? 17 :
+    totalShorts >= 80  ? 18 :
+    totalShorts >= 50  ? 19 :
+    totalShorts >= 30  ? 20 :
+    totalShorts >= 20  ? 25 :
+    totalShorts >= 10  ? 27 :
+    30;
+  return basePrice * (targetRef / refBase);
 }
 
 /**
@@ -128,7 +120,7 @@ const LEVELS = [
   },
   {
     name: "Cinetic",
-    multLabel: "+40% vs Neuro",
+    multLabel: "+25% vs Neuro",
     includes: "Tout Neuro inclus",
     bullets: [
       "Animations & zooms",
@@ -140,7 +132,7 @@ const LEVELS = [
   },
   {
     name: "Domination",
-    multLabel: "+60% vs Cinetic",
+    multLabel: "+50% vs Cinetic",
     includes: "Tout Cinetic inclus",
     bullets: ["Motion design", "Animations avancées", "Color grading cinéma", "Branding intégré"],
   },
@@ -309,23 +301,108 @@ function catIconClass(theme: Theme, catId: string): string {
   return theme.iconPod;
 }
 
-function calcDeliveryDays(totalVideos: number, isExpress: boolean): string {
-  if (totalVideos <= 0) return "—";
-  // Base standard
-  let days: number;
-  if (totalVideos <= 3) days = 4;
-  else if (totalVideos <= 6) days = 5;
-  else if (totalVideos <= 10) days = 7;
-  else days = Math.ceil(totalVideos / 3);
+/**
+ * Délais de livraison — 12 monteurs en relais 7j/7
+ * (logique par famille de contenu, goulot d'étranglement = le max)
+ */
+function calcDeliveryStandard(quantities: Record<string, number>, podShorts: number): number {
+  const s1 = (quantities["s1"] ?? 0) + (quantities["s2"] ?? 0);
+  const pb = quantities["pb"] ?? 0;
+  const l1 = quantities["l1"] ?? 0;
+  const l2 = quantities["l2"] ?? 0;
+  const l3 = quantities["l3"] ?? 0;
+  const pd = quantities["pd"] ?? 0;
 
-  if (isExpress) {
-    // Express = environ la moitié, minimum 1j
-    days = Math.max(1, Math.round(days * 0.45));
+  let dS1 = 0;
+  if (s1 > 0) {
+    if      (s1 <= 8)   dS1 = 2;
+    else if (s1 <= 20)  dS1 = 3;
+    else if (s1 <= 35)  dS1 = 4;
+    else if (s1 <= 50)  dS1 = 5;
+    else if (s1 <= 70)  dS1 = 6;
+    else                dS1 = 8 + Math.floor((s1 - 70) / 15);
   }
 
-  if (days === 1) return "24h";
-  if (days <= 2) return "48h";
-  return `${days} jours`;
+  let dPb = 0;
+  if (pb > 0) {
+    if      (pb <= 8)   dPb = 2;
+    else if (pb <= 20)  dPb = 3;
+    else if (pb <= 35)  dPb = 4;
+    else if (pb <= 50)  dPb = 5;
+    else if (pb <= 70)  dPb = 6;
+    else                dPb = 8 + Math.floor((pb - 70) / 15);
+  }
+
+  let dL1 = 0;
+  if (l1 > 0) {
+    if      (l1 <= 3)   dL1 = 2;
+    else if (l1 <= 8)   dL1 = 4;
+    else if (l1 <= 12)  dL1 = 6;
+    else                dL1 = 6 + Math.ceil((l1 - 12) / 3);
+  }
+
+  let dL2 = 0;
+  if (l2 > 0) {
+    if      (l2 <= 2)   dL2 = 3;
+    else if (l2 <= 6)   dL2 = 5;
+    else if (l2 <= 12)  dL2 = 7;
+    else                dL2 = 8 + Math.ceil((l2 - 12) / 2);
+  }
+
+  let dL3 = 0;
+  if (l3 > 0) {
+    if      (l3 === 1)  dL3 = 6;
+    else if (l3 <= 4)   dL3 = 10;
+    else if (l3 <= 8)   dL3 = 14;
+    else                dL3 = 14 + Math.ceil((l3 - 8) * 2);
+  }
+
+  let dPd = 0;
+  if (pd > 0) {
+    if      (pd === 1)  dPd = 4;
+    else if (pd <= 3)   dPd = 6;
+    else if (pd <= 6)   dPd = 9;
+    else if (pd <= 10)  dPd = 12;
+    else                dPd = 12 + Math.ceil((pd - 10) / 2);
+  }
+
+  const podShortDays = podShorts > 0
+    ? (podShorts <= 8 ? 1 : podShorts <= 20 ? 2 : 3)
+    : 0;
+
+  return Math.max(dS1, dPb, dL1, dL2, dL3, dPd + podShortDays);
+}
+
+function calcDeliveryDays(
+  quantities: Record<string, number>,
+  podShorts: number,
+  isExpress: boolean,
+): string {
+  const standard = calcDeliveryStandard(quantities, podShorts);
+  if (standard === 0) return "—";
+
+  if (!isExpress) {
+    if (standard <= 1) return "24h";
+    if (standard === 2) return "48h";
+    return `${standard} jours`;
+  }
+
+  const s1 = (quantities["s1"] ?? 0) + (quantities["s2"] ?? 0);
+  const pb = quantities["pb"] ?? 0;
+  const l3 = quantities["l3"] ?? 0;
+  const pd = quantities["pd"] ?? 0;
+
+  const expressBlocked = s1 > 70 || pb > 70 || l3 > 4 || pd > 6;
+  if (expressBlocked) {
+    if (standard <= 1) return "24h";
+    if (standard === 2) return "48h";
+    return `${standard} jours`;
+  }
+
+  const exp = Math.max(1, Math.round(standard * 0.6));
+  if (exp <= 1) return "24h";
+  if (exp === 2) return "48h";
+  return `${exp} jours`;
 }
 
 function formatLabel(key: string): string {
@@ -595,6 +672,18 @@ export function DevisBuilder({
     }
   }, [open]);
 
+  // Reset express si la commande devient trop lourde pour l'offrir
+  useEffect(() => {
+    if (!express) return;
+    const s1total = (quantities["s1"] ?? 0) + (quantities["s2"] ?? 0);
+    const pbTotal = quantities["pb"] ?? 0;
+    const l3Total = quantities["l3"] ?? 0;
+    const pdTotal = quantities["pd"] ?? 0;
+    if (s1total > 70 || pbTotal > 70 || l3Total > 4 || pdTotal > 6) {
+      setExpress(false);
+    }
+  }, [quantities, podShorts, express]);
+
   const theme = useMemo(() => buildTheme(variant === "surmesure"), [variant]);
 
   const pricing = useMemo(() => {
@@ -654,7 +743,7 @@ export function DevisBuilder({
     const total = afterDisc + expressAdd;
 
     const selectedOptions = OPTIONS.filter((o) => opts[o.k]);
-    const delivery = calcDeliveryDays(totalVideos, express);
+    const delivery = calcDeliveryDays(quantities, podShorts, express);
 
     return {
       lineItems: allItems,
@@ -1042,36 +1131,64 @@ export function DevisBuilder({
 
             {/* ── STEP 5 : Délai de livraison ── */}
             <Step n="5" title="Délai de livraison" theme={theme}>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {[
-                  {
-                    e: false,
-                    t: "Standard",
-                    s: pricing.delivery,
-                    sub: "Inclus",
-                  },
-                  {
-                    e: true,
-                    t: "Express prioritaire",
-                    s: calcDeliveryDays(pricing.totalVideos, true),
-                    sub: `+${Math.round(EXPRESS_RATE * 100)}% du total`,
-                  },
-                ].map((d) => {
-                  const on = express === d.e;
-                  return (
-                    <button
-                      type="button"
-                      key={d.t}
-                      onClick={() => setExpress(d.e)}
-                      className={`rounded-2xl border p-4 text-left transition-all duration-300 ${getCardStyle(on, theme.isDark)}`}
-                    >
-                      <div className={`font-semibold text-sm ${theme.textPrimary}`}>{d.t}</div>
-                      <div className={`text-sm mt-1 font-semibold ${theme.textPrimary}`}>{d.s}</div>
-                      <div className={`text-xs mt-0.5 ${theme.textSecondary} opacity-90`}>{d.sub}</div>
-                    </button>
-                  );
-                })}
-              </div>
+              {(() => {
+                const s1total = (quantities["s1"] ?? 0) + (quantities["s2"] ?? 0) + podShorts;
+                const pbTotal = quantities["pb"] ?? 0;
+                const l3Total = quantities["l3"] ?? 0;
+                const pdTotal = quantities["pd"] ?? 0;
+                const expressBlocked = s1total > 70 || pbTotal > 70 || l3Total > 4 || pdTotal > 6;
+
+                // Si express était sélectionné mais que la commande est devenue trop lourde, on reset
+                if (expressBlocked && express) {
+                  // On ne peut pas appeler setExpress ici directement (render), on gère visuellement
+                }
+
+                return (
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {[
+                      {
+                        e: false,
+                        t: "Standard",
+                        s: pricing.delivery,
+                        sub: "Inclus",
+                        blocked: false,
+                      },
+                      {
+                        e: true,
+                        t: "Express prioritaire",
+                        s: expressBlocked
+                          ? "Non disponible pour ce volume"
+                          : calcDeliveryDays(quantities, podShorts, true),
+                        sub: expressBlocked
+                          ? "Volume trop important pour ce délai"
+                          : `+${Math.round(EXPRESS_RATE * 100)}% du total`,
+                        blocked: expressBlocked,
+                      },
+                    ].map((d) => {
+                      const on = express === d.e && !d.blocked;
+                      return (
+                        <button
+                          type="button"
+                          key={d.t}
+                          disabled={d.blocked}
+                          onClick={() => !d.blocked && setExpress(d.e)}
+                          className={`rounded-2xl border p-4 text-left transition-all duration-300 ${
+                            d.blocked
+                              ? theme.isDark
+                                ? "border-white/5 bg-white/[0.01] opacity-40 cursor-not-allowed"
+                                : "border-foreground/5 bg-foreground/[0.02] opacity-40 cursor-not-allowed"
+                              : getCardStyle(on, theme.isDark)
+                          }`}
+                        >
+                          <div className={`font-semibold text-sm ${theme.textPrimary}`}>{d.t}</div>
+                          <div className={`text-sm mt-1 font-semibold ${theme.textPrimary}`}>{d.s}</div>
+                          <div className={`text-xs mt-0.5 ${theme.textSecondary} opacity-90`}>{d.sub}</div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
             </Step>
           </div>
         </div>

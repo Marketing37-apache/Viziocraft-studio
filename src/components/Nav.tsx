@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
 const LOGO = "https://cdn.prod.website-files.com/6996b2b19f614702ad210f02/6996b52b771675ec516ec984_Asset%201%20(1).png";
@@ -6,6 +6,8 @@ const LOGO = "https://cdn.prod.website-files.com/6996b2b19f614702ad210f02/6996b5
 export function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const { location } = useRouterState();
+  const onDevisPage = location.pathname.startsWith("/devis/");
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
@@ -22,7 +24,6 @@ export function Nav() {
     { href: "/#faq", label: "FAQ" },
   ];
 
-  // when on top, hero is dark → white text. When scrolled, white blurred bg → dark text.
   const textColor = scrolled ? "text-foreground" : "text-white";
   const subColor = scrolled ? "text-foreground/70 hover:text-foreground" : "text-white/80 hover:text-white";
 
@@ -63,12 +64,14 @@ export function Nav() {
           >
             Contact
           </a>
-          <a
-            href="/devis/standard"
-            className="inline-flex items-center gap-2 rounded-full bg-brand-gradient px-5 py-2.5 text-sm font-semibold text-white glow-brand hover:opacity-95 transition"
-          >
-            Devis →
-          </a>
+          {!onDevisPage && (
+            <a
+              href="/devis/standard"
+              className="inline-flex items-center gap-2 rounded-full bg-brand-gradient px-5 py-2.5 text-sm font-semibold text-white glow-brand hover:opacity-95 transition"
+            >
+              Devis →
+            </a>
+          )}
         </div>
 
         <button
@@ -102,13 +105,15 @@ export function Nav() {
               >
                 Contact
               </a>
-              <a
-                href="/devis/standard"
-                onClick={() => setOpen(false)}
-                className="block text-center rounded-full bg-brand-gradient px-5 py-3 text-sm font-semibold text-white"
-              >
-                Devis →
-              </a>
+              {!onDevisPage && (
+                <a
+                  href="/devis/standard"
+                  onClick={() => setOpen(false)}
+                  className="block text-center rounded-full bg-brand-gradient px-5 py-3 text-sm font-semibold text-white"
+                >
+                  Devis →
+                </a>
+              )}
             </li>
           </ul>
         </div>
