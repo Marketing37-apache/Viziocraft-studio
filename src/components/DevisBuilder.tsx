@@ -8,7 +8,7 @@ const BASE_PRICES: Record<string, number> = {
   pb: 50,
   l1: 200,
   l2: 220,
-  l3: 250,
+  l3: 260,
   pd: 250,
 };
 
@@ -17,54 +17,97 @@ const LEVEL_MULT = [1, 1.25, 1.875] as const;
 const EXPRESS_RATE = 0.35;
 
 /**
- * Prix unitaire des shorts selon la quantité totale commandée (s1 + s2 + pb).
- * Ces seuils s'appliquent silencieusement — aucun % n'est affiché au client.
- * La valeur retournée est le prix BASE avant multiplication par le niveau.
+ * Tranches marginales pour les shorts — ancre s1 = 28€.
+ * Chaque unité est facturée au prix de sa tranche.
+ * Le total est donc strictement croissant, sans rebond possible.
  *
- * Grille ancrée sur s1=30€ comme référence :
- *   1-9    → 30€   (prix plein)
- *  10-19   → 27€   (−10%)
- *  20-29   → 25€   (−17%)
- *  30-49   → 20€   (−33%) → 30 × 20 = 600€ pour s1 Neuro
- *  50-79   → 19€   (−37%)
- *  80-99   → 18€   (−40%)
- * 100-149  → 17€   (−43%)
- *  150+    → 16€   (−47%)
+ * Vérification clé (s1 Neuro) :
+ *   10 shorts → 9×28 + 1×24 = 276€  (moy. 27,6€)
+ *   20 shorts → +10×24 = 492€       (moy. 24,6€  → ~25-26€ cible ✓)
+ *   30 shorts → +10×21+1×17 = 719€  (one-shot) → ×0.85 = 611€ multishoot ✓
  */
-function getShortUnitPrice(basePrice: number, totalShorts: number): number {
-  const refBase = 30; // s1 de référence
-  const targetRef =
-    totalShorts >= 150 ? 16 :
-    totalShorts >= 100 ? 17 :
-    totalShorts >= 80  ? 18 :
-    totalShorts >= 50  ? 19 :
-    totalShorts >= 30  ? 20 :
-    totalShorts >= 20  ? 25 :
-    totalShorts >= 10  ? 27 :
-    30;
-  return basePrice * (targetRef / refBase);
+const SHORT_TIERS: { from: number; to: number; ref: number }[] = [
+  { from: 1,   to: 9,        ref: 28   },
+  { from: 10,  to: 19,       ref: 24   },
+  { from: 20,  to: 29,       ref: 21   },
+  { from: 30,  to: 49,       ref: 17   },
+  { from: 50,  to: 79,       ref: 16   },
+  { from: 80,  to: 119,      ref: 15   },
+  { from: 120, to: 149,      ref: 14   },
+  { from: 150, to: Infinity, ref: 13.5 },
+];
+
+/**
+ * Calcule le total en tranches pour `qty` unités d'un short de prix de base `basePrice`.
+ * Le ratio de chaque tranche est calculé par rapport à l'ancre s1=28€.
+ * unitAvg = prix moyen arrondi (affiché en récap).
+ */
+function calcShortTotal(basePrice: number, qty: number): { total: number; unitAvg: number } {
+  if (qty <= 0) return { total: 0, unitAvg: basePrice };
+  const anchor = 28;
+  let total = 0;
+  let remaining = qty;
+  for (const tier of SHORT_TIERS) {
+    if (remaining <= 0) break;
+    const count = tier.to === Infinity
+      ? remaining
+      : Math.min(remaining, tier.to - tier.from + 1);
+    const unitPrice = Math.round(basePrice * (tier.ref / anchor) * 100) / 100;
+    total += unitPrice * count;
+    remaining -= count;
+  }
+  total = Math.round(total);
+  return { total, unitAvg: Math.round((total / qty) * 100) / 100 };
 }
 
 /**
- * Prix unitaire des longs formats selon la quantité totale commandée (l1+l2+l3).
- * Paliers discrets — non affiché au client.
+ * Tranches marginales pour les longs formats.
+ * Volumes faibles donc tranches courtes.
+ * Ratios appliqués sur le prix de base de chaque format (l1=200, l2=220, l3=260).
+ *
+ *  1–2  → prix plein
+ *  3–5  → −5%
+ *  6–10 → −8%
+ * 11–15 → −11%
+ * 16+   → −14%
  */
-function getLongUnitPrice(basePrice: number, totalLongs: number): number {
-  let ratio = 1;
-  if (totalLongs >= 8) ratio = 0.88;        // −12%
-  else if (totalLongs >= 5) ratio = 0.92;   // −8%
-  else if (totalLongs >= 3) ratio = 0.95;   // −5%
-  return basePrice * ratio;
+const LONG_TIERS: { from: number; to: number; ratio: number }[] = [
+  { from: 1,  to: 2,        ratio: 1.00 },
+  { from: 3,  to: 5,        ratio: 0.95 },
+  { from: 6,  to: 10,       ratio: 0.92 },
+  { from: 11, to: 15,       ratio: 0.89 },
+  { from: 16, to: Infinity, ratio: 0.86 },
+];
+
+function calcLongTotal(basePrice: number, qty: number): { total: number; unitAvg: number } {
+  if (qty <= 0) return { total: 0, unitAvg: basePrice };
+  let total = 0;
+  let remaining = qty;
+  for (const tier of LONG_TIERS) {
+    if (remaining <= 0) break;
+    const count = tier.to === Infinity
+      ? remaining
+      : Math.min(remaining, tier.to - tier.from + 1);
+    total += Math.round(basePrice * tier.ratio) * count;
+    remaining -= count;
+  }
+  total = Math.round(total);
+  return { total, unitAvg: Math.round((total / qty) * 100) / 100 };
 }
 
 /**
- * Prix unitaire du podcast selon le nombre d'épisodes.
- * −3% par épisode supplémentaire, plafonné à −20%.
+ * Podcast — −3% par épisode supplémentaire en tranches, plafonné à −20%.
+ * Chaque épisode i (0-indexé) coûte basePrice × (1 − min(i×0.03, 0.20)).
+ * Total toujours croissant car chaque épisode > 0€.
  */
-function getPodUnitPrice(basePrice: number, episodes: number): number {
-  if (episodes <= 1) return basePrice;
-  const disc = Math.min((episodes - 1) * 0.03, 0.20);
-  return basePrice * (1 - disc);
+function calcPodTotal(basePrice: number, qty: number): { total: number; unitAvg: number } {
+  if (qty <= 0) return { total: 0, unitAvg: basePrice };
+  let total = 0;
+  for (let i = 0; i < qty; i++) {
+    const disc = Math.min(i * 0.03, 0.20);
+    total += Math.round(basePrice * (1 - disc));
+  }
+  return { total, unitAvg: Math.round((total / qty) * 100) / 100 };
 }
 
 /** 3 familles distinctes */
@@ -689,42 +732,39 @@ export function DevisBuilder({
   const pricing = useMemo(() => {
     const mult = LEVEL_MULT[lvl];
 
-    // Totaux par famille pour les remises de volume
-    const totalShorts = (quantities["s1"] ?? 0) + (quantities["s2"] ?? 0) + (quantities["pb"] ?? 0);
-    const totalLongs = (quantities["l1"] ?? 0) + (quantities["l2"] ?? 0) + (quantities["l3"] ?? 0);
-    const totalPod = quantities["pd"] ?? 0;
-
     const lineItems = ALL_KEYS.filter((k) => quantities[k] > 0).map((key) => {
       const qty = quantities[key];
       const basePrice = BASE_PRICES[key];
 
-      // Prix de base ajusté selon le volume (remise discrète)
-      let adjustedBase: number;
+      let calcResult: { total: number; unitAvg: number };
       if (key === "s1" || key === "s2" || key === "pb") {
-        adjustedBase = getShortUnitPrice(basePrice, totalShorts);
+        calcResult = calcShortTotal(basePrice, qty);
       } else if (key === "l1" || key === "l2" || key === "l3") {
-        adjustedBase = getLongUnitPrice(basePrice, totalLongs);
+        calcResult = calcLongTotal(basePrice, qty);
       } else if (key === "pd") {
-        adjustedBase = getPodUnitPrice(basePrice, totalPod);
+        calcResult = calcPodTotal(basePrice, qty);
       } else {
-        adjustedBase = basePrice;
+        calcResult = { total: basePrice * qty, unitAvg: basePrice };
       }
 
-      const unitFinal = Math.round(adjustedBase * mult);
-      const total = unitFinal * qty;
+      const total = Math.round(calcResult.total * mult);
+      const unitFinal = Math.round(calcResult.unitAvg * mult);
       return { key, label: formatLabel(key), qty, unitBase: basePrice, unitFinal, total };
     });
 
-    // Shorts dérivés du podcast (10€ base, mêmes paliers que les shorts classiques)
+    // Shorts dérivés du podcast (10€ base, mêmes tranches que les shorts classiques)
     const podShortItems = podShorts > 0
-      ? [{
-          key: "pod-short",
-          label: `Clips courts (podcast)`,
-          qty: podShorts,
-          unitBase: 10,
-          unitFinal: Math.round(getShortUnitPrice(10, podShorts) * mult),
-          total: Math.round(getShortUnitPrice(10, podShorts) * mult) * podShorts,
-        }]
+      ? (() => {
+          const { total: psTotal, unitAvg: psAvg } = calcShortTotal(10, podShorts);
+          return [{
+            key: "pod-short",
+            label: "Clips courts (podcast)",
+            qty: podShorts,
+            unitBase: 10,
+            unitFinal: Math.round(psAvg * mult),
+            total: Math.round(psTotal * mult),
+          }];
+        })()
       : [];
 
     const allItems = [...lineItems, ...podShortItems];
