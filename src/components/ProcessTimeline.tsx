@@ -10,7 +10,7 @@ const STEPS = [
     desc: "On analyse votre besoin, votre positionnement, votre direction artistique. On verrouille ensemble la cible, le ton, et les formats.",
     duration: "30 min",
     bullets: ["Brief créatif", "Plan d'action", "Devis détaillé"],
-    img: `${CDN2}/69bbd209b6d1ec9b233be4af_DSC00306-p-1080.jpg`,
+    img: "https://drive.google.com/uc?export=view&id=1UcJYRiTLj3bUZ6-E0-VRazMjCfAFkJdJ",
   },
   {
     n: "02",
@@ -19,7 +19,7 @@ const STEPS = [
     desc: "Une première vidéo réalisée sur votre contenu, dans votre style.\nDA validée, une preuve concrète avant tout engagement.",
     duration: "72h",
     bullets: ["DA validée", "Standards verrouillés", "Aucun engagement"],
-    img: new URL("../assets/step2-test.jpg", import.meta.url).href,
+    img: "https://drive.google.com/uc?export=view&id=1qncQN2QH0WyXDRJfr13JI3C5cOonQ4MU",
   },
   {
     n: "03",
@@ -28,7 +28,7 @@ const STEPS = [
     desc: "On déploie plusieurs monteurs en parallèle pour scaler votre volume sans jamais sacrifier la qualité.",
     duration: "En continu",
     bullets: ["+20 monteurs", "Chef de projet dédié", "Qualité constante"],
-    img: `${CDN2}/69bbd298e7222bfba34e34da_DSC00274-p-1080.jpg`,
+    img: "https://drive.google.com/uc?export=view&id=12JHWofuWHsy_7cJSoKJwiOiddTbsNLB1",
   },
   {
     n: "04",
@@ -37,7 +37,7 @@ const STEPS = [
     desc: "WhatsApp + Frame.io. Pas d'emails, pas de tickets, pas d'attente. Une review à la seconde près, une réponse en moins de 2h.",
     duration: "7j/7",
     bullets: ["Review à la seconde", "Réponse < 2h", "Drive partagé"],
-    img: `${CDN2}/69bbd390da6242586058293c_DSC00314-p-1080.jpg`,
+    img: "https://drive.google.com/uc?export=view&id=1AXgeZalmw8juUStCikP4rf-ueUoPSN0W",
   },
 ];
 
