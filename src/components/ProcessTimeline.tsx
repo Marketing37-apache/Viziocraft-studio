@@ -19,7 +19,7 @@ const STEPS = [
     desc: "Une première vidéo réalisée sur votre contenu, dans votre style.\nDA validée, une preuve concrète avant tout engagement.",
     duration: "72h",
     bullets: ["DA validée", "Standards verrouillés", "Aucun engagement"],
-    img: `${CDN2}/69bbd24fca314a4a29a46fe9_DSC00269-p-1080.jpg`,
+    img: new URL("../assets/step2-test.jpg", import.meta.url).href,
   },
   {
     n: "03",
