@@ -15,7 +15,7 @@ const STEPS = [
   {
     n: "02",
     kicker: "Étape 02 — Validation",
-    title: "La vidéo test",
+    title: "Démarrage du projet",
     desc: "Une première vidéo réelle, sur votre contenu, dans votre style. C'est la preuve avant tout engagement.",
     duration: "72h",
     bullets: ["DA validée", "Standards verrouillés", "Aucun engagement"],

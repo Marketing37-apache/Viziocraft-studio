@@ -34,12 +34,12 @@ const ETAPES: Record<string, Etape> = {
       { h: "Cadrer ta DA", p: "Ton univers visuel, ta typographie, tes références, tes refus. On construit un cadre clair pour garantir une cohérence sur l'ensemble des livrables." },
       { h: "Définir le workflow", p: "Volume, formats, délais, points de validation, canaux de communication. Tout est posé dès le départ pour éviter les frictions plus tard." },
     ],
-    next: { slug: "video-test", title: "La vidéo test" },
+    next: { slug: "video-test", title: "Démarrage du projet" },
   },
   "video-test": {
     n: "02",
     slug: "video-test",
-    title: "La vidéo test",
+    title: "Démarrage du projet",
     tagline: "On monte une première vidéo pour valider le rendu, le rythme, le style.",
     img: step2,
     intro:
@@ -47,7 +47,7 @@ const ETAPES: Record<string, Etape> = {
     blocks: [
       { h: "Une preuve, pas une promesse", p: "On monte une vidéo complète avec ton DA, ton rythme, tes codes. Si quelque chose ne te plaît pas, on ajuste avant de lancer la production en volume." },
       { h: "Calibrage du style", p: "Tu valides : ton de voix, choix de b-rolls, niveau de motion, traitement des sous-titres, format des intros. On verrouille les standards." },
-      { h: "Aucun engagement", p: "Tu décides après la vidéo test si on continue. Pas de surprise, pas de qualité aléatoire en cours de route." },
+      { h: "Aucun engagement", p: "Tu décides après si on continue. Pas de surprise, pas de qualité aléatoire en cours de route." },
     ],
     prev: { slug: "appel-de-preparation", title: "L'appel de préparation" },
     next: { slug: "production", title: "La production" },
