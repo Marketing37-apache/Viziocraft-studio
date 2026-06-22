@@ -85,17 +85,29 @@
 
 @layer base {
   * { border-color: var(--color-border); }
-  html { scroll-behavior: smooth; background: oklch(0.985 0.005 280); }
+  html {
+    scroll-behavior: smooth;
+    background: oklch(0.985 0.005 280);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
   }
   h1, h2, h3, h4 {
     font-family: 'Space Grotesk', 'Inter', sans-serif;
     letter-spacing: -0.025em;
     font-weight: 600;
+  }
+  /* Prevent iOS from zooming into inputs (require font-size ≥ 16px on mobile) */
+  @media (max-width: 640px) {
+    input, textarea, select {
+      font-size: max(16px, 1em);
+    }
   }
 }
 

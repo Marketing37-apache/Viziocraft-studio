@@ -505,7 +505,7 @@ function FormatCard({
   function Stepper({ size }: { size: "sm" | "lg" }) {
     const h = size === "lg" ? "h-9 w-9" : "h-8 w-8";
     const textSz = size === "lg" ? "text-sm" : "text-xs";
-    const numW = size === "lg" ? "w-7 text-base" : "w-6 text-sm";
+    const numW = size === "lg" ? "w-10 text-sm sm:text-base" : "w-8 text-xs sm:text-sm";
     return (
       <div className={`flex items-center gap-2 rounded-full p-1 border ${theme.isDark ? "bg-white/5 border-white/5" : "bg-foreground/[0.03] border-foreground/5"}`}>
         <StepperButton
@@ -543,7 +543,7 @@ function FormatCard({
 
   if (solo) {
     return (
-      <div className={`flex flex-col sm:flex-row sm:items-center gap-6 rounded-2xl border p-6 transition-all duration-300 ${getCardStyle(active, theme.isDark)}`}>
+      <div className={`flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 rounded-2xl border p-4 sm:p-6 transition-all duration-300 ${getCardStyle(active, theme.isDark)}`}>
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2.5 mb-2">
             <h4 className={`text-base font-bold font-display ${theme.textPrimary}`}>{fmt.name}</h4>
@@ -576,7 +576,7 @@ function FormatCard({
   }
 
   return (
-    <div className={`flex flex-col justify-between rounded-2xl border p-5 transition-all duration-300 ${getCardStyle(active, theme.isDark)}`}>
+    <div className={`flex flex-col justify-between rounded-2xl border p-3.5 sm:p-5 transition-all duration-300 ${getCardStyle(active, theme.isDark)}`}>
       <div className="space-y-2.5">
         <div className="flex items-start justify-between gap-3">
           <h4 className={`text-sm font-bold leading-tight font-display ${theme.textPrimary}`}>{fmt.name}</h4>
@@ -620,7 +620,7 @@ function PodcastShortsSection({
     : "bg-white border border-foreground/10 text-[#1a1410] hover:bg-foreground/5 shadow-xs";
 
   return (
-    <div className={`mt-5 rounded-2xl border p-5 transition-all duration-300 ${getCardStyle(active, theme.isDark)}`}>
+    <div className={`mt-5 rounded-2xl border p-3.5 sm:p-5 transition-all duration-300 ${getCardStyle(active, theme.isDark)}`}>
       <div className="flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1.5">
@@ -661,7 +661,7 @@ function PodcastShortsSection({
                 if (!isNaN(v) && v >= 0) onTick(v - qty);
                 else if (e.target.value === "") onTick(-qty);
               }}
-              className={`w-7 text-center font-display text-base font-bold tabular-nums bg-transparent border-none outline-none [appearance:textfield] ${active ? theme.textPrimary : theme.textMuted}`}
+              className={`w-10 text-center font-display text-sm sm:text-base font-bold tabular-nums bg-transparent border-none outline-none [appearance:textfield] ${active ? theme.textPrimary : theme.textMuted}`}
               aria-label="Nombre de clips podcast"
             />
             <StepperButton
@@ -929,9 +929,9 @@ export function DevisBuilder({
   const podQty = quantities["pd"] ?? 0;
 
   return (
-    <div id="devis-builder" className="w-full">
-      <form onSubmit={submit} className="grid gap-6 lg:grid-cols-[1.25fr_1fr] items-start">
-        <div className={`rounded-[2rem] border ${theme.containerBg} p-6 sm:p-8 space-y-10 shadow-xl relative`}>
+    <div id="devis-builder" className="w-full pb-24 lg:pb-0">
+      <form onSubmit={submit} className="grid gap-4 sm:gap-6 lg:grid-cols-[1.25fr_1fr] items-start">
+        <div className={`rounded-2xl sm:rounded-[2rem] border ${theme.containerBg} p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-10 shadow-xl relative`}>
           {onClose && (
             <button
               type="button"
@@ -951,13 +951,13 @@ export function DevisBuilder({
             <h3 className="mt-2 font-display text-2xl sm:text-3xl font-bold">Configurez votre production</h3>
           </header>
 
-          <div className="space-y-10 border-t border-foreground/10 pt-8">
+          <div className="space-y-6 sm:space-y-10 border-t border-foreground/10 pt-5 sm:pt-8">
 
             {/* ── STEP 1 : Formats & quantités ── */}
             <Step n="1" title="Formats & quantités" theme={theme}>
 
               {/* Onglets */}
-              <div className={`flex p-1 rounded-full border mb-6 ${theme.isDark ? "bg-white/5 border-white/10" : "bg-foreground/[0.03] border-foreground/5"}`}>
+              <div className={`flex p-1 rounded-full border mb-4 sm:mb-6 ${theme.isDark ? "bg-white/5 border-white/10" : "bg-foreground/[0.03] border-foreground/5"}`}>
                 {FORMAT_CATEGORIES.map((cat) => {
                   const isActive = activeTab === cat.id;
                   const count = cat.formats.reduce((s, f) => s + (quantities[f.key] ?? 0), 0)
@@ -967,7 +967,7 @@ export function DevisBuilder({
                       type="button"
                       key={cat.id}
                       onClick={() => setActiveTab(cat.id)}
-                      className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer ${
+                      className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-1.5 sm:py-2 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer ${
                         isActive
                           ? variant === "surmesure"
                             ? "bg-gradient-to-r from-[#a78bfa] to-[#ec4899] text-white shadow-sm"
@@ -978,9 +978,12 @@ export function DevisBuilder({
                       }`}
                     >
                       <CatIcon id={cat.id} className="w-3.5 h-3.5 shrink-0" />
-                      <span>{cat.title}</span>
+                      <span className="hidden sm:inline">{cat.title}</span>
+                      <span className="sm:hidden">
+                        {cat.id === "short" ? "Shorts" : cat.id === "long" ? "Long" : "Podcast"}
+                      </span>
                       {count > 0 && (
-                        <span className={`flex h-4.5 w-4.5 items-center justify-center rounded-full text-[9px] font-extrabold ${
+                        <span className={`min-w-[1.125rem] px-1 inline-flex items-center justify-center rounded-full text-[9px] font-extrabold ${
                           isActive
                             ? "bg-white text-black"
                             : variant === "surmesure"
@@ -1046,7 +1049,7 @@ export function DevisBuilder({
 
             {/* ── STEP 2 : Niveau de montage ── */}
             <Step n="2" title="Niveau de montage" theme={theme}>
-              <div className="grid gap-4 sm:grid-cols-3">
+              <div className="grid grid-cols-3 gap-2 sm:gap-4">
                 {LEVELS.map((l, idx) => {
                   const on = lvl === idx;
                   return (
@@ -1054,16 +1057,16 @@ export function DevisBuilder({
                       type="button"
                       key={l.name}
                       onClick={() => setLvl(idx)}
-                      className={`rounded-xl border p-4 text-left transition-all duration-200 ${on ? theme.btnActive : theme.btnInactive}`}
+                      className={`rounded-xl border p-2.5 sm:p-4 text-left transition-all duration-200 ${on ? theme.btnActive : theme.btnInactive}`}
                     >
-                      <h4 className={`font-display text-sm font-bold ${theme.textPrimary}`}>{l.name}</h4>
-                      <p className={`text-[11px] mt-0.5 ${theme.textSecondary}`}>{l.multLabel}</p>
+                      <h4 className={`font-display text-[11px] sm:text-sm font-bold leading-tight ${theme.textPrimary}`}>{l.name}</h4>
+                      <p className={`text-[8px] sm:text-[11px] mt-0.5 leading-snug ${theme.textSecondary}`}>{l.multLabel}</p>
                       {l.includes && (
-                        <span className="mt-2 inline-block rounded-full bg-emerald-500/15 px-2 py-0.5 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400">
+                        <span className="hidden sm:inline-block mt-2 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400">
                           {l.includes}
                         </span>
                       )}
-                      <ul className="mt-3 space-y-0.5">
+                      <ul className="hidden sm:block mt-3 space-y-0.5">
                         {l.bullets.map((b) => (
                           <li key={b} className={`text-[10px] pl-2.5 relative before:content-['·'] before:absolute before:left-0 ${theme.textSecondary}`}>
                             {b}
@@ -1228,7 +1231,7 @@ export function DevisBuilder({
         </div>
 
         {/* ── PANNEAU RÉCAP ── */}
-        <div className={`rounded-[2rem] border ${theme.containerBg} p-6 sm:p-8 space-y-5 shadow-xl lg:sticky lg:top-28 ${theme.panelGlow}`}>
+        <div id="devis-recap" className={`rounded-2xl sm:rounded-[2rem] border ${theme.containerBg} p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-5 shadow-xl lg:sticky lg:top-28 ${theme.panelGlow}`}>
           <div>
             <h4 className={`font-display text-xl sm:text-2xl font-bold ${theme.textPrimary}`}>Votre estimation</h4>
             <p className={`text-xs mt-1 ${theme.mutedText}`}>{summaryLine}</p>
@@ -1334,6 +1337,36 @@ export function DevisBuilder({
           )}
         </div>
       </form>
+
+      {pricing.totalVideos > 0 && status !== "success" && (
+        <div
+          className={`lg:hidden fixed bottom-0 inset-x-0 z-50 border-t backdrop-blur-xl flex items-center justify-between gap-3 px-4 py-3 shadow-[0_-4px_20px_-8px_rgba(0,0,0,0.2)] ${
+            variant === "surmesure"
+              ? "bg-[#0d0a1a]/95 border-white/10"
+              : "bg-white/95 border-foreground/10"
+          }`}
+        >
+          <div className="flex flex-col min-w-0">
+            <span className={`text-[10px] font-medium ${theme.textMuted}`}>
+              {pricing.totalVideos} vidéo{pricing.totalVideos > 1 ? "s" : ""} · {LEVELS[lvl].name}
+            </span>
+            <span className={`font-display text-xl font-bold tabular-nums ${theme.isDark ? "text-[#c4b5fd]" : "text-[#a8632d]"}`}>
+              {pricing.total}€
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => document.getElementById("devis-recap")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+            className={`shrink-0 rounded-full px-4 py-2.5 text-xs font-semibold text-white ${
+              variant === "surmesure"
+                ? "bg-gradient-to-r from-[#a78bfa] to-[#ec4899]"
+                : "bg-[#1a1410]"
+            }`}
+          >
+            Voir le récap →
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -1355,8 +1388,8 @@ function RecapRow({
       ? "text-amber-600 dark:text-amber-400"
       : theme.textSecondary;
   return (
-    <div className={`flex justify-between gap-3 py-1.5 ${textColor}`}>
-      <span className="opacity-90">{label}</span>
+    <div className={`flex justify-between gap-2 sm:gap-3 py-1 sm:py-1.5 ${textColor}`}>
+      <span className="opacity-90 min-w-0 flex-1 leading-snug">{label}</span>
       <span className="font-semibold tabular-nums shrink-0">{value}</span>
     </div>
   );

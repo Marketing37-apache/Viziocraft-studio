@@ -220,32 +220,32 @@ function Index() {
       <Nav />
 
       {/* HERO */}
-      <section className="surface-ink relative overflow-hidden pt-32 pb-24 lg:pt-44 lg:pb-32">
+      <section className="surface-ink relative overflow-hidden pt-24 pb-14 sm:pt-32 sm:pb-20 lg:pt-44 lg:pb-32">
         <div className="grain" />
-        <div className="relative mx-auto max-w-7xl px-6 lg:px-10">
-          <div className="grid items-center gap-12 lg:grid-cols-[1.1fr_1fr]">
+        <div className="relative mx-auto max-w-7xl px-5 sm:px-6 lg:px-10">
+          <div className="grid items-center gap-10 sm:gap-12 lg:grid-cols-[1.1fr_1fr]">
             <div className="fade-in">
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-1.5 text-xs font-medium text-white/80 backdrop-blur">
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-3 py-1.5 text-[11px] sm:px-4 sm:text-xs font-medium text-white/80 backdrop-blur">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 Agence de montage vidéo · Disponibles 7j/7
               </span>
-              <h1 className="mt-6 font-display text-5xl leading-[1.02] tracking-tight sm:text-6xl lg:text-7xl text-white">
-                Votre équipe monteur<br />vidéo <span className="text-brand-gradient">dédiée.</span>
+              <h1 className="mt-5 sm:mt-6 font-display text-[2.2rem] leading-[1.06] tracking-tight sm:text-5xl lg:text-7xl text-white">
+                Votre équipe monteur vidéo <span className="text-brand-gradient">dédiée.</span>
               </h1>
-              <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/75">
+              <p className="mt-5 sm:mt-6 max-w-xl text-[15px] sm:text-lg leading-relaxed text-white/75">
                 Shorts, publicités, podcasts et branding vidéo produits avec rapidité,
                 cohérence et exigence, pensés pour scaler votre contenu sans compromis.
               </p>
-              <div className="mt-9 flex flex-wrap gap-3">
-                <a href="#showreel" className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-4 text-sm font-semibold text-[#1a0b2e] hover:opacity-90 transition">
+              <div className="mt-7 sm:mt-9 flex flex-wrap gap-3">
+                <a href="#showreel" className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3.5 sm:px-7 sm:py-4 text-sm font-semibold text-[#1a0b2e] hover:opacity-90 transition">
                   Voir nos réalisations
                 </a>
-                <a href="/devis/surmesure" className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-7 py-4 text-sm font-semibold text-white backdrop-blur hover:bg-white/10 transition">
+                <a href="/devis/surmesure" className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-5 py-3.5 sm:px-7 sm:py-4 text-sm font-semibold text-white backdrop-blur hover:bg-white/10 transition">
                   <span>Calculer mon devis</span>
                   <span className="hidden sm:inline text-white/50 text-xs font-normal">· Estimer mon projet en 2 min</span>
                 </a>
               </div>
-              <dl className="mt-14 grid grid-cols-3 gap-6 border-t border-white/10 pt-8">
+              <dl className="mt-10 sm:mt-14 grid grid-cols-3 gap-3 sm:gap-6 border-t border-white/10 pt-7 sm:pt-8">
                 <Stat k="+100" v="Clients satisfaits" />
                 <Stat k="+5000" v="Vidéos produites" />
                 <Stat k="7j/7" v="Production en continu" />
@@ -276,22 +276,22 @@ function Index() {
       <FormatsMarquee />
 
       {/* SHOWREEL — auto-scrolling marquees */}
-      <section id="showreel" className="relative py-20 sm:py-24 lg:py-32">
-        <div className="mx-auto max-w-7xl px-6 lg:px-10">
+      <section id="showreel" className="relative py-14 sm:py-20 lg:py-32">
+        <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-10">
           <div className="max-w-3xl">
             <Eyebrow>Réalisations récentes</Eyebrow>
-            <h2 className="mt-4 font-display text-4xl tracking-tight sm:text-5xl">
+            <h2 className="mt-4 font-display text-3xl tracking-tight sm:text-4xl lg:text-5xl">
               Le travail parle <span className="text-brand-gradient">pour nous.</span>
             </h2>
-            <p className="mt-3 max-w-xl text-muted-foreground">
+            <p className="mt-3 max-w-xl text-[15px] sm:text-base text-muted-foreground">
               Une sélection de shorts et de formats longs produits pour nos créateurs et marques.
             </p>
           </div>
         </div>
 
           {/* Shorts — verticaux */}
-          <div className="mx-auto max-w-7xl px-6 lg:px-10">
-            <div className="mt-10 flex items-end justify-between gap-4">
+          <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-10">
+            <div className="mt-8 sm:mt-10 flex items-end justify-between gap-4">
               <div>
                 <span className="inline-flex items-center gap-2 rounded-full bg-brand-soft px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-primary">
                   <span className="h-1.5 w-1.5 rounded-full bg-primary" />
@@ -305,14 +305,14 @@ function Index() {
           </div>
 
           {/* Longs — horizontaux */}
-          <div className="mx-auto mt-20 max-w-7xl px-6 lg:px-10 sm:mt-24">
+          <div className="mx-auto mt-14 sm:mt-20 lg:mt-24 max-w-7xl px-5 sm:px-6 lg:px-10">
             <div className="flex items-end justify-between gap-4">
               <div>
                 <span className="inline-flex items-center gap-2 rounded-full bg-brand-soft px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-primary">
                   <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                   Formats longs · YouTube · Podcasts
                 </span>
-                <h3 className="mt-3 font-display text-2xl sm:text-3xl tracking-tight">
+                <h3 className="mt-3 font-display text-xl sm:text-2xl lg:text-3xl tracking-tight">
                   Des vidéos longues qui <span className="text-brand-gradient">tiennent l'attention.</span>
                 </h3>
               </div>
@@ -325,16 +325,16 @@ function Index() {
 
 
       {/* SERVICES — floating cards */}
-      <section id="services" className="relative bg-muted/40 py-24 lg:py-32">
-        <div className="mx-auto max-w-7xl px-6 lg:px-10">
+      <section id="services" className="relative bg-muted/40 py-14 sm:py-20 lg:py-32">
+        <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-10">
           <div className="max-w-3xl">
             <Eyebrow>Services</Eyebrow>
-            <h2 className="mt-4 font-display text-4xl tracking-tight sm:text-5xl">
-              Une production vidéo pensée<br />pour <span className="text-brand-gradient">scaler votre contenu.</span>
+            <h2 className="mt-4 font-display text-3xl tracking-tight sm:text-4xl lg:text-5xl">
+              Une production vidéo pensée pour <span className="text-brand-gradient">scaler votre contenu.</span>
             </h2>
-            <p className="mt-5 text-lg text-muted-foreground">
+            <p className="mt-4 sm:mt-5 text-[15px] sm:text-lg text-muted-foreground">
               Sous-titres, b-rolls, animations, IA, quelle que soit votre DA, nous adaptons
-              chaque contenu à votre identité et à votre audience. Survolez chaque format pour découvrir le détail.
+              chaque contenu à votre identité et à votre audience.
             </p>
           </div>
           <ServicesShowcase />
@@ -342,14 +342,14 @@ function Index() {
       </section>
 
       {/* PROCESS — timeline */}
-      <section id="process" className="relative py-24 lg:py-32">
-        <div className="mx-auto max-w-7xl px-6 lg:px-10">
+      <section id="process" className="relative py-14 sm:py-20 lg:py-32">
+        <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-10">
           <div className="mx-auto max-w-3xl text-center">
             <Eyebrow>Comment ça se passe</Eyebrow>
-            <h2 className="mt-4 font-display text-4xl tracking-tight sm:text-5xl">
-              Un workflow rapide,<br />structuré, et <span className="text-brand-gradient">fiable.</span>
+            <h2 className="mt-4 font-display text-3xl tracking-tight sm:text-4xl lg:text-5xl">
+              Un workflow rapide, structuré, et <span className="text-brand-gradient">fiable.</span>
             </h2>
-            <p className="mt-5 text-muted-foreground">
+            <p className="mt-4 sm:mt-5 text-[15px] sm:text-base text-muted-foreground">
               Une méthode éprouvée en 4 étapes, pensée pour garantir cohérence et qualité constante,
               projet après projet.
             </p>
@@ -359,21 +359,21 @@ function Index() {
       </section>
 
       {/* TARIFS */}
-      <section id="tarifs" className="relative bg-muted/40 py-24 lg:py-32">
-        <div className="mx-auto max-w-7xl px-6 lg:px-10">
+      <section id="tarifs" className="relative bg-muted/40 py-14 sm:py-20 lg:py-32">
+        <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-10">
           <div className="max-w-3xl">
             <Eyebrow>Tarifs</Eyebrow>
-            <h2 className="mt-4 font-display text-4xl tracking-tight sm:text-5xl">
+            <h2 className="mt-4 font-display text-3xl tracking-tight sm:text-4xl lg:text-5xl">
               Trois manières de travailler <span className="text-brand-gradient">ensemble.</span>
             </h2>
-            <p className="mt-4 text-muted-foreground">
+            <p className="mt-4 text-[15px] sm:text-base text-muted-foreground">
               Pas de surprises, pas de frais cachés. Les détails du devis se construisent à la demande.
             </p>
           </div>
 
-          <div className="mt-12 grid gap-6 lg:grid-cols-3">
+          <div className="mt-10 sm:mt-12 grid gap-4 sm:gap-6 lg:grid-cols-3">
             {/* Essentiel — léger */}
-            <div className="relative flex flex-col rounded-3xl border border-foreground/10 bg-card p-8 transition hover:-translate-y-1 hover:shadow-[0_30px_60px_-25px_rgba(123,45,142,0.25)]">
+            <div className="relative flex flex-col rounded-3xl border border-foreground/10 bg-card p-6 sm:p-8 transition hover:-translate-y-1 hover:shadow-[0_30px_60px_-25px_rgba(123,45,142,0.25)]">
               <span className="inline-flex w-fit items-center rounded-full bg-amber-100 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-amber-700">À la vidéo</span>
               <h3 className="mt-4 font-display text-2xl">Montage essentiel</h3>
               <p className="mt-1 text-sm text-muted-foreground">Pour tester sans engagement</p>
@@ -397,7 +397,7 @@ function Index() {
             </div>
 
             {/* Continu — populaire, dark */}
-            <div className="relative flex flex-col rounded-3xl border-2 border-transparent bg-[#1a0b2e] p-8 text-white shadow-[0_40px_70px_-25px_rgba(123,45,142,0.55)] lg:scale-[1.03]">
+            <div className="relative flex flex-col rounded-3xl border-2 border-transparent bg-[#1a0b2e] p-6 sm:p-8 text-white shadow-[0_40px_70px_-25px_rgba(123,45,142,0.55)] lg:scale-[1.03]">
               <div className="absolute -inset-px -z-10 rounded-3xl bg-brand-gradient opacity-50 blur-2xl" />
               <span className="absolute -top-3 left-8 rounded-full bg-brand-gradient px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-white shadow-lg">
                 Le plus populaire
@@ -424,7 +424,7 @@ function Index() {
             </div>
 
             {/* Sur mesure */}
-            <div className="relative flex flex-col rounded-3xl border border-foreground/10 bg-card p-8 transition hover:-translate-y-1 hover:shadow-[0_30px_60px_-25px_rgba(123,45,142,0.25)]">
+            <div className="relative flex flex-col rounded-3xl border border-foreground/10 bg-card p-6 sm:p-8 transition hover:-translate-y-1 hover:shadow-[0_30px_60px_-25px_rgba(123,45,142,0.25)]">
               <span className="inline-flex w-fit items-center rounded-full bg-brand-soft px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary">Sur mesure</span>
               <h3 className="mt-4 font-display text-2xl">Production personnalisée</h3>
               <p className="mt-1 text-sm text-muted-foreground">Entièrement à la carte</p>
@@ -451,14 +451,14 @@ function Index() {
       </section>
 
       {/* FAQ */}
-      <section id="faq" className="relative py-24 lg:py-32">
-        <div className="mx-auto max-w-5xl px-6 lg:px-10">
+      <section id="faq" className="relative py-14 sm:py-20 lg:py-32">
+        <div className="mx-auto max-w-5xl px-5 sm:px-6 lg:px-10">
           <div className="max-w-2xl">
             <Eyebrow>Vos questions, nos réponses</Eyebrow>
-            <h2 className="mt-4 font-display text-4xl tracking-tight sm:text-5xl">
+            <h2 className="mt-4 font-display text-3xl tracking-tight sm:text-4xl lg:text-5xl">
               Les vraies <span className="text-brand-gradient">questions</span> que nos clients nous posent.
             </h2>
-            <p className="mt-4 text-muted-foreground">
+            <p className="mt-4 text-[15px] sm:text-base text-muted-foreground">
               Vous ne trouvez pas votre réponse ? Posez-la directement dans le formulaire — on revient sous 24h.
             </p>
           </div>
@@ -467,33 +467,33 @@ function Index() {
       </section>
 
       {/* CONTACT */}
-      <section id="contact" className="relative overflow-hidden py-24 lg:py-32">
+      <section id="contact" className="relative overflow-hidden py-14 sm:py-20 lg:py-32">
         <div className="absolute inset-0 -z-10">
           <div className="absolute -left-32 top-20 h-[500px] w-[500px] rounded-full bg-[radial-gradient(closest-side,rgba(123,45,142,0.18),transparent)] blur-3xl" />
           <div className="absolute -right-32 bottom-20 h-[500px] w-[500px] rounded-full bg-[radial-gradient(closest-side,rgba(43,168,226,0.18),transparent)] blur-3xl" />
         </div>
 
-        <div className="mx-auto max-w-7xl px-6 lg:px-10">
-          <div className="grid gap-12 lg:grid-cols-[1fr_1.05fr] lg:items-stretch">
+        <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-10">
+          <div className="grid gap-10 sm:gap-12 lg:grid-cols-[1fr_1.05fr] lg:items-stretch">
             <div className="relative flex flex-col">
               <Eyebrow>Contact</Eyebrow>
-              <h2 className="mt-4 font-display text-4xl tracking-tight sm:text-5xl">
+              <h2 className="mt-4 font-display text-3xl tracking-tight sm:text-4xl lg:text-5xl">
                 Discutons de votre <span className="text-brand-gradient">projet.</span>
               </h2>
-              <p className="mt-5 text-muted-foreground">
+              <p className="mt-4 sm:mt-5 text-[15px] sm:text-base text-muted-foreground">
                 VizioCraft est une société basée à Madagascar, fondée par deux frères passionnés
                 par la création de contenu. Notre mission : offrir une solution concrète aux pros
                 qui veulent produire vite et bien, sans compromis sur la qualité.
               </p>
 
-              <div className="mt-8 grid grid-cols-2 gap-4">
+              <div className="mt-6 sm:mt-8 grid grid-cols-2 gap-3 sm:gap-4">
                 <BigStat k="+100" v="Clients satisfaits" />
                 <BigStat k="+5000" v="Vidéos produites" />
               </div>
 
-              <div className="relative mt-8 flex-1">
+              <div className="relative mt-6 sm:mt-8 flex-1 hidden sm:block">
                 <div className="absolute -inset-3 -z-10 rounded-[2rem] bg-brand-gradient opacity-25 blur-2xl" />
-                <div className="relative h-full overflow-hidden rounded-[2rem] border border-foreground/10 shadow-2xl">
+                <div className="relative h-full max-h-[420px] lg:max-h-none overflow-hidden rounded-[2rem] border border-foreground/10 shadow-2xl">
                   <img src={CONTACT_FRAME} alt="Les fondateurs VizioCraft" className="h-full w-full object-cover" />
                   <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#1a0b2e] via-[#1a0b2e]/60 to-transparent p-6 text-white sm:p-8">
                     <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/70">Charles & Alexandre</p>
@@ -503,16 +503,16 @@ function Index() {
               </div>
             </div>
 
-            <div className="rounded-[2rem] border border-foreground/10 bg-card p-7 sm:p-10 shadow-[0_40px_80px_-30px_rgba(123,45,142,0.3)]">
+            <div className="rounded-[2rem] border border-foreground/10 bg-card p-6 sm:p-8 lg:p-10 shadow-[0_40px_80px_-30px_rgba(123,45,142,0.3)]">
               <span className="inline-flex items-center gap-2 rounded-full bg-brand-soft px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Réponse sous 24h
               </span>
-              <h3 className="mt-4 font-display text-2xl sm:text-3xl">Réserver un appel de préparation</h3>
+              <h3 className="mt-4 font-display text-xl sm:text-2xl lg:text-3xl">Réserver un appel de préparation</h3>
               <p className="mt-3 text-sm text-muted-foreground">
                 Quelques infos suffisent — on revient vers vous rapidement pour caler un appel et discuter
                 de votre projet (formats, volume, délais).
               </p>
-              <div className="mt-7">
+              <div className="mt-6 sm:mt-7">
                 <ContactForm />
               </div>
             </div>
@@ -529,8 +529,8 @@ function Index() {
 function Stat({ k, v }: { k: string; v: string }) {
   return (
     <div>
-      <dt className="font-display text-3xl text-white">{k}</dt>
-      <dd className="mt-1 text-xs text-white/60">{v}</dd>
+      <dt className="font-display text-xl sm:text-3xl text-white">{k}</dt>
+      <dd className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs text-white/60">{v}</dd>
     </div>
   );
 }

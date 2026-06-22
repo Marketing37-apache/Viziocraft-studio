@@ -28,10 +28,10 @@ export function Footer() {
   return (
     <footer className="surface-ink relative overflow-hidden">
       <div className="grain" />
-      <div className="relative mx-auto max-w-7xl px-6 py-16 lg:px-10">
-        <div className="grid gap-12 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
+      <div className="relative mx-auto max-w-7xl px-5 sm:px-6 py-12 sm:py-16 lg:px-10">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr] lg:gap-12">
           {/* Brand */}
-          <div>
+          <div className="col-span-2 lg:col-span-1">
             <Link to="/" className="inline-flex items-center gap-3">
               <img src={LOGO} alt="VizioCraft" className="h-9 w-auto" />
             </Link>

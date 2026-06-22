@@ -31,14 +31,14 @@ export function Faq({ items }: { items: FaqItem[] }) {
               transition: `opacity 600ms ease ${i * 80}ms, transform 600ms cubic-bezier(.2,.7,.2,1) ${i * 80}ms`,
             }}
           >
-            <AccordionTrigger className="px-6 py-5 sm:px-8 sm:py-6 text-base sm:text-lg font-display hover:no-underline hover:bg-muted/40 [&[data-state=open]]:bg-brand-soft">
-              <span className="flex items-center gap-4">
-                <span className="text-xs font-semibold text-primary">{String(i + 1).padStart(2, "0")}</span>
+            <AccordionTrigger className="px-5 py-4 sm:px-8 sm:py-6 text-[15px] sm:text-base lg:text-lg font-display hover:no-underline hover:bg-muted/40 [&[data-state=open]]:bg-brand-soft text-left">
+              <span className="flex items-center gap-3 sm:gap-4">
+                <span className="shrink-0 text-xs font-semibold text-primary">{String(i + 1).padStart(2, "0")}</span>
                 <span>{f.q}</span>
               </span>
             </AccordionTrigger>
-            <AccordionContent className="px-6 pb-6 sm:px-8 sm:pb-7 pt-0">
-              <p className="ml-10 max-w-3xl text-muted-foreground leading-relaxed">{f.a}</p>
+            <AccordionContent className="px-5 pb-5 sm:px-8 sm:pb-7 pt-0">
+              <p className="ml-0 sm:ml-10 max-w-3xl text-[14px] sm:text-base text-muted-foreground leading-relaxed">{f.a}</p>
             </AccordionContent>
           </AccordionItem>
         ))}

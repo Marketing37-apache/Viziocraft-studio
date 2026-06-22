@@ -81,7 +81,7 @@ function DevisPage() {
       <Nav />
 
       {/* HERO */}
-      <section className="relative overflow-hidden pt-32 pb-12 lg:pt-44 lg:pb-16">
+      <section className="relative overflow-hidden pt-24 pb-10 sm:pt-32 sm:pb-12 lg:pt-44 lg:pb-16">
         {m.decorative === "neon-prestige" && (
           <>
             <div className="absolute -left-40 top-20 h-[700px] w-[700px] rounded-full bg-[radial-gradient(closest-side,rgba(167,139,250,0.25),transparent)] blur-3xl" />
@@ -92,29 +92,29 @@ function DevisPage() {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_15%,rgba(168,99,45,0.08),transparent_55%)]" />
         )}
 
-        <div className="relative mx-auto max-w-5xl px-6 lg:px-10">
+        <div className="relative mx-auto max-w-5xl px-5 sm:px-6 lg:px-10">
           <Link to="/" hash="tarifs" className={`inline-flex items-center gap-2 text-xs uppercase tracking-[0.22em] ${m.accent} hover:opacity-80`}>
             ← Retour aux formules
           </Link>
 
-          <div className="mt-8">
-            <span className={`inline-flex items-center gap-2 rounded-full ${m.badgeBg} ${m.badgeText} px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em]`}>
+          <div className="mt-6 sm:mt-8">
+            <span className={`inline-flex items-center gap-2 rounded-full ${m.badgeBg} ${m.badgeText} px-3 py-1.5 sm:px-4 text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.18em]`}>
               {m.eyebrow}
             </span>
-            <h1 className="mt-6 font-display text-4xl leading-[1.04] tracking-tight sm:text-5xl lg:text-6xl">
+            <h1 className="mt-5 sm:mt-6 font-display text-[1.9rem] leading-[1.07] tracking-tight sm:text-4xl lg:text-6xl">
               {m.title}
               <span className={m.accent}>{m.highlight}</span>
             </h1>
-            <p className="mt-5 max-w-2xl text-lg leading-relaxed opacity-80">{m.baseline}</p>
+            <p className="mt-4 sm:mt-5 max-w-2xl text-[15px] sm:text-lg leading-relaxed opacity-80">{m.baseline}</p>
           </div>
         </div>
       </section>
 
       {/* BUILDER */}
-      <section className="px-6 pb-24 lg:px-10 lg:pb-32">
+      <section className="px-4 sm:px-6 pb-16 sm:pb-24 lg:px-10 lg:pb-32">
         <div className="mx-auto max-w-7xl">
-          <div className={variant === "surmesure" ? "rounded-[2.5rem] p-[2px] bg-gradient-to-br from-[#a78bfa] via-[#ec4899] to-[#f59e0b] shadow-[0_20px_50px_rgba(0,0,0,0.5)]" : ""}>
-            <div className={variant === "surmesure" ? "rounded-[2.4rem] bg-[#0b0716] p-1" : ""}>
+          <div className={variant === "surmesure" ? "sm:rounded-[2.5rem] p-[2px] bg-gradient-to-br from-[#a78bfa] via-[#ec4899] to-[#f59e0b] shadow-[0_20px_50px_rgba(0,0,0,0.5)]" : ""}>
+            <div className={variant === "surmesure" ? "sm:rounded-[2.4rem] bg-[#0b0716] p-1" : ""}>
               <DevisBuilder open variant={variant} />
             </div>
           </div>
