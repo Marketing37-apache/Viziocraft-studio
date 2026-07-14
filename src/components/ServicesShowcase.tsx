@@ -76,6 +76,33 @@ function ServiceButton({ s, i }: { s: Service; i: number }) {
   const ref = useRef<HTMLElement>(null);
   const [visible, setVisible] = useState(false);
   const [hovered, setHovered] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: 50, y: 50 });
+  const rafRef = useRef<number | undefined>(undefined);
+
+  // Generate unique particles for each button instance
+  const particles = useRef<Array<{
+    id: number;
+    startX: number;
+    startY: number;
+    vx: number;
+    vy: number;
+    size: number;
+    color: 'primary' | 'pink';
+    delay: number;
+  }>>([]);
+
+  useEffect(() => {
+    particles.current = [...Array(10)].map((_, idx) => ({
+      id: idx,
+      startX: 10 + Math.random() * 80,
+      startY: 10 + Math.random() * 80,
+      vx: (Math.random() - 0.5) * 6,
+      vy: (Math.random() - 0.5) * 6 - 1.5,
+      size: 2 + Math.random() * 3,
+      color: Math.random() > 0.5 ? 'primary' : 'pink',
+      delay: idx * 50,
+    }));
+  }, []);
 
   useEffect(() => {
     if (!ref.current) return;
@@ -86,6 +113,18 @@ function ServiceButton({ s, i }: { s: Service; i: number }) {
     obs.observe(ref.current);
     return () => obs.disconnect();
   }, []);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => {
+      setMousePosition({ x, y });
+    });
+  };
 
   const Wrapper: any = s.slug ? Link : "a";
   const wrapperProps = s.slug
@@ -98,7 +137,8 @@ function ServiceButton({ s, i }: { s: Service; i: number }) {
       {...wrapperProps}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="group relative overflow-hidden rounded-2xl border border-foreground/10 bg-card px-5 py-5 transition-all duration-300 hover:border-primary/25 hover:-translate-y-1 hover:shadow-[0_20px_50px_-15px_rgba(123,45,142,0.2)]"
+      onMouseMove={handleMouseMove}
+      className="group relative overflow-hidden rounded-2xl bg-card transition-all duration-500"
       style={{
         opacity: visible ? 1 : 0,
         transform: visible
@@ -107,44 +147,109 @@ function ServiceButton({ s, i }: { s: Service; i: number }) {
         transition: `opacity 650ms ease ${i * 70}ms, transform 650ms cubic-bezier(.16,.9,.3,1) ${i * 70}ms`,
       }}
     >
-      {/* Glow blob qui suit le hover */}
+      {/* Optimized gradient background using CSS variables */}
       <div
-        className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+        className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
         style={{
-          background: "radial-gradient(circle at 30% 50%, rgba(123,45,142,0.12) 0%, transparent 70%)",
+          background: `radial-gradient(circle at ${mousePosition.x}% ${mousePosition.y}%, rgba(123,45,142,0.12) 0%, rgba(236,72,153,0.06) 40%, transparent 70%)`,
         }}
       />
 
-      {/* Ligne accent animée en bas */}
+      {/* Simplified border glow */}
+      <div className="absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-gradient-to-br from-primary/10 via-transparent to-pink-500/10" />
+
+      {/* Corner accents - simplified */}
+      <div className="absolute top-0 left-0 w-6 h-6 border-l-2 border-t-2 border-primary/0 transition-all duration-500 group-hover:border-primary/30 rounded-tl-xl" />
+      <div className="absolute top-0 right-0 w-6 h-6 border-r-2 border-t-2 border-primary/0 transition-all duration-500 group-hover:border-primary/30 rounded-tr-xl" />
+      <div className="absolute bottom-0 left-0 w-6 h-6 border-l-2 border-b-2 border-primary/0 transition-all duration-500 group-hover:border-primary/30 rounded-bl-xl" />
+      <div className="absolute bottom-0 right-0 w-6 h-6 border-r-2 border-b-2 border-primary/0 transition-all duration-500 group-hover:border-primary/30 rounded-br-xl" />
+
+      {/* Contenu principal */}
+      <div className="relative p-5">
+        <div className="flex items-start gap-4">
+          {/* Icône avec effet simplifié */}
+          <div className="relative">
+            <div className="absolute inset-0 rounded-xl bg-brand-gradient opacity-0 blur-lg transition-all duration-500 group-hover:opacity-30" />
+            <div className="relative flex h-12 w-12 items-center justify-center rounded-xl border border-foreground/10 bg-background text-primary transition-all duration-500 group-hover:border-primary/40 group-hover:scale-105 group-hover:-translate-y-0.5">
+              <ServiceIcon path={s.svgPath} />
+            </div>
+          </div>
+
+          <div className="flex-1 min-w-0">
+            {/* Titre - gardé visible avec changement de couleur */}
+            <p className="font-display text-[16px] font-bold leading-tight text-foreground transition-colors duration-500 group-hover:text-primary">
+              {s.t}
+            </p>
+
+            {/* Tag et sous-titre - révélés avec animation */}
+            <div
+              className="overflow-hidden transition-all duration-500 ease-out"
+              style={{
+                maxHeight: hovered ? "70px" : "0px",
+                opacity: hovered ? 1 : 0,
+              }}
+            >
+              <div className="pt-3 space-y-2">
+                <span className="inline-block rounded-full bg-primary/10 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.18em] text-primary border border-primary/20">
+                  {s.tag}
+                </span>
+                <p className="text-[12px] leading-relaxed text-muted-foreground">
+                  {s.sub}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Flèche optimisée */}
+          <div className="shrink-0 relative">
+            <div className="absolute inset-0 rounded-full bg-brand-gradient opacity-0 blur-sm transition-all duration-500 group-hover:opacity-40" />
+            <div className="relative flex h-10 w-10 items-center justify-center rounded-full border border-foreground/10 text-muted-foreground transition-all duration-500 group-hover:border-primary/50 group-hover:bg-primary group-hover:text-white group-hover:scale-105 group-hover:shadow-[0_0_20px_rgba(123,45,142,0.4)]">
+              <svg
+                className="w-4 h-4 transition-transform duration-500 group-hover:translate-x-0.5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Ligne animée en bas */}
       <div
-        className="absolute bottom-0 left-0 h-[2px] bg-brand-gradient transition-all duration-500 ease-out"
+        className="absolute bottom-0 left-0 h-[3px] bg-gradient-to-r from-primary via-pink-500 to-primary transition-all duration-500 ease-out"
         style={{ width: hovered ? "100%" : "0%" }}
       />
 
-      <div className="relative flex items-start justify-between gap-4">
-        {/* Icône + contenu */}
-        <div className="flex items-start gap-3.5 min-w-0">
-          {/* Icône avec animation de rotation légère */}
-          <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-foreground/10 bg-background text-primary transition-all duration-300 group-hover:border-primary/30 group-hover:bg-brand-soft group-hover:scale-110 group-hover:rotate-3">
-            <ServiceIcon path={s.svgPath} />
-          </div>
-
-          <div className="min-w-0">
-            {/* Tag */}
-            <span className="inline-block rounded-full bg-primary/8 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.18em] text-primary/70 mb-1.5">
-              {s.tag}
-            </span>
-            {/* Titre */}
-            <p className="font-display text-[15px] font-semibold leading-tight text-foreground">{s.t}</p>
-            {/* Sous-titre */}
-            <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">{s.sub}</p>
-          </div>
-        </div>
-
-        {/* Flèche */}
-        <div className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full border border-foreground/10 text-sm text-muted-foreground transition-all duration-300 group-hover:border-primary/40 group-hover:bg-brand-soft group-hover:text-primary group-hover:translate-x-0.5 group-hover:-translate-y-0.5 mt-0.5">
-          →
-        </div>
+      {/* Particules avancées avec système de physique */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {particles.current.map((particle) => (
+          <div
+            key={particle.id}
+            className={`absolute rounded-full transition-all duration-1200 ease-out ${
+              particle.color === 'primary' ? 'bg-primary/70' : 'bg-pink-500/70'
+            }`}
+            style={{
+              left: `${particle.startX}%`,
+              top: `${particle.startY}%`,
+              width: hovered ? `${particle.size}px` : '0px',
+              height: hovered ? `${particle.size}px` : '0px',
+              opacity: hovered ? 0.9 : 0,
+              transform: hovered 
+                ? `translate(${particle.vx * 20}px, ${particle.vy * 20}px) scale(${1 + Math.random() * 0.3})` 
+                : 'translate(0, 0) scale(0)',
+              transitionDelay: `${particle.delay}ms`,
+              boxShadow: hovered 
+                ? particle.color === 'primary' 
+                  ? '0 0 8px rgba(123,45,142,0.6)' 
+                  : '0 0 8px rgba(236,72,153,0.6)'
+                : 'none',
+            }}
+          />
+        ))}
       </div>
     </Wrapper>
   );
