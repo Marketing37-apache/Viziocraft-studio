@@ -689,24 +689,78 @@ export function DevisBuilder({
   onClose?: () => void;
 }) {
   const [quantities, setQuantities] = useState<Record<string, number>>(() => {
+    // Load from localStorage if available, otherwise use defaults
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('devis-quantities');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          // If parsing fails, use defaults
+        }
+      }
+    }
     const initial = { ...EMPTY_QTY };
-    initial["s1"] = variant === "surmesure" ? 4 : 1;
+    initial["s1"] = 1; // Default: short classique = 1, everything else = 0
     return initial;
   });
   // Shorts dérivés du podcast (section spéciale)
-  const [podShorts, setPodShorts] = useState(0);
+  const [podShorts, setPodShorts] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('devis-podShorts');
+      if (saved) return parseInt(saved, 10);
+    }
+    return 0;
+  });
 
-  const [activeTab, setActiveTab] = useState<string>("short");
-  const [lvl, setLvl] = useState(0);
-  const [opts, setOpts] = useState<Record<string, boolean>>({});
-  const [express, setExpress] = useState(false);
-  const [duration, setDuration] = useState<"one-shot" | "multishoot">("one-shot");
-  const [frequency, setFrequency] = useState(MULTISHOOT_FREQUENCIES[0]);
+  const [activeTab, setActiveTab] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('devis-activeTab');
+      if (saved) return saved;
+    }
+    return "short";
+  });
+  const [lvl, setLvl] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('devis-lvl');
+      if (saved) return parseInt(saved, 10);
+    }
+    return 0;
+  });
+  const [opts, setOpts] = useState<Record<string, boolean>>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('devis-opts');
+      if (saved) return JSON.parse(saved);
+    }
+    return {};
+  });
+  const [express, setExpress] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('devis-express');
+      if (saved) return saved === 'true';
+    }
+    return false;
+  });
+  const [duration, setDuration] = useState<"one-shot" | "multishoot">(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('devis-duration');
+      if (saved === 'one-shot' || saved === 'multishoot') return saved;
+    }
+    return "multishoot"; // Default: multishoot mensuel
+  });
+  const [frequency, setFrequency] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('devis-frequency');
+      if (saved && MULTISHOOT_FREQUENCIES.includes(saved)) return saved;
+    }
+    return MULTISHOOT_FREQUENCIES[0]; // Default: Continue au fil du montage
+  });
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [formStarted, setFormStarted] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -714,6 +768,52 @@ export function DevisBuilder({
       if (el) setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
     }
   }, [open]);
+
+  // Save form state to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('devis-quantities', JSON.stringify(quantities));
+  }, [quantities]);
+
+  useEffect(() => {
+    localStorage.setItem('devis-podShorts', podShorts.toString());
+  }, [podShorts]);
+
+  useEffect(() => {
+    localStorage.setItem('devis-activeTab', activeTab);
+  }, [activeTab]);
+
+  useEffect(() => {
+    localStorage.setItem('devis-lvl', lvl.toString());
+  }, [lvl]);
+
+  useEffect(() => {
+    localStorage.setItem('devis-opts', JSON.stringify(opts));
+  }, [opts]);
+
+  useEffect(() => {
+    localStorage.setItem('devis-express', express.toString());
+  }, [express]);
+
+  useEffect(() => {
+    localStorage.setItem('devis-duration', duration);
+  }, [duration]);
+
+  useEffect(() => {
+    localStorage.setItem('devis-frequency', frequency);
+  }, [frequency]);
+
+  // Track when user starts filling the form
+  useEffect(() => {
+    if (!formStarted && (name || email)) {
+      setFormStarted(true);
+      if (typeof window !== 'undefined' && (window as any).dataLayer) {
+        (window as any).dataLayer.push({
+          event: 'devis_form_start',
+          form_variant: variant,
+        });
+      }
+    }
+  }, [name, email, formStarted, variant]);
 
   // Reset express si la commande devient trop lourde pour l'offrir
   useEffect(() => {
@@ -875,10 +975,51 @@ export function DevisBuilder({
     return lines.join("\n");
   }
 
+  // Function to reset form to defaults
+  function resetForm() {
+    const initial = { ...EMPTY_QTY };
+    initial["s1"] = 1;
+    setQuantities(initial);
+    setPodShorts(0);
+    setActiveTab("short");
+    setLvl(0);
+    setOpts({});
+    setExpress(false);
+    setDuration("multishoot");
+    setFrequency(MULTISHOOT_FREQUENCIES[0]);
+    setName("");
+    setEmail("");
+    setPhone("");
+    setMessage("");
+    setStatus("idle");
+    setFormStarted(false);
+    
+    // Clear localStorage
+    localStorage.removeItem('devis-quantities');
+    localStorage.removeItem('devis-podShorts');
+    localStorage.removeItem('devis-activeTab');
+    localStorage.removeItem('devis-lvl');
+    localStorage.removeItem('devis-opts');
+    localStorage.removeItem('devis-express');
+    localStorage.removeItem('devis-duration');
+    localStorage.removeItem('devis-frequency');
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!name || !email || pricing.totalVideos === 0) return;
     setStatus("loading");
+    
+    // Track form submission start
+    if (typeof window !== 'undefined' && (window as any).dataLayer) {
+      (window as any).dataLayer.push({
+        event: 'devis_form_submit',
+        form_variant: variant,
+        total_videos: pricing.totalVideos,
+        total_price: pricing.total,
+      });
+    }
+    
     const fd = new FormData();
     fd.append("_subject", `Devis VizioCraft — ${pricing.total}€ — ${name}`);
     fd.append("Formule", variant === "surmesure" ? "Production sur mesure" : "Montage essentiel");
@@ -912,8 +1053,36 @@ export function DevisBuilder({
     try {
       const res = await fetch(FORMSPREE, { method: "POST", body: fd, headers: { Accept: "application/json" } });
       setStatus(res.ok ? "success" : "error");
+      if (res.ok) {
+        // Track successful form submission
+        if (typeof window !== 'undefined' && (window as any).dataLayer) {
+          (window as any).dataLayer.push({
+            event: 'devis_form_success',
+            form_variant: variant,
+            total_videos: pricing.totalVideos,
+            total_price: pricing.total,
+          });
+        }
+        // Clear form data after successful submission
+        resetForm();
+      } else {
+        // Track form submission error
+        if (typeof window !== 'undefined' && (window as any).dataLayer) {
+          (window as any).dataLayer.push({
+            event: 'devis_form_error',
+            form_variant: variant,
+          });
+        }
+      }
     } catch {
       setStatus("error");
+      // Track form submission error
+      if (typeof window !== 'undefined' && (window as any).dataLayer) {
+        (window as any).dataLayer.push({
+          event: 'devis_form_error',
+          form_variant: variant,
+        });
+      }
     }
   }
 
@@ -944,11 +1113,25 @@ export function DevisBuilder({
           )}
 
           <header>
-            <span className={`inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.22em] ${theme.badgeText}`}>
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              {variant === "surmesure" ? "Production sur mesure" : "Montage essentiel"}
-            </span>
-            <h3 className="mt-2 font-display text-2xl sm:text-3xl font-bold">Configurez votre production</h3>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <span className={`inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.22em] ${theme.badgeText}`}>
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  {variant === "surmesure" ? "Production sur mesure" : "Montage essentiel"}
+                </span>
+                <h3 className="mt-2 font-display text-2xl sm:text-3xl font-bold">Configurez votre production</h3>
+              </div>
+              <button
+                type="button"
+                onClick={resetForm}
+                className={`p-2 rounded-full border ${theme.isDark ? "border-white/10 text-white/60 hover:text-white hover:bg-white/5" : "border-foreground/10 text-foreground/60 hover:text-foreground hover:bg-foreground/5"} transition`}
+                aria-label="Réinitialiser"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              </button>
+            </div>
           </header>
 
           <div className="space-y-6 sm:space-y-10 border-t border-foreground/10 pt-5 sm:pt-8">

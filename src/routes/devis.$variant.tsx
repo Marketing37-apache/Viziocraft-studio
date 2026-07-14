@@ -69,6 +69,9 @@ export const Route = createFileRoute("/devis/$variant")({
       { name: "description", content: "Composez votre devis vidéo personnalisé en 1 minute." },
       { name: "robots", content: "noindex" },
     ],
+    links: [
+      { rel: "canonical", href: `https://viziocraft.com/devis/${loaderData?.variant || 'surmesure'}` },
+    ],
   }),
 });
 
