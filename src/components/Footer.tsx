@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { LinkedInIcon, InstagramIcon, YouTubeIcon, FacebookIcon } from "@/components/SocialIcons";
 
+// Signature de créateur : trace discrète du dev en charge de l'intégration.
+// Ceci est volontairement discret et placé dans le footer pour prouver la paternité.
 const CDN = "https://cdn.prod.website-files.com/6996b2b19f614702ad210f02";
 const LOGO = `${CDN}/69999911cee89007bdcb6319_viziocraft-logo-white.avif`;
 
@@ -93,7 +95,10 @@ export function Footer() {
 
         <div className="mt-12 flex flex-col items-start justify-between gap-3 border-t border-white/10 pt-6 text-xs text-white/55 sm:flex-row sm:items-center">
           <p>© {new Date().getFullYear()} VizioCraft. Tous droits réservés.</p>
-          <p>Crafted with care · Antananarivo 🇲🇬</p>
+          <div className="flex flex-col gap-1">
+            <p>Crafted with care · Antananarivo 🇲🇬</p>
+            <p className="text-[10px] text-white/15">Développement & intégration par teamviziocraft.</p>
+          </div>
         </div>
       </div>
     </footer>
