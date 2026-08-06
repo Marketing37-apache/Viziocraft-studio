@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { LinkedInIcon, InstagramIcon, YouTubeIcon, FacebookIcon } from "@/components/SocialIcons";
+import signatureImg from "../assets/signature-masimirado.png";
 
 // Signature de créateur : trace discrète du dev en charge de l'intégration.
 // Ceci est volontairement discret et placé dans le footer pour prouver la paternité.
@@ -97,7 +98,18 @@ export function Footer() {
           <p>© {new Date().getFullYear()} VizioCraft. Tous droits réservés.</p>
           <div className="flex flex-col gap-1">
             <p>Crafted with care · Antananarivo 🇲🇬</p>
-            <p className="text-[10px] text-white/15">Développement & intégration par teamviziocraft.</p>
+            <p className="text-[10px] text-white/15">
+              Développement & intégration par{' '}
+              <a
+                href="https://lumina-canvapro-mt.pages.dev/"
+                target="_blank"
+                rel="noreferrer"
+                className="text-white/70 transition hover:text-white"
+              >
+                teamviziocraft
+              </a>
+              .
+            </p>
           </div>
         </div>
       </div>
