@@ -929,56 +929,135 @@ export function DevisBuilder({
     setPodShorts((prev) => Math.max(0, prev + delta));
   }
 
-  function buildEmailBody(): string {
-    const { lineItems, selectedOptions, subtotal, discAmt, expressAdd, total, totalVideos, optionTotal } = pricing;
+  /**
+   * Corps du mail interne (reçu par VizioCraft) — version structurée.
+   * Lisible d'un coup d'œil, sans bruit.
+   */
+  function buildInternalEmailBody(): string {
+    const { lineItems, selectedOptions, discAmt, expressAdd, total, totalVideos } = pricing;
+    const prenom = name.split(" ")[0];
+
+    const sep = "────────────────────────────────────";
     const lines: string[] = [
-      "—— DEVIS VIZIOCRAFT — DÉTAIL COMPLET ——",
+      `Nouveau devis de ${name} <${email}>`,
+      sep,
       "",
-      `Formule: ${variant === "surmesure" ? "Production sur mesure" : "Montage essentiel"}`,
-      `Niveau de montage: ${LEVELS[lvl].name} (×${LEVEL_MULT[lvl]})`,
-      "",
-      "── VIDÉOS ──",
+      "FORMATS SÉLECTIONNÉS",
     ];
 
     if (lineItems.length === 0) {
-      lines.push("  (aucune vidéo)");
+      lines.push("  (aucun format)");
     } else {
       lineItems.forEach((l) => {
-        lines.push(
-          `  • ${l.qty}× ${l.label}`,
-          `    ${l.unitFinal}€/u → ${l.total}€`
-        );
+        lines.push(`  • ${l.qty}× ${l.label}  —  niveau ${LEVELS[lvl].name}`);
       });
     }
 
-    if (selectedOptions.length > 0 && totalVideos > 0) {
-      lines.push("", "── OPTIONS COMPLÉMENTAIRES ──");
-      selectedOptions.forEach((o) => {
-        lines.push(`  • ${o.k}: +${o.p}€/vid × ${totalVideos} = +${o.p * totalVideos}€`);
-      });
-    }
-
-    lines.push("", "── COLLABORATION ──", `  Mode: ${duration === "multishoot" ? "Multishoot mensuel (−15%)" : "One shot"}`);
-    if (duration === "multishoot") {
-      lines.push(`  Fréquence: ${frequency}`);
-      if (discAmt > 0) lines.push(`  Réduction mensuelle: −15% = −${discAmt}€`);
+    if (selectedOptions.length > 0) {
+      lines.push("", "OPTIONS");
+      selectedOptions.forEach((o) => lines.push(`  • ${o.k}`));
     }
 
     lines.push(
       "",
-      "── LIVRAISON ──",
-      `  ${express ? `Express prioritaire (+${Math.round(EXPRESS_RATE * 100)}%) = +${expressAdd}€` : `Standard (${pricing.delivery})`}`,
+      "COLLABORATION",
+      `  ${duration === "multishoot" ? `Multishoot mensuel — ${frequency}` : "One shot"}`,
       "",
-      "── TOTAL ──",
-      `  Sous-total: ${subtotal}€`
+      "DÉLAI DE LIVRAISON",
+      `  ${express ? `Express prioritaire` : `Standard — ${pricing.delivery}`}`,
+      "",
+      sep,
+      `TOTAL ESTIMÉ : ${total}€`,
+      `(${totalVideos} vidéo${totalVideos > 1 ? "s" : ""}${discAmt > 0 ? " — réduction multishoot −15% appliquée" : ""}${expressAdd > 0 ? " — majoration express +35%" : ""})`,
+      sep,
     );
-    if (discAmt > 0) lines.push(`  Après réduction multishoot: ${subtotal - discAmt}€`);
-    if (expressAdd > 0) lines.push(`  Majoration express: +${expressAdd}€`);
-    lines.push(`  TOTAL ESTIMÉ: ${total}€`);
 
     if (message.trim()) {
-      lines.push("", "── MESSAGE CLIENT ──", message.trim());
+      lines.push("", "MESSAGE DU CLIENT", message.trim());
     }
+
+    lines.push(
+      "",
+      "─── Répondre directement à cet email pour contacter le client ───",
+      `Reply-To : ${name} <${email}>`,
+    );
+
+    // Unused variable suppression
+    void prenom;
+    return lines.join("\n");
+  }
+
+  /**
+   * Corps du mail envoyé en copie au client (CC).
+   * Ton propre, chaleureux, avec récap clair et CTA appel.
+   */
+  function buildClientEmailBody(): string {
+    const { lineItems, selectedOptions, total, totalVideos } = pricing;
+    const prenom = name.split(" ")[0];
+
+    const lines: string[] = [
+      `Salut ${prenom},`,
+      "",
+      "Merci d'avoir configuré ton projet sur VizioCraft !",
+      "Voici le récapitulatif de ton estimation personnalisée.",
+      "",
+      "════════════════════════════════════",
+      "   TON ESTIMATION VIZIOCRAFT 🎬",
+      "════════════════════════════════════",
+      "",
+    ];
+
+    // Tableau récap
+    const col1 = 26;
+    function row(label: string, value: string) {
+      return `  ${label.padEnd(col1, ".")} ${value}`;
+    }
+
+    if (lineItems.length > 0) {
+      lines.push("  FORMATS");
+      lineItems.forEach((l) => {
+        lines.push(row(`  ${l.qty}× ${l.label}`, `niveau ${LEVELS[lvl].name}`));
+      });
+    }
+
+    if (selectedOptions.length > 0) {
+      lines.push("", "  OPTIONS");
+      selectedOptions.forEach((o) => lines.push(`    • ${o.k}`));
+    }
+
+    lines.push(
+      "",
+      row("  Collaboration", duration === "multishoot" ? `Mensuelle — ${frequency}` : "One shot"),
+      row("  Délai estimé", express ? "Express prioritaire" : pricing.delivery),
+      "",
+      "────────────────────────────────────",
+      `  Prix estimé : ${total}€`,
+      "────────────────────────────────────",
+      "",
+      "Cette estimation est calculée sur la base de tes choix.",
+      "Elle peut être ajustée selon les détails de ton projet.",
+      "",
+      "════════════════════════════════════",
+      "",
+      "Envie d'affiner le projet ensemble ?",
+      "Réservons 15 minutes pour valider les détails et",
+      "répondre à toutes tes questions.",
+      "",
+      "  → Réserver un appel gratuit",
+      "     https://viziocraft.com/#contact",
+      "",
+      "════════════════════════════════════",
+      "",
+      "Une question avant l'appel ?",
+      "Réponds directement à cet email — on te revient sous 24h.",
+      "",
+      "À très vite,",
+      "L'équipe VizioCraft",
+      "contact@viziocraft.com | viziocraft.com",
+    );
+
+    // Unused variable suppression
+    void totalVideos;
     return lines.join("\n");
   }
 
@@ -1015,8 +1094,7 @@ export function DevisBuilder({
     e.preventDefault();
     if (!name || !email || pricing.totalVideos === 0) return;
     setStatus("loading");
-    
-    // Track form submission start
+
     if (typeof window !== 'undefined' && (window as any).dataLayer) {
       (window as any).dataLayer.push({
         event: 'devis_form_submit',
@@ -1025,41 +1103,53 @@ export function DevisBuilder({
         total_price: pricing.total,
       });
     }
-    
+
+    const prenom = name.split(" ")[0];
+
     const fd = new FormData();
-    fd.append("_subject", `Devis VizioCraft — ${pricing.total}€ — ${name}`);
-    fd.append("Formule", variant === "surmesure" ? "Production sur mesure" : "Montage essentiel");
-    fd.append("Nom", name);
+    // ── Formspree meta ──────────────────────────────────────────────────────
+    // Objet du mail reçu par VizioCraft
+    fd.append("_subject", `🎬 Devis VizioCraft — ${prenom} — ${pricing.totalVideos} vidéo${pricing.totalVideos > 1 ? "s" : ""}`);
+    // Répondre à cet email = contacter directement le client
+    fd.append("_replyto", email);
+    // Copie envoyée au client avec son récap + CTA appel
+    fd.append("_cc", email);
+
+    // ── Données structurées (mail interne) ──────────────────────────────────
+    fd.append("Nom complet", name);
     fd.append("Email", email);
+    fd.append("Formule", variant === "surmesure" ? "Production sur mesure" : "Montage essentiel");
     fd.append(
-      "Détail vidéos",
-      pricing.lineItems.map((l) => `${l.qty}× ${l.label} (${LEVELS[lvl].name}) = ${l.total}€`).join("\n")
+      "Formats",
+      pricing.lineItems.length > 0
+        ? pricing.lineItems.map((l) => `${l.qty}× ${l.label} (${LEVELS[lvl].name})`).join(" | ")
+        : "—"
     );
-    fd.append("Niveau de montage", `${LEVELS[lvl].name} (×${LEVEL_MULT[lvl]})`);
     fd.append(
       "Options",
       pricing.selectedOptions.length > 0
-        ? pricing.selectedOptions.map((o) => `${o.k} (+${o.p * pricing.totalVideos}€)`).join(", ")
+        ? pricing.selectedOptions.map((o) => o.k).join(", ")
         : "Aucune"
     );
     fd.append(
       "Collaboration",
-      duration === "multishoot"
-        ? `Multishoot mensuel — ${frequency} — −15% appliqué`
-        : "One shot — commande unique"
+      duration === "multishoot" ? `Multishoot mensuel — ${frequency}` : "One shot"
     );
     fd.append(
-      "Livraison",
-      express ? `Express prioritaire (+${Math.round(EXPRESS_RATE * 100)}%)` : `Standard (${pricing.delivery})`
+      "Délai",
+      express ? `Express prioritaire` : `Standard — ${pricing.delivery}`
     );
-    fd.append("Récapitulatif complet", buildEmailBody());
     fd.append("Total estimé", `${pricing.total}€`);
-    fd.append("Message", message);
+    if (message.trim()) fd.append("Message client", message.trim());
+
+    // Corps complet (récap interne lisible + récap client)
+    fd.append("Détail interne", buildInternalEmailBody());
+    fd.append("Mail envoyé au client (CC)", buildClientEmailBody());
+
     try {
       const res = await fetch(FORMSPREE, { method: "POST", body: fd, headers: { Accept: "application/json" } });
       setStatus(res.ok ? "success" : "error");
       if (res.ok) {
-        // Track successful form submission
         if (typeof window !== 'undefined' && (window as any).dataLayer) {
           (window as any).dataLayer.push({
             event: 'devis_form_success',
@@ -1068,25 +1158,16 @@ export function DevisBuilder({
             total_price: pricing.total,
           });
         }
-        // Clear form data after successful submission
         resetForm();
       } else {
-        // Track form submission error
         if (typeof window !== 'undefined' && (window as any).dataLayer) {
-          (window as any).dataLayer.push({
-            event: 'devis_form_error',
-            form_variant: variant,
-          });
+          (window as any).dataLayer.push({ event: 'devis_form_error', form_variant: variant });
         }
       }
     } catch {
       setStatus("error");
-      // Track form submission error
       if (typeof window !== 'undefined' && (window as any).dataLayer) {
-        (window as any).dataLayer.push({
-          event: 'devis_form_error',
-          form_variant: variant,
-        });
+        (window as any).dataLayer.push({ event: 'devis_form_error', form_variant: variant });
       }
     }
   }
