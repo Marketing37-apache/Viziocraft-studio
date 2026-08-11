@@ -1,5 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+/**
+ * SHOW_PRICES — contrôle l'affichage de tous les montants financiers dans le configurateur.
+ * false = les prix sont masqués (logique de calcul conservée, email envoyé avec le total).
+ * true  = comportement normal, tous les prix s'affichent.
+ * Pour réactiver : passer à true.
+ */
+const SHOW_PRICES = false;
+
 const FORMSPREE = "https://formspree.io/f/maqkaznd";
 
 const BASE_PRICES: Record<string, number> = {
@@ -757,7 +765,6 @@ export function DevisBuilder({
   });
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [formStarted, setFormStarted] = useState(false);
@@ -989,7 +996,6 @@ export function DevisBuilder({
     setFrequency(MULTISHOOT_FREQUENCIES[0]);
     setName("");
     setEmail("");
-    setPhone("");
     setMessage("");
     setStatus("idle");
     setFormStarted(false);
@@ -1025,7 +1031,6 @@ export function DevisBuilder({
     fd.append("Formule", variant === "surmesure" ? "Production sur mesure" : "Montage essentiel");
     fd.append("Nom", name);
     fd.append("Email", email);
-    fd.append("Téléphone", phone || "—");
     fd.append(
       "Détail vidéos",
       pricing.lineItems.map((l) => `${l.qty}× ${l.label} (${LEVELS[lvl].name}) = ${l.total}€`).join("\n")
@@ -1282,9 +1287,12 @@ export function DevisBuilder({
                         {on ? "✓" : ""}
                       </span>
                       <span className={`flex-1 text-xs font-semibold ${theme.textPrimary}`}>{o.k}</span>
-                      <span className={`text-[11px] font-bold ${theme.isDark ? "text-[#c4b5fd]" : "text-[#a8632d]"}`}>
-                        +{o.p}€
-                      </span>
+                      {/* SHOW_PRICES: prix option — masqué si false */}
+                      {SHOW_PRICES && (
+                        <span className={`text-[11px] font-bold ${theme.isDark ? "text-[#c4b5fd]" : "text-[#a8632d]"}`}>
+                          +{o.p}€
+                        </span>
+                      )}
                     </button>
                   );
                 })}
@@ -1433,7 +1441,7 @@ export function DevisBuilder({
                     <RecapRow
                       key={l.key}
                       label={`${l.qty}× ${l.label} (${LEVELS[lvl].name})`}
-                      value={`${l.total}€`}
+                      value={SHOW_PRICES ? `${l.total}€` : ""}
                       theme={theme}
                     />
                   ))}
@@ -1441,11 +1449,12 @@ export function DevisBuilder({
                     <RecapRow
                       key={o.k}
                       label={`Option : ${o.k} ×${pricing.totalVideos}`}
-                      value={`+${o.p * pricing.totalVideos}€`}
+                      value={SHOW_PRICES ? `+${o.p * pricing.totalVideos}€` : ""}
                       theme={theme}
                     />
                   ))}
-                  {pricing.discAmt > 0 && (
+                  {/* SHOW_PRICES: ligne réduction — masquée si false */}
+                  {SHOW_PRICES && pricing.discAmt > 0 && (
                     <RecapRow
                       label="Réduction multishoot mensuel"
                       value={`−${pricing.discAmt}€`}
@@ -1453,7 +1462,8 @@ export function DevisBuilder({
                       theme={theme}
                     />
                   )}
-                  {pricing.expressAdd > 0 && (
+                  {/* SHOW_PRICES: supplément express — masqué si false */}
+                  {SHOW_PRICES && pricing.expressAdd > 0 && (
                     <RecapRow label="Supplément express prioritaire" value={`+${pricing.expressAdd}€`} accent="warn" theme={theme} />
                   )}
                 </>
@@ -1461,7 +1471,8 @@ export function DevisBuilder({
             </div>
             <div className="border-t border-foreground/10 px-4 py-4 flex items-end justify-between gap-3">
               <div className={`text-[11px] space-y-0.5 ${theme.textSecondary}`}>
-                {pricing.subtotal > 0 && pricing.discAmt + pricing.expressAdd > 0 && (
+                {/* SHOW_PRICES: sous-total barré — masqué si false */}
+                {SHOW_PRICES && pricing.subtotal > 0 && pricing.discAmt + pricing.expressAdd > 0 && (
                   <span className="line-through block opacity-60">{pricing.subtotal}€</span>
                 )}
                 {pricing.totalVideos > 0 && (
@@ -1471,7 +1482,8 @@ export function DevisBuilder({
                 )}
               </div>
               <div className="text-right">
-                {(pricing.discAmt > 0 || pricing.expressAdd > 0) && pricing.subtotal > 0 && (
+                {/* SHOW_PRICES: badges collab/express et total animé — masqués si false */}
+                {SHOW_PRICES && (pricing.discAmt > 0 || pricing.expressAdd > 0) && pricing.subtotal > 0 && (
                   <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mb-0.5 font-medium">
                     {[
                       pricing.discAmt > 0 ? "Collab −15%" : "",
@@ -1479,7 +1491,7 @@ export function DevisBuilder({
                     ].filter(Boolean).join(" · ")}
                   </p>
                 )}
-                <AnimatedPrice total={pricing.total} />
+                {SHOW_PRICES && <AnimatedPrice total={pricing.total} />}
               </div>
             </div>
           </div>
@@ -1489,7 +1501,6 @@ export function DevisBuilder({
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
               <Inp theme={theme} v={name} set={setName} ph="Nom complet *" />
               <Inp theme={theme} v={email} set={setEmail} ph="Email *" type="email" />
-              <Inp theme={theme} v={phone} set={setPhone} ph="Téléphone" type="tel" />
             </div>
             <textarea
               value={message}
@@ -1533,9 +1544,12 @@ export function DevisBuilder({
             <span className={`text-[10px] font-medium ${theme.textMuted}`}>
               {pricing.totalVideos} vidéo{pricing.totalVideos > 1 ? "s" : ""} · {LEVELS[lvl].name}
             </span>
-            <span className={`font-display text-xl font-bold tabular-nums ${theme.isDark ? "text-[#c4b5fd]" : "text-[#a8632d]"}`}>
-              {pricing.total}€
-            </span>
+            {/* SHOW_PRICES: total barre mobile — masqué si false */}
+            {SHOW_PRICES && (
+              <span className={`font-display text-xl font-bold tabular-nums ${theme.isDark ? "text-[#c4b5fd]" : "text-[#a8632d]"}`}>
+                {pricing.total}€
+              </span>
+            )}
           </div>
           <button
             type="button"

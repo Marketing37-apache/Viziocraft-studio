@@ -93,8 +93,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "apple-touch-icon", href: "/favicon.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" },
       { rel: "preconnect", href: "https://cdn.prod.website-files.com" },
+      // Preload prioritaire du logo (LCP)
       { rel: "preload", as: "image", href: "https://cdn.prod.website-files.com/6996b2b19f614702ad210f02/6996b52b771675ec516ec984_Asset%201%20(1).png", fetchPriority: "high" },
     ],
   }),
@@ -105,19 +105,30 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: React.ReactNode }) {
+  const FONTS_URL = "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap";
+
   return (
     <html lang="fr">
       <head>
+        {/* GTM — chargé de façon asynchrone pour ne pas bloquer le thread principal */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-WQLN2XWD');`,
+            __html: `window.dataLayer=window.dataLayer||[];
+(function(){var s=document.createElement('script');s.async=true;
+s.src='https://www.googletagmanager.com/gtm.js?id=GTM-WQLN2XWD';
+document.head.appendChild(s);})();`,
           }}
         />
         <HeadContent />
+        {/*
+          Fonts non-bloquantes : preload + swap media print→all.
+          Le <noscript> assure le fallback si JS est désactivé.
+        */}
+        <link rel="preload" as="style" href={FONTS_URL} />
+        {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+        {/* @ts-expect-error — onLoad string est volontaire ici pour le pattern non-bloquant */}
+        <link rel="stylesheet" href={FONTS_URL} media="print" onLoad="this.media='all'" />
+        <noscript dangerouslySetInnerHTML={{ __html: `<link rel="stylesheet" href="${FONTS_URL}" />` }} />
       </head>
       <body>
         <noscript dangerouslySetInnerHTML={{ __html: '<iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WQLN2XWD" height="0" width="0" style="display:none;visibility:hidden"></iframe>' }} />

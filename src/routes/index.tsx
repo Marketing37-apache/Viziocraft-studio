@@ -115,7 +115,7 @@ function LongCard({ video }: { video: LongVideo }) {
           target="_blank"
           rel="noreferrer"
           aria-label={`Voir ${video.title} sur YouTube`}
-          className="absolute inset-0 z-10"
+          className="absolute inset-0 z-10 pointer-events-none group-hover:pointer-events-auto"
         />
       </div>
     </div>
