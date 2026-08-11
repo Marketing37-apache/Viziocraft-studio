@@ -1112,8 +1112,6 @@ export function DevisBuilder({
     fd.append("_subject", `🎬 Devis VizioCraft — ${prenom} — ${pricing.totalVideos} vidéo${pricing.totalVideos > 1 ? "s" : ""}`);
     // Répondre à cet email = contacter directement le client
     fd.append("_replyto", email);
-    // Copie envoyée au client avec son récap + CTA appel
-    fd.append("_cc", email);
 
     // ── Données structurées (mail interne) ──────────────────────────────────
     fd.append("Nom complet", name);
@@ -1142,9 +1140,8 @@ export function DevisBuilder({
     fd.append("Total estimé", `${pricing.total}€`);
     if (message.trim()) fd.append("Message client", message.trim());
 
-    // Corps complet (récap interne lisible + récap client)
+    // Corps complet (récap interne lisible)
     fd.append("Détail interne", buildInternalEmailBody());
-    fd.append("Mail envoyé au client (CC)", buildClientEmailBody());
 
     try {
       const res = await fetch(FORMSPREE, { method: "POST", body: fd, headers: { Accept: "application/json" } });
