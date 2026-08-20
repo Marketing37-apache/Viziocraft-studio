@@ -120,15 +120,9 @@ document.head.appendChild(s);})();`,
           }}
         />
         <HeadContent />
-        {/*
-          Fonts non-bloquantes : preload + swap media print→all.
-          Le <noscript> assure le fallback si JS est désactivé.
-        */}
+        {/* Fonts avec display=swap pour chargement non-bloquant */}
         <link rel="preload" as="style" href={FONTS_URL} />
-        {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-        {/* @ts-expect-error — onLoad string est volontaire ici pour le pattern non-bloquant */}
-        <link rel="stylesheet" href={FONTS_URL} media="print" onLoad="this.media='all'" />
-        <noscript dangerouslySetInnerHTML={{ __html: `<link rel="stylesheet" href="${FONTS_URL}" />` }} />
+        <link rel="stylesheet" href={FONTS_URL} />
       </head>
       <body>
         <noscript dangerouslySetInnerHTML={{ __html: '<iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WQLN2XWD" height="0" width="0" style="display:none;visibility:hidden"></iframe>' }} />

@@ -23,7 +23,7 @@ export const Route = createFileRoute("/")({
 const CDN = "https://cdn.prod.website-files.com/6996b2b19f614702ad210f02";
 const CONTACT_FRAME = `${CDN}/6999a130299153a6ec0f8c4a_Frame%201.avif`;
 const PRESENTATION_YT = "S3AOQxL4Uio";
-const YOUTUBE_PREVIEW_PARAMS = "rel=0&modestbranding=1&playsinline=1&mute=1&autoplay=1&loop=1&controls=0";
+const YOUTUBE_PREVIEW_PARAMS = "rel=0&modestbranding=1&playsinline=1&mute=1&autoplay=1&loop=1&controls=0&cc_load_policy=0&hl=en";
 
 // ——— Shorts: 2 rows, IDs strictly disjoint so no video appears twice ———
 const SHORTS_ROW_A: ShortItem[] = [
@@ -79,7 +79,7 @@ function LongCard({ video }: { video: LongVideo }) {
         setIsInViewport(e.isIntersecting);
       },
       { 
-        rootMargin: "250px", // preload when within 250px of viewport
+        rootMargin: "200px", // Compromis perf/fluidité
         threshold: 0.01 
       }
     );
@@ -87,7 +87,8 @@ function LongCard({ video }: { video: LongVideo }) {
     return () => obs.disconnect();
   }, []);
 
-  const params = `autoplay=1&mute=1&loop=1&playlist=${video.id}&controls=0&modestbranding=1&playsinline=1&rel=0&showinfo=0&iv_load_policy=3`;
+  // Suppression sous-titres + langue EN pour éviter auto-activation
+  const params = `autoplay=1&mute=1&loop=1&playlist=${video.id}&controls=0&modestbranding=1&playsinline=1&rel=0&showinfo=0&iv_load_policy=3&cc_load_policy=0&hl=en`;
 
   return (
     <div className="group block min-w-[260px] sm:min-w-[320px] md:min-w-[380px]">

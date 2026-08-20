@@ -22,7 +22,7 @@ function ShortCard({ id, client }: ShortItem) {
         setIsInViewport(e.isIntersecting);
       },
       { 
-        rootMargin: "250px", // preload when within 250px of viewport
+        rootMargin: "200px", // Compromis perf/fluidité
         threshold: 0.01 
       }
     );
@@ -30,9 +30,10 @@ function ShortCard({ id, client }: ShortItem) {
     return () => obs.disconnect();
   }, []);
 
+  // Suppression sous-titres + langue EN
   const params =
     "autoplay=1&mute=1&loop=1&playlist=" + id +
-    "&controls=0&modestbranding=1&playsinline=1&rel=0&showinfo=0&iv_load_policy=3";
+    "&controls=0&modestbranding=1&playsinline=1&rel=0&showinfo=0&iv_load_policy=3&cc_load_policy=0&hl=en";
 
   return (
     <div className="group relative shrink-0 w-[165px] sm:w-[210px] md:w-[230px]">
