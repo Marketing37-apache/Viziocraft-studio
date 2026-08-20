@@ -12,9 +12,9 @@ export const Route = createFileRoute("/")({
   component: Index,
   head: () => ({
     meta: [
-      { title: "VizioCraft — Agence de montage vidéo premium" },
+      { title: "VizioCraft — Agence de montage vidéo" },
       { name: "description", content: "Votre équipe vidéo dédiée. Shorts, ads, podcasts, motion design. +100 clients, +5000 vidéos produites." },
-      { property: "og:title", content: "VizioCraft — Agence de montage vidéo premium" },
+      { property: "og:title", content: "VizioCraft — Agence de montage vidéo" },
       { property: "og:description", content: "Votre équipe vidéo dédiée. Production scalable, qualité constante." },
     ],
   }),

@@ -73,7 +73,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "VizioCraft — Votre équipe vidéo dédiée" },
-      { name: "description", content: "Agence de montage vidéo premium. Reels, ads, podcasts, contenus sociaux produits avec rapidité, cohérence et exigence." },
+      { name: "description", content: "Agence de montage vidéo. Reels, ads, podcasts, contenus sociaux produits avec rapidité, cohérence et exigence." },
       { property: "og:title", content: "VizioCraft — Votre équipe vidéo dédiée" },
       { property: "og:description", content: "Une équipe créative dédiée à votre contenu vidéo." },
       { property: "og:type", content: "website" },
@@ -83,7 +83,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:image:alt", content: "VizioCraft — Agence de montage vidéo" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "VizioCraft — Votre équipe vidéo dédiée" },
-      { name: "twitter:description", content: "Agence de montage vidéo premium. Reels, ads, podcasts, contenus sociaux." },
+      { name: "twitter:description", content: "Agence de montage vidéo. Reels, ads, podcasts, contenus sociaux." },
       { name: "twitter:image", content: "https://cdn.prod.website-files.com/6996b2b19f614702ad210f02/6996b52b771675ec516ec984_Asset%201%20(1).png" },
     ],
     links: [
