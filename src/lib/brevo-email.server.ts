@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import PDFDocument from "pdfkit";
+import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 
 // API Key Brevo depuis les variables d'environnement
 const BREVO_API_KEY = process.env.BREVO_API_KEY || "";
@@ -101,118 +101,331 @@ export const sendDevisEmails = createServerFn({ method: "POST" }).handler(
 // GÉNÉRATION PDF DU DEVIS
 // ========================================
 async function generateDevisPDF(name: string, email: string, devisData: any): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    const doc = new PDFDocument({ size: "A4", margin: 50 });
-    const chunks: Buffer[] = [];
-
-    doc.on("data", (chunk) => chunks.push(chunk));
-    doc.on("end", () => resolve(Buffer.concat(chunks)));
-    doc.on("error", reject);
-
-    // Header avec logo et infos
-    doc.fontSize(24).fillColor("#7b2d8e").text("VizioCraft", { align: "left" });
-    doc.fontSize(10).fillColor("#666").text("Votre équipe vidéo dédiée", { align: "left" });
-    doc.moveDown(0.5);
-    doc.fontSize(9).fillColor("#999").text(`Date : ${new Date().toLocaleDateString("fr-FR")}`);
-    doc.text(`Contact : contact@viziocraft.com`);
-    doc.moveDown(2);
-
-    // Titre
-    doc.fontSize(18).fillColor("#1d1d1f").text("DEVIS", { align: "center" });
-    doc.moveDown(1);
-
-    // Informations client
-    doc.fontSize(11).fillColor("#7b2d8e").text("CLIENT", { underline: true });
-    doc.moveDown(0.3);
-    doc.fontSize(10).fillColor("#333").text(`Nom : ${name}`);
-    doc.text(`Email : ${email}`);
-    doc.moveDown(1.5);
-
-    // Configuration
-    doc.fontSize(11).fillColor("#7b2d8e").text("CONFIGURATION", { underline: true });
-    doc.moveDown(0.3);
-    doc.fontSize(10).fillColor("#333");
-    doc.text(`Formule : ${devisData.formula}`);
-    doc.text(`Niveau de montage : ${devisData.niveau}`);
-    doc.text(`Collaboration : ${devisData.collaboration}`);
-    doc.moveDown(1.5);
-
-    // Tableau des vidéos
-    if (devisData.videos && devisData.videos.length > 0) {
-      doc.fontSize(11).fillColor("#7b2d8e").text("DÉTAIL DES VIDÉOS", { underline: true });
-      doc.moveDown(0.5);
-
-      const tableTop = doc.y;
-      const col1 = 50;
-      const col2 = 320;
-      const col3 = 400;
-      const col4 = 480;
-
-      // Header tableau
-      doc.fontSize(9).fillColor("#7b2d8e");
-      doc.text("Format", col1, tableTop);
-      doc.text("Qté", col2, tableTop);
-      doc.text("Prix/u", col3, tableTop);
-      doc.text("Total", col4, tableTop);
-
-      doc.moveTo(col1, tableTop + 15).lineTo(550, tableTop + 15).stroke("#7b2d8e");
-
-      let yPos = tableTop + 25;
-      doc.fontSize(9).fillColor("#333");
-
-      devisData.videos.forEach((v: any) => {
-        doc.text(v.type, col1, yPos, { width: 260 });
-        doc.text(String(v.qty), col2, yPos);
-        doc.text(`${v.unitPrice}€`, col3, yPos);
-        doc.text(`${v.total}€`, col4, yPos);
-        yPos += 20;
-      });
-
-      doc.moveTo(col1, yPos).lineTo(550, yPos).stroke("#ddd");
-      doc.moveDown(2);
-    }
-
-    // Options
-    if (devisData.options && devisData.options.length > 0) {
-      doc.fontSize(10).fillColor("#666");
-      doc.text(`Options : ${devisData.options.join(", ")}`);
-      doc.moveDown(1);
-    }
-
-    // Totaux
-    doc.moveDown(1);
-    const totalsX = 350;
-    doc.fontSize(10).fillColor("#666");
-    doc.text("Sous-total :", totalsX, doc.y);
-    doc.text(`${devisData.subtotal}€`, 480, doc.y, { align: "right" });
-    doc.moveDown(0.5);
-
-    if (devisData.reduction > 0) {
-      doc.text("Réduction multishoot :", totalsX, doc.y);
-      doc.text(`-${devisData.reduction}€`, 480, doc.y, { align: "right" });
-      doc.moveDown(0.5);
-    }
-
-    if (devisData.express > 0) {
-      doc.text("Supplément express :", totalsX, doc.y);
-      doc.text(`+${devisData.express}€`, 480, doc.y, { align: "right" });
-      doc.moveDown(0.5);
-    }
-
-    doc.moveTo(totalsX, doc.y + 5).lineTo(550, doc.y + 5).stroke("#7b2d8e");
-    doc.moveDown(0.8);
-
-    doc.fontSize(14).fillColor("#7b2d8e").font("Helvetica-Bold");
-    doc.text("TOTAL :", totalsX, doc.y);
-    doc.text(`${devisData.totalFinal}€`, 480, doc.y, { align: "right" });
-
-    doc.moveDown(2);
-    doc.fontSize(9).fillColor("#999").font("Helvetica");
-    doc.text("Ce devis est valable 30 jours. Les prix sont exprimés en euros TTC.");
-    doc.text("VizioCraft — contact@viziocraft.com — viziocraft.com", { align: "center" });
-
-    doc.end();
+  const pdfDoc = await PDFDocument.create();
+  const page = pdfDoc.addPage([595, 842]); // A4 size
+  const { width, height } = page.getSize();
+  
+  // Load fonts
+  const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  
+  // Colors
+  const purple = rgb(0.48, 0.18, 0.56); // #7b2d8e
+  const gray = rgb(0.4, 0.4, 0.4);
+  const darkGray = rgb(0.2, 0.2, 0.2);
+  const lightGray = rgb(0.6, 0.6, 0.6);
+  
+  let y = height - 50;
+  
+  // Header - Logo and Title
+  page.drawText("VIZIOCRAFT", {
+    x: 50,
+    y: y,
+    size: 24,
+    font: boldFont,
+    color: purple,
   });
+  
+  y -= 20;
+  page.drawText("Votre équipe vidéo dédiée", {
+    x: 50,
+    y: y,
+    size: 10,
+    font: regularFont,
+    color: gray,
+  });
+  
+  y -= 25;
+  const dateStr = new Date().toLocaleDateString("fr-FR");
+  page.drawText(`Date : ${dateStr}`, {
+    x: 50,
+    y: y,
+    size: 9,
+    font: regularFont,
+    color: lightGray,
+  });
+  
+  y -= 15;
+  page.drawText("Contact : contact@viziocraft.com", {
+    x: 50,
+    y: y,
+    size: 9,
+    font: regularFont,
+    color: lightGray,
+  });
+  
+  y -= 40;
+  
+  // Centered title "DEVIS"
+  const devisText = "DEVIS";
+  const devisWidth = boldFont.widthOfTextAtSize(devisText, 18);
+  page.drawText(devisText, {
+    x: (width - devisWidth) / 2,
+    y: y,
+    size: 18,
+    font: boldFont,
+    color: darkGray,
+  });
+  
+  y -= 30;
+  
+  // Client information section
+  page.drawText("CLIENT", {
+    x: 50,
+    y: y,
+    size: 11,
+    font: boldFont,
+    color: purple,
+  });
+  
+  // Underline
+  page.drawLine({
+    start: { x: 50, y: y - 2 },
+    end: { x: 110, y: y - 2 },
+    thickness: 1,
+    color: purple,
+  });
+  
+  y -= 20;
+  page.drawText(`Nom : ${name}`, {
+    x: 50,
+    y: y,
+    size: 10,
+    font: regularFont,
+    color: darkGray,
+  });
+  
+  y -= 15;
+  page.drawText(`Email : ${email}`, {
+    x: 50,
+    y: y,
+    size: 10,
+    font: regularFont,
+    color: darkGray,
+  });
+  
+  y -= 30;
+  
+  // Configuration section
+  page.drawText("CONFIGURATION", {
+    x: 50,
+    y: y,
+    size: 11,
+    font: boldFont,
+    color: purple,
+  });
+  
+  page.drawLine({
+    start: { x: 50, y: y - 2 },
+    end: { x: 160, y: y - 2 },
+    thickness: 1,
+    color: purple,
+  });
+  
+  y -= 20;
+  page.drawText(`Formule : ${devisData.formula}`, {
+    x: 50,
+    y: y,
+    size: 10,
+    font: regularFont,
+    color: darkGray,
+  });
+  
+  y -= 15;
+  page.drawText(`Niveau de montage : ${devisData.niveau}`, {
+    x: 50,
+    y: y,
+    size: 10,
+    font: regularFont,
+    color: darkGray,
+  });
+  
+  y -= 15;
+  page.drawText(`Collaboration : ${devisData.collaboration}`, {
+    x: 50,
+    y: y,
+    size: 10,
+    font: regularFont,
+    color: darkGray,
+  });
+  
+  y -= 30;
+  
+  // Videos table
+  if (devisData.videos && devisData.videos.length > 0) {
+    page.drawText("DÉTAIL DES VIDÉOS", {
+      x: 50,
+      y: y,
+      size: 11,
+      font: boldFont,
+      color: purple,
+    });
+    
+    page.drawLine({
+      start: { x: 50, y: y - 2 },
+      end: { x: 180, y: y - 2 },
+      thickness: 1,
+      color: purple,
+    });
+    
+    y -= 25;
+    
+    // Table headers
+    const col1 = 50;
+    const col2 = 320;
+    const col3 = 400;
+    const col4 = 480;
+    
+    page.drawText("Format", { x: col1, y: y, size: 9, font: boldFont, color: purple });
+    page.drawText("Qté", { x: col2, y: y, size: 9, font: boldFont, color: purple });
+    page.drawText("Prix/u", { x: col3, y: y, size: 9, font: boldFont, color: purple });
+    page.drawText("Total", { x: col4, y: y, size: 9, font: boldFont, color: purple });
+    
+    y -= 5;
+    page.drawLine({
+      start: { x: col1, y: y },
+      end: { x: 545, y: y },
+      thickness: 1,
+      color: purple,
+    });
+    
+    y -= 15;
+    
+    // Table rows
+    for (const video of devisData.videos) {
+      const formatText = video.type.length > 35 ? video.type.substring(0, 35) + "..." : video.type;
+      page.drawText(formatText, { x: col1, y: y, size: 9, font: regularFont, color: darkGray });
+      page.drawText(String(video.qty), { x: col2, y: y, size: 9, font: regularFont, color: darkGray });
+      page.drawText(`${video.unitPrice}€`, { x: col3, y: y, size: 9, font: regularFont, color: darkGray });
+      page.drawText(`${video.total}€`, { x: col4, y: y, size: 9, font: regularFont, color: darkGray });
+      y -= 18;
+    }
+    
+    page.drawLine({
+      start: { x: col1, y: y + 5 },
+      end: { x: 545, y: y + 5 },
+      thickness: 0.5,
+      color: rgb(0.87, 0.87, 0.87),
+    });
+    
+    y -= 10;
+  }
+  
+  // Options
+  if (devisData.options && devisData.options.length > 0) {
+    y -= 10;
+    page.drawText(`Options : ${devisData.options.join(", ")}`, {
+      x: 50,
+      y: y,
+      size: 10,
+      font: regularFont,
+      color: gray,
+    });
+    y -= 20;
+  }
+  
+  // Totals section
+  y -= 20;
+  const totalsX = 350;
+  
+  page.drawText("Sous-total :", {
+    x: totalsX,
+    y: y,
+    size: 10,
+    font: regularFont,
+    color: gray,
+  });
+  page.drawText(`${devisData.subtotal}€`, {
+    x: 480,
+    y: y,
+    size: 10,
+    font: regularFont,
+    color: darkGray,
+  });
+  
+  if (devisData.reduction > 0) {
+    y -= 18;
+    page.drawText("Réduction multishoot :", {
+      x: totalsX,
+      y: y,
+      size: 10,
+      font: regularFont,
+      color: gray,
+    });
+    page.drawText(`-${devisData.reduction}€`, {
+      x: 480,
+      y: y,
+      size: 10,
+      font: regularFont,
+      color: darkGray,
+    });
+  }
+  
+  if (devisData.express > 0) {
+    y -= 18;
+    page.drawText("Supplément express :", {
+      x: totalsX,
+      y: y,
+      size: 10,
+      font: regularFont,
+      color: gray,
+    });
+    page.drawText(`+${devisData.express}€`, {
+      x: 480,
+      y: y,
+      size: 10,
+      font: regularFont,
+      color: darkGray,
+    });
+  }
+  
+  y -= 10;
+  page.drawLine({
+    start: { x: totalsX, y: y },
+    end: { x: 545, y: y },
+    thickness: 2,
+    color: purple,
+  });
+  
+  y -= 25;
+  page.drawText("TOTAL :", {
+    x: totalsX,
+    y: y,
+    size: 14,
+    font: boldFont,
+    color: purple,
+  });
+  page.drawText(`${devisData.totalFinal}€`, {
+    x: 480,
+    y: y,
+    size: 14,
+    font: boldFont,
+    color: purple,
+  });
+  
+  // Footer
+  y -= 40;
+  page.drawText("Ce devis est valable 30 jours. Les prix sont exprimés en euros TTC.", {
+    x: 50,
+    y: y,
+    size: 9,
+    font: regularFont,
+    color: lightGray,
+  });
+  
+  y -= 15;
+  const footerText = "VizioCraft — contact@viziocraft.com — viziocraft.com";
+  const footerWidth = regularFont.widthOfTextAtSize(footerText, 9);
+  page.drawText(footerText, {
+    x: (width - footerWidth) / 2,
+    y: y,
+    size: 9,
+    font: regularFont,
+    color: lightGray,
+  });
+  
+  const pdfBytes = await pdfDoc.save();
+  return Buffer.from(pdfBytes);
 }
 
 // ========================================
