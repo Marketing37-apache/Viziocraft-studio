@@ -75,11 +75,11 @@ function calcShortTotal(basePrice: number, qty: number): { total: number; unitAv
  * Volumes faibles donc tranches courtes.
  * Ratios appliqués sur le prix de base de chaque format (l1=200, l2=220, l3=260).
  *
- *  1–2  → prix plein
- *  3–5  → −5%
- *  6–10 → −8%
- * 11–15 → −11%
- * 16+   → −14%
+ *  1-2  -> prix plein
+ *  3-5  -> -5%
+ *  6-10 -> -8%
+ * 11-15 -> -11%
+ * 16+   -> -14%
  */
 const LONG_TIERS: { from: number; to: number; ratio: number }[] = [
   { from: 1,  to: 2,        ratio: 1.00 },
@@ -106,9 +106,9 @@ function calcLongTotal(basePrice: number, qty: number): { total: number; unitAvg
 }
 
 /**
- * Podcast — −3% par épisode supplémentaire en tranches, plafonné à −20%.
- * Chaque épisode i (0-indexé) coûte basePrice × (1 − min(i×0.03, 0.20)).
- * Total toujours croissant car chaque épisode > 0€.
+ * Podcast - -3% par episode supplementaire en tranches, plafonne a -20%.
+ * Chaque episode i (0-indexe) coute basePrice x (1 - min(i x 0.03, 0.20)).
+ * Total toujours croissant car chaque episode > 0 euros.
  */
 function calcPodTotal(basePrice: number, qty: number): { total: number; unitAvg: number } {
   if (qty <= 0) return { total: 0, unitAvg: basePrice };
@@ -127,7 +127,7 @@ const FORMAT_CATEGORIES = [
     title: "Short / Reel",
     subtitle: "Reels, TikTok, facecam, UGC, pub",
     formats: [
-      { key: "s1", name: "Short Classique", desc: "Facecam & UGC — cut dynamique, sous-titres", dur: "−45s" },
+      { key: "s1", name: "Short Classique", desc: "Facecam & UGC — cut dynamique, sous-titres", dur: "-45s" },
       { key: "s2", name: "Short Développé", desc: "Storytelling vertical plus développé", dur: "+45s" },
       { key: "pb", name: "Short Publicitaire", desc: "Spot publicitaire — hook, CTA, rythme serré" },
     ],
@@ -137,7 +137,7 @@ const FORMAT_CATEGORIES = [
     title: "Long YouTube",
     subtitle: "Vlog, tutoriel, review, documentaire",
     formats: [
-      { key: "l1", name: "Format classique", desc: "Capsules, tutos courts, review", dur: "−8 min" },
+      { key: "l1", name: "Format classique", desc: "Capsules, tutos courts, review", dur: "-8 min" },
       { key: "l2", name: "Format Standard", desc: "Vlog dense, entretien, documentary court", dur: "8–15 min" },
       { key: "l3", name: "Format Long", desc: "Documentaire, masterclass, film de marque", dur: "+15 min" },
     ],
@@ -230,7 +230,7 @@ function useHoldCounter(
   return { start, stop };
 }
 
-/* ─── StepperButton — bouton + / − avec long-press ──────────────────────── */
+/* --- StepperButton - bouton + / - avec long-press ----------------------- */
 function StepperButton({
   delta,
   onTick,
@@ -524,7 +524,7 @@ function FormatCard({
           disabled={qty === 0}
           className={`${h} rounded-full flex items-center justify-center ${textSz} font-bold transition disabled:opacity-20 cursor-pointer select-none ${stepperBtnBase}`}
         >
-          −
+          -
         </StepperButton>
         <input
           type="text"
@@ -658,7 +658,7 @@ function PodcastShortsSection({
               disabled={qty === 0}
               className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-bold transition disabled:opacity-20 cursor-pointer select-none ${stepperBtnBase}`}
             >
-              −
+              -
             </StepperButton>
             <input
               type="text"
@@ -884,7 +884,7 @@ export function DevisBuilder({
     const optionTotal = optPerVid * totalVideos;
     const subtotal = videoTotal + optionTotal;
 
-    // Multishoot : −15% fixe si collaboration mensuelle enchaînée
+    // Multishoot : -15% fixe si collaboration mensuelle enchainee
     const multiDisc = duration === "multishoot" ? 0.15 : 0;
     const discAmt = multiDisc > 0 ? Math.round(subtotal * multiDisc) : 0;
     const afterDisc = subtotal - discAmt;
@@ -969,8 +969,8 @@ export function DevisBuilder({
       `  ${express ? `Express prioritaire` : `Standard — ${pricing.delivery}`}`,
       "",
       sep,
-      `TOTAL ESTIMÉ : ${total}€`,
-      `(${totalVideos} vidéo${totalVideos > 1 ? "s" : ""}${discAmt > 0 ? " — réduction multishoot −15% appliquée" : ""}${expressAdd > 0 ? " — majoration express +35%" : ""})`,
+      `TOTAL ESTIME : ${total}€`,
+      `(${totalVideos} video${totalVideos > 1 ? "s" : ""}${discAmt > 0 ? " - reduction multishoot -15% appliquee" : ""}${expressAdd > 0 ? " - majoration express +35%" : ""})`,
       sep,
     );
 
@@ -1387,7 +1387,7 @@ export function DevisBuilder({
                     <h4 className={`font-semibold text-sm ${theme.textPrimary}`}>{d.label}</h4>
                     {duration === d.key && d.key === "multishoot" && (
                       <span className="mt-1 inline-block rounded-full bg-emerald-500/15 px-2 py-0.5 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400">
-                        −15% sur le total
+                        -15% sur le total
                       </span>
                     )}
                     <p className={`text-xs mt-2 leading-relaxed ${theme.textSecondary}`}>{d.hint}</p>
@@ -1522,8 +1522,8 @@ export function DevisBuilder({
                   {/* SHOW_PRICES: ligne réduction — masquée si false */}
                   {SHOW_PRICES && pricing.discAmt > 0 && (
                     <RecapRow
-                      label="Réduction multishoot mensuel"
-                      value={`−${pricing.discAmt}€`}
+                      label="Reduction multishoot mensuel"
+                      value={`-${pricing.discAmt}€`}
                       accent="disc"
                       theme={theme}
                     />
@@ -1552,7 +1552,7 @@ export function DevisBuilder({
                 {SHOW_PRICES && (pricing.discAmt > 0 || pricing.expressAdd > 0) && pricing.subtotal > 0 && (
                   <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mb-0.5 font-medium">
                     {[
-                      pricing.discAmt > 0 ? "Collab −15%" : "",
+                      pricing.discAmt > 0 ? "Collab -15%" : "",
                       pricing.expressAdd > 0 ? "Express +35%" : "",
                     ].filter(Boolean).join(" · ")}
                   </p>
