@@ -14,7 +14,6 @@ type SendDevisPayload = {
     formula: string;
     niveau: string;
     collaboration: string;
-    delivery: string;
     videos: Array<{ type: string; qty: number; price: number }>;
     options: string[];
     totalVideos: number;
@@ -136,7 +135,6 @@ async function generateDevisPDF(name: string, email: string, devisData: any): Pr
     doc.text(`Formule : ${devisData.formula}`);
     doc.text(`Niveau de montage : ${devisData.niveau}`);
     doc.text(`Collaboration : ${devisData.collaboration}`);
-    doc.text(`Délai de livraison : ${devisData.delivery}`);
     doc.moveDown(1.5);
 
     // Tableau des vidéos
@@ -261,7 +259,6 @@ function buildInternalEmailBody(
     lines.push(`<tr><td style="padding: 8px 0; color: #666; width: 180px; font-size: 14px;">Formule</td><td style="padding: 8px 0; font-weight: 600; font-size: 14px;">${devisData.formula}</td></tr>`);
     lines.push(`<tr><td style="padding: 8px 0; color: #666; font-size: 14px;">Niveau de montage</td><td style="padding: 8px 0; font-weight: 600; font-size: 14px;">${devisData.niveau}</td></tr>`);
     lines.push(`<tr><td style="padding: 8px 0; color: #666; font-size: 14px;">Collaboration</td><td style="padding: 8px 0; font-size: 14px;">${devisData.collaboration}</td></tr>`);
-    lines.push(`<tr><td style="padding: 8px 0; color: #666; font-size: 14px;">Délai</td><td style="padding: 8px 0; font-size: 14px;">${devisData.delivery}</td></tr>`);
     lines.push(`</table>`);
     lines.push(`</div>`);
 

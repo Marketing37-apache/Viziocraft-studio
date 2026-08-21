@@ -1111,7 +1111,6 @@ export function DevisBuilder({
       formula: variant === "surmesure" ? "Production sur mesure" : "Montage essentiel",
       niveau: LEVELS[lvl].name,
       collaboration: duration === "multishoot" ? `Multishoot mensuel — ${frequency}` : "One shot",
-      delivery: express ? `Express prioritaire` : `Standard — ${pricing.delivery}`,
       videos: pricing.lineItems.map((l) => ({
         type: l.label,
         qty: l.qty,
@@ -1422,7 +1421,8 @@ export function DevisBuilder({
               </div>
             </Step>
 
-            {/* ── STEP 5 : Délai de livraison ── */}
+            {/* ── STEP 5 : Délai de livraison ── MASQUÉ */}
+            {false && (
             <Step n="5" title="Délai de livraison" theme={theme}>
               {(() => {
                 const s1total = (quantities["s1"] ?? 0) + (quantities["s2"] ?? 0) + podShorts;
@@ -1483,6 +1483,7 @@ export function DevisBuilder({
                 );
               })()}
             </Step>
+            )}
           </div>
         </div>
 
@@ -1585,8 +1586,12 @@ export function DevisBuilder({
           </button>
 
           {status === "success" && (
-            <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-600">
-              Devis envoyé. Récapitulatif détaillé transmis par mail — nous revenons vers vous très rapidement.
+            <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-5 text-center">
+              <div className="mb-2 text-2xl">✓</div>
+              <p className="font-semibold text-emerald-700 mb-1">Votre devis a bien été envoyé</p>
+              <p className="text-sm text-emerald-600">
+                Vous recevrez votre devis détaillé par email d'ici quelques instants. Nous reviendrons vers vous sous 24 heures pour échanger sur votre projet.
+              </p>
             </div>
           )}
           {status === "error" && (
