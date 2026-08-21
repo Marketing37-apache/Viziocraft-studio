@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { sendDevisEmails } from "@/lib/brevo-email.server";
 
 /**
  * SHOW_PRICES — contrôle l'affichage de tous les montants financiers dans le configurateur.
@@ -8,7 +9,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
  */
 const SHOW_PRICES = false;
 
-const FORMSPREE = "https://formspree.io/f/maqkaznd";
+// Remplacé par API Brevo (voir /api/send-devis)
+// const FORMSPREE = "https://formspree.io/f/maqkaznd";
 
 const BASE_PRICES: Record<string, number> = {
   s1: 30,
@@ -1104,64 +1106,49 @@ export function DevisBuilder({
       });
     }
 
-    const prenom = name.split(" ")[0];
-
-    const fd = new FormData();
-    // ── Formspree meta ──────────────────────────────────────────────────────
-    // Objet du mail reçu par VizioCraft
-    fd.append("_subject", `🎬 Devis VizioCraft — ${prenom} — ${pricing.totalVideos} vidéo${pricing.totalVideos > 1 ? "s" : ""}`);
-    // Répondre à cet email = contacter directement le client
-    fd.append("_replyto", email);
-
-    // ── Données structurées (mail interne) ──────────────────────────────────
-    fd.append("Nom complet", name);
-    fd.append("Email", email);
-    fd.append("Formule", variant === "surmesure" ? "Production sur mesure" : "Montage essentiel");
-    fd.append(
-      "Formats",
-      pricing.lineItems.length > 0
-        ? pricing.lineItems.map((l) => `${l.qty}× ${l.label} (${LEVELS[lvl].name})`).join(" | ")
-        : "—"
-    );
-    fd.append(
-      "Options",
-      pricing.selectedOptions.length > 0
-        ? pricing.selectedOptions.map((o) => o.k).join(", ")
-        : "Aucune"
-    );
-    fd.append(
-      "Collaboration",
-      duration === "multishoot" ? `Multishoot mensuel — ${frequency}` : "One shot"
-    );
-    fd.append(
-      "Délai",
-      express ? `Express prioritaire` : `Standard — ${pricing.delivery}`
-    );
-    fd.append("Total estimé", `${pricing.total}€`);
-    if (message.trim()) fd.append("Message client", message.trim());
-
-    // Corps complet (récap interne lisible)
-    fd.append("Détail interne", buildInternalEmailBody());
+    // Préparation des données pour Brevo
+    const devisData = {
+      formula: variant === "surmesure" ? "Production sur mesure" : "Montage essentiel",
+      niveau: LEVELS[lvl].name,
+      collaboration: duration === "multishoot" ? `Multishoot mensuel — ${frequency}` : "One shot",
+      delivery: express ? `Express prioritaire` : `Standard — ${pricing.delivery}`,
+      videos: pricing.lineItems.map((l) => ({
+        type: l.label,
+        qty: l.qty,
+        unitPrice: l.unitFinal,
+        total: l.total,
+      })),
+      options: pricing.selectedOptions.map((o) => o.k),
+      totalVideos: pricing.totalVideos,
+      subtotal: pricing.subtotal,
+      reduction: pricing.discAmt,
+      express: express ? pricing.expressAdd : 0,
+      totalFinal: pricing.total,
+    };
 
     try {
-      const res = await fetch(FORMSPREE, { method: "POST", body: fd, headers: { Accept: "application/json" } });
-      setStatus(res.ok ? "success" : "error");
-      if (res.ok) {
-        if (typeof window !== 'undefined' && (window as any).dataLayer) {
-          (window as any).dataLayer.push({
-            event: 'devis_form_success',
-            form_variant: variant,
-            total_videos: pricing.totalVideos,
-            total_price: pricing.total,
-          });
-        }
-        resetForm();
-      } else {
-        if (typeof window !== 'undefined' && (window as any).dataLayer) {
-          (window as any).dataLayer.push({ event: 'devis_form_error', form_variant: variant });
-        }
+      await sendDevisEmails({
+        data: {
+          name,
+          email,
+          company: "", // Pas de champ entreprise dans le form actuel
+          message: message.trim(),
+          devisData,
+        },
+      });
+
+      setStatus("success");
+      if (typeof window !== 'undefined' && (window as any).dataLayer) {
+        (window as any).dataLayer.push({
+          event: 'devis_form_success',
+          form_variant: variant,
+          total_videos: pricing.totalVideos,
+          total_price: pricing.total,
+        });
       }
-    } catch {
+      resetForm();
+    } catch (error) {
+      console.error("Erreur envoi:", error);
       setStatus("error");
       if (typeof window !== 'undefined' && (window as any).dataLayer) {
         (window as any).dataLayer.push({ event: 'devis_form_error', form_variant: variant });
