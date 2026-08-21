@@ -127,7 +127,7 @@ async function generateDevisPDF(name: string, email: string, devisData: any): Pr
   });
   
   y -= 20;
-  page.drawText("Votre équipe vidéo dédiée", {
+  page.drawText("Votre equipe video dediee", {
     x: 50,
     y: y,
     size: 10,
@@ -253,7 +253,7 @@ async function generateDevisPDF(name: string, email: string, devisData: any): Pr
   
   // Videos table
   if (devisData.videos && devisData.videos.length > 0) {
-    page.drawText("DÉTAIL DES VIDÉOS", {
+    page.drawText("DETAIL DES VIDEOS", {
       x: 50,
       y: y,
       size: 11,
@@ -277,7 +277,7 @@ async function generateDevisPDF(name: string, email: string, devisData: any): Pr
     const col4 = 480;
     
     page.drawText("Format", { x: col1, y: y, size: 9, font: boldFont, color: purple });
-    page.drawText("Qté", { x: col2, y: y, size: 9, font: boldFont, color: purple });
+    page.drawText("Qte", { x: col2, y: y, size: 9, font: boldFont, color: purple });
     page.drawText("Prix/u", { x: col3, y: y, size: 9, font: boldFont, color: purple });
     page.drawText("Total", { x: col4, y: y, size: 9, font: boldFont, color: purple });
     
@@ -345,7 +345,7 @@ async function generateDevisPDF(name: string, email: string, devisData: any): Pr
   
   if (devisData.reduction > 0) {
     y -= 18;
-    page.drawText("Réduction multishoot :", {
+    page.drawText("Reduction multishoot :", {
       x: totalsX,
       y: y,
       size: 10,
@@ -363,7 +363,7 @@ async function generateDevisPDF(name: string, email: string, devisData: any): Pr
   
   if (devisData.express > 0) {
     y -= 18;
-    page.drawText("Supplément express :", {
+    page.drawText("Supplement express :", {
       x: totalsX,
       y: y,
       size: 10,
@@ -405,7 +405,7 @@ async function generateDevisPDF(name: string, email: string, devisData: any): Pr
   
   // Footer
   y -= 40;
-  page.drawText("Ce devis est valable 30 jours. Les prix sont exprimés en euros TTC.", {
+  page.drawText("Ce devis est valable 30 jours. Les prix sont exprimes en euros TTC.", {
     x: 50,
     y: y,
     size: 9,
