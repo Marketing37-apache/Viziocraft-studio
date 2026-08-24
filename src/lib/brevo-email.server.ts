@@ -1,7 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
-import { readFile } from "fs/promises";
-import { join } from "path";
 
 // API Key Brevo depuis les variables d'environnement
 const BREVO_API_KEY = process.env.BREVO_API_KEY || "";
@@ -112,9 +110,10 @@ async function generateDevisPDF(name: string, email: string, devisData: any): Pr
   const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
   const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-  // Charger le logo VZ
-  const logoPath = join(process.cwd(), "public", "favicon-vz.png");
-  const logoBytes = await readFile(logoPath);
+  // Charger le logo VZ depuis le CDN
+  const logoUrl = "https://cdn.prod.website-files.com/6996b2b19f614702ad210f02/6996b52b771675ec516ec984_Asset%201%20(1).png";
+  const logoResponse = await fetch(logoUrl);
+  const logoBytes = await logoResponse.arrayBuffer();
   const logoImage = await pdfDoc.embedPng(logoBytes);
   const logoDims = logoImage.scale(0.035);
 
