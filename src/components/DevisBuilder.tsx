@@ -698,73 +698,75 @@ export function DevisBuilder({
   variant?: "essentiel" | "surmesure";
   onClose?: () => void;
 }) {
+  // Initialize with defaults first (server-side safe)
   const [quantities, setQuantities] = useState<Record<string, number>>(() => {
-    // Load from localStorage if available, otherwise use defaults
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('devis-quantities');
-      if (saved) {
-        try {
-          return JSON.parse(saved);
-        } catch (e) {
-          // If parsing fails, use defaults
-        }
-      }
-    }
     const initial = { ...EMPTY_QTY };
     initial["s1"] = 1; // Default: short classique = 1, everything else = 0
     return initial;
   });
+  
+  // Load from localStorage after mount (client-side only)
+  useEffect(() => {
+    const saved = localStorage.getItem('devis-quantities');
+    if (saved) {
+      try {
+        setQuantities(JSON.parse(saved));
+      } catch (e) {
+        // If parsing fails, keep defaults
+      }
+    }
+  }, []);
+  
   // Shorts dérivés du podcast (section spéciale)
-  const [podShorts, setPodShorts] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('devis-podShorts');
-      if (saved) return parseInt(saved, 10);
-    }
-    return 0;
-  });
+  const [podShorts, setPodShorts] = useState(0);
+  
+  // Load from localStorage after mount
+  useEffect(() => {
+    const saved = localStorage.getItem('devis-podShorts');
+    if (saved) setPodShorts(parseInt(saved, 10));
+  }, []);
 
-  const [activeTab, setActiveTab] = useState<string>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('devis-activeTab');
-      if (saved) return saved;
-    }
-    return "short";
-  });
-  const [lvl, setLvl] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('devis-lvl');
-      if (saved) return parseInt(saved, 10);
-    }
-    return 0;
-  });
-  const [opts, setOpts] = useState<Record<string, boolean>>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('devis-opts');
-      if (saved) return JSON.parse(saved);
-    }
-    return {};
-  });
-  const [express, setExpress] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('devis-express');
-      if (saved) return saved === 'true';
-    }
-    return false;
-  });
-  const [duration, setDuration] = useState<"one-shot" | "multishoot">(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('devis-duration');
-      if (saved === 'one-shot' || saved === 'multishoot') return saved;
-    }
-    return "multishoot"; // Default: multishoot mensuel
-  });
-  const [frequency, setFrequency] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('devis-frequency');
-      if (saved && MULTISHOOT_FREQUENCIES.includes(saved)) return saved;
-    }
-    return MULTISHOOT_FREQUENCIES[0]; // Default: Continue au fil du montage
-  });
+  const [activeTab, setActiveTab] = useState<string>("short");
+  
+  useEffect(() => {
+    const saved = localStorage.getItem('devis-activeTab');
+    if (saved) setActiveTab(saved);
+  }, []);
+  
+  const [lvl, setLvl] = useState(0);
+  
+  useEffect(() => {
+    const saved = localStorage.getItem('devis-lvl');
+    if (saved) setLvl(parseInt(saved, 10));
+  }, []);
+  
+  const [opts, setOpts] = useState<Record<string, boolean>>({});
+  
+  useEffect(() => {
+    const saved = localStorage.getItem('devis-opts');
+    if (saved) setOpts(JSON.parse(saved));
+  }, []);
+  
+  const [express, setExpress] = useState(false);
+  
+  useEffect(() => {
+    const saved = localStorage.getItem('devis-express');
+    if (saved) setExpress(saved === 'true');
+  }, []);
+  
+  const [duration, setDuration] = useState<"one-shot" | "multishoot">("multishoot");
+  
+  useEffect(() => {
+    const saved = localStorage.getItem('devis-duration');
+    if (saved === 'one-shot' || saved === 'multishoot') setDuration(saved);
+  }, []);
+  
+  const [frequency, setFrequency] = useState(MULTISHOOT_FREQUENCIES[0]);
+  
+  useEffect(() => {
+    const saved = localStorage.getItem('devis-frequency');
+    if (saved && MULTISHOOT_FREQUENCIES.includes(saved)) setFrequency(saved);
+  }, []);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");

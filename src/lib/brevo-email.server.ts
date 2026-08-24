@@ -1,5 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import { readFile } from "fs/promises";
+import { join } from "path";
 
 // API Key Brevo depuis les variables d'environnement
 const BREVO_API_KEY = process.env.BREVO_API_KEY || "";
@@ -14,7 +16,7 @@ type SendDevisPayload = {
     formula: string;
     niveau: string;
     collaboration: string;
-    videos: Array<{ type: string; qty: number; price: number }>;
+    videos: Array<{ type: string; qty: number; unitPrice: number; total: number }>;
     options: string[];
     totalVideos: number;
     subtotal: number;
@@ -24,8 +26,9 @@ type SendDevisPayload = {
   };
 };
 
-export const sendDevisEmails = createServerFn({ method: "POST" }).handler(
-  async ({ data }: { data: SendDevisPayload }) => {
+export const sendDevisEmails = createServerFn({ method: "POST" })
+  .inputValidator((d: SendDevisPayload) => d)
+  .handler(async ({ data }) => {
     const { name, email, company, message, devisData } = data;
 
     try {
@@ -65,7 +68,7 @@ export const sendDevisEmails = createServerFn({ method: "POST" }).handler(
         sender: { name: "VizioCraft", email: "marketing@viziocraft.com" },
         to: [{ email: email, name: name || "" }],
         replyTo: { email: "marketing@viziocraft.com", name: "VizioCraft" },
-        subject: `Votre devis VizioCraft — ${devisData.totalFinal}€`,
+        subject: `Votre devis personnalise VizioCraft`,
         htmlContent: buildClientEmailBody(name, devisData),
         attachment: [
           {
@@ -98,332 +101,204 @@ export const sendDevisEmails = createServerFn({ method: "POST" }).handler(
 );
 
 // ========================================
-// GÉNÉRATION PDF DU DEVIS
+// GÉNÉRATION PDF DU DEVIS (création from scratch avec header stylé)
 // ========================================
 async function generateDevisPDF(name: string, email: string, devisData: any): Promise<Buffer> {
   const pdfDoc = await PDFDocument.create();
-  const page = pdfDoc.addPage([595, 842]); // A4 size
+  const page = pdfDoc.addPage([595, 842]); // A4
   const { width, height } = page.getSize();
-  
-  // Load fonts
+
+  // Charger les polices
   const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
   const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  
-  // Colors
-  const purple = rgb(0.48, 0.18, 0.56); // #7b2d8e
-  const gray = rgb(0.4, 0.4, 0.4);
+
+  // Charger le logo VZ
+  const logoPath = join(process.cwd(), "public", "favicon-vz.png");
+  const logoBytes = await readFile(logoPath);
+  const logoImage = await pdfDoc.embedPng(logoBytes);
+  const logoDims = logoImage.scale(0.035);
+
+  // Couleurs
+  const purple = rgb(0.48, 0.18, 0.56); // #7b2d8e (VIZIO)
+  const blue = rgb(0.17, 0.66, 0.89); // #2ba8e2 (CRAFT)
+  const black = rgb(0.06, 0.06, 0.08);
   const darkGray = rgb(0.2, 0.2, 0.2);
+  const gray = rgb(0.45, 0.45, 0.45);
   const lightGray = rgb(0.6, 0.6, 0.6);
-  
-  let y = height - 50;
-  
-  // Header - Logo and Title
-  page.drawText("VIZIOCRAFT", {
-    x: 50,
-    y: y,
-    size: 24,
-    font: boldFont,
-    color: purple,
+
+  const contentX = 50;
+  const contentRight = width - 50;
+
+  // ===== HEADER =====
+  let y = height - 60;
+
+  const vizioText = "VIZIO";
+  const craftText = "CRAFT";
+  const logoTextSize = 30;
+  const vizioWidth = boldFont.widthOfTextAtSize(vizioText, logoTextSize);
+
+  page.drawText(vizioText, { x: contentX, y, size: logoTextSize, font: boldFont, color: purple });
+  page.drawText(craftText, { x: contentX + vizioWidth, y, size: logoTextSize, font: boldFont, color: blue });
+
+  // Logo image à droite du header
+  page.drawImage(logoImage, {
+    x: contentRight - logoDims.width,
+    y: y - 4,
+    width: logoDims.width,
+    height: logoDims.height,
   });
-  
+
   y -= 20;
-  page.drawText("Votre equipe video dediee", {
-    x: 50,
-    y: y,
-    size: 10,
-    font: regularFont,
-    color: gray,
-  });
-  
-  y -= 25;
+  page.drawText("Votre equipe video dediee", { x: contentX, y, size: 11, font: regularFont, color: darkGray });
+
+  y -= 30;
   const dateStr = new Date().toLocaleDateString("fr-FR");
-  page.drawText(`Date : ${dateStr}`, {
-    x: 50,
-    y: y,
-    size: 9,
-    font: regularFont,
-    color: lightGray,
-  });
-  
-  y -= 15;
-  page.drawText("Contact : contact@viziocraft.com", {
-    x: 50,
-    y: y,
-    size: 9,
-    font: regularFont,
-    color: lightGray,
-  });
-  
-  y -= 40;
-  
-  // Centered title "DEVIS"
+  page.drawText(`Date : ${dateStr}`, { x: contentX, y, size: 9, font: regularFont, color: gray });
+  y -= 14;
+  page.drawText("Contact : marketing@viziocraft.com", { x: contentX, y, size: 9, font: regularFont, color: gray });
+
+  y -= 45;
+
+  // ===== TITRE "DEVIS" centré =====
   const devisText = "DEVIS";
-  const devisWidth = boldFont.widthOfTextAtSize(devisText, 18);
-  page.drawText(devisText, {
-    x: (width - devisWidth) / 2,
-    y: y,
-    size: 18,
-    font: boldFont,
-    color: darkGray,
-  });
-  
-  y -= 30;
-  
-  // Client information section
-  page.drawText("CLIENT", {
-    x: 50,
-    y: y,
-    size: 11,
-    font: boldFont,
-    color: purple,
-  });
-  
-  // Underline
-  page.drawLine({
-    start: { x: 50, y: y - 2 },
-    end: { x: 110, y: y - 2 },
-    thickness: 1,
-    color: purple,
-  });
-  
-  y -= 20;
-  page.drawText(`Nom : ${name}`, {
-    x: 50,
-    y: y,
-    size: 10,
-    font: regularFont,
-    color: darkGray,
-  });
-  
-  y -= 15;
-  page.drawText(`Email : ${email}`, {
-    x: 50,
-    y: y,
-    size: 10,
-    font: regularFont,
-    color: darkGray,
-  });
-  
-  y -= 30;
-  
-  // Configuration section
-  page.drawText("CONFIGURATION", {
-    x: 50,
-    y: y,
-    size: 11,
-    font: boldFont,
-    color: purple,
-  });
-  
-  page.drawLine({
-    start: { x: 50, y: y - 2 },
-    end: { x: 160, y: y - 2 },
-    thickness: 1,
-    color: purple,
-  });
-  
-  y -= 20;
-  page.drawText(`Formule : ${devisData.formula}`, {
-    x: 50,
-    y: y,
-    size: 10,
-    font: regularFont,
-    color: darkGray,
-  });
-  
-  y -= 15;
-  page.drawText(`Niveau de montage : ${devisData.niveau}`, {
-    x: 50,
-    y: y,
-    size: 10,
-    font: regularFont,
-    color: darkGray,
-  });
-  
-  y -= 15;
-  page.drawText(`Collaboration : ${devisData.collaboration}`, {
-    x: 50,
-    y: y,
-    size: 10,
-    font: regularFont,
-    color: darkGray,
-  });
-  
-  y -= 30;
-  
-  // Videos table
+  const devisWidth = boldFont.widthOfTextAtSize(devisText, 22);
+  page.drawText(devisText, { x: (width - devisWidth) / 2, y, size: 22, font: boldFont, color: black });
+
+  y -= 50;
+
+  // ===== CLIENT =====
+  page.drawText("CLIENT", { x: contentX, y, size: 12, font: boldFont, color: black });
+  page.drawLine({ start: { x: contentX, y: y - 4 }, end: { x: contentX + 80, y: y - 4 }, thickness: 1.5, color: black });
+
+  y -= 24;
+  page.drawText(`Nom : ${name}`, { x: contentX, y, size: 10, font: regularFont, color: darkGray });
+  y -= 16;
+  page.drawText(`Email : ${email}`, { x: contentX, y, size: 10, font: regularFont, color: darkGray });
+
+  y -= 34;
+
+  // ===== CONFIGURATION =====
+  page.drawText("CONFIGURATION", { x: contentX, y, size: 12, font: boldFont, color: black });
+  page.drawLine({ start: { x: contentX, y: y - 4 }, end: { x: contentX + 130, y: y - 4 }, thickness: 1.5, color: black });
+
+  y -= 24;
+  page.drawText(`Formule : ${devisData.formula}`, { x: contentX, y, size: 10, font: regularFont, color: darkGray });
+  y -= 16;
+  page.drawText(`Niveau de montage : ${devisData.niveau}`, { x: contentX, y, size: 10, font: regularFont, color: darkGray });
+  y -= 16;
+  page.drawText(`Collaboration : ${devisData.collaboration}`, { x: contentX, y, size: 10, font: regularFont, color: darkGray });
+
+  y -= 34;
+
+  // ===== DETAIL DES VIDEOS =====
   if (devisData.videos && devisData.videos.length > 0) {
-    page.drawText("DETAIL DES VIDEOS", {
-      x: 50,
-      y: y,
-      size: 11,
-      font: boldFont,
-      color: purple,
-    });
-    
-    page.drawLine({
-      start: { x: 50, y: y - 2 },
-      end: { x: 180, y: y - 2 },
-      thickness: 1,
-      color: purple,
-    });
-    
-    y -= 25;
-    
-    // Table headers
-    const col1 = 50;
-    const col2 = 320;
-    const col3 = 400;
-    const col4 = 480;
-    
-    page.drawText("Format", { x: col1, y: y, size: 9, font: boldFont, color: purple });
-    page.drawText("Qte", { x: col2, y: y, size: 9, font: boldFont, color: purple });
-    page.drawText("Prix/u", { x: col3, y: y, size: 9, font: boldFont, color: purple });
-    page.drawText("Total", { x: col4, y: y, size: 9, font: boldFont, color: purple });
-    
-    y -= 5;
-    page.drawLine({
-      start: { x: col1, y: y },
-      end: { x: 545, y: y },
-      thickness: 1,
-      color: purple,
-    });
-    
-    y -= 15;
-    
-    // Table rows
+    page.drawText("DETAIL DES VIDEOS", { x: contentX, y, size: 12, font: boldFont, color: black });
+    page.drawLine({ start: { x: contentX, y: y - 4 }, end: { x: contentX + 170, y: y - 4 }, thickness: 1.5, color: black });
+
+    y -= 28;
+
+    const col1 = contentX;
+    const col2 = 460;
+    const col3 = 505;
+    const col4 = 545;
+
+    page.drawText("Format", { x: col1, y, size: 9, font: boldFont, color: black });
+    page.drawText("Qte", { x: col2, y, size: 9, font: boldFont, color: black });
+    page.drawText("Prix", { x: col3, y, size: 9, font: boldFont, color: black });
+    page.drawText("Total", { x: col4, y, size: 9, font: boldFont, color: black });
+
+    y -= 6;
+    page.drawLine({ start: { x: col1, y }, end: { x: contentRight, y }, thickness: 1, color: black });
+
+    y -= 18;
+
     for (const video of devisData.videos) {
-      const formatText = video.type.length > 35 ? video.type.substring(0, 35) + "..." : video.type;
-      page.drawText(formatText, { x: col1, y: y, size: 9, font: regularFont, color: darkGray });
-      page.drawText(String(video.qty), { x: col2, y: y, size: 9, font: regularFont, color: darkGray });
-      page.drawText(`${video.unitPrice}€`, { x: col3, y: y, size: 9, font: regularFont, color: darkGray });
-      page.drawText(`${video.total}€`, { x: col4, y: y, size: 9, font: regularFont, color: darkGray });
-      y -= 18;
+      const formatText = video.type.length > 42 ? video.type.substring(0, 39) + "..." : video.type;
+
+      page.drawText(formatText, { x: col1, y, size: 9.5, font: regularFont, color: black });
+      page.drawText(String(video.qty), { x: col2, y, size: 9.5, font: regularFont, color: black });
+      page.drawText(`${video.unitPrice}€`, { x: col3, y, size: 9.5, font: regularFont, color: black });
+      page.drawText(`${video.total}€`, { x: col4, y, size: 9.5, font: regularFont, color: black });
+
+      y -= 22;
+
+      if (y < 180) break;
     }
-    
-    page.drawLine({
-      start: { x: col1, y: y + 5 },
-      end: { x: 545, y: y + 5 },
-      thickness: 0.5,
-      color: rgb(0.87, 0.87, 0.87),
-    });
-    
-    y -= 10;
+
+    page.drawLine({ start: { x: col1, y: y + 8 }, end: { x: contentRight, y: y + 8 }, thickness: 0.5, color: lightGray });
+
+    y -= 25;
   }
-  
-  // Options
-  if (devisData.options && devisData.options.length > 0) {
-    y -= 10;
-    page.drawText(`Options : ${devisData.options.join(", ")}`, {
-      x: 50,
-      y: y,
-      size: 10,
-      font: regularFont,
-      color: gray,
-    });
-    y -= 20;
+
+  // ===== OPTIONS =====
+  if (devisData.options && devisData.options.length > 0 && y > 150) {
+    const optionsLabel = "Options : ";
+    const optionsText = devisData.options.join(", ");
+    const maxWidth = 300;
+
+    page.drawText(optionsLabel, { x: contentX, y, size: 9.5, font: regularFont, color: black });
+    const labelWidth = regularFont.widthOfTextAtSize(optionsLabel, 9.5);
+
+    // Découpe le texte des options sur plusieurs lignes si trop long
+    const words = optionsText.split(", ");
+    let line = "";
+    let lineY = y;
+    let first = true;
+    for (const word of words) {
+      const candidate = line ? `${line}, ${word}` : word;
+      const w = regularFont.widthOfTextAtSize(candidate, 9.5);
+      if (w > maxWidth && line) {
+        page.drawText(line, { x: first ? contentX + labelWidth : contentX, y: lineY, size: 9.5, font: regularFont, color: black });
+        lineY -= 15;
+        line = word;
+        first = false;
+      } else {
+        line = candidate;
+      }
+    }
+    if (line) {
+      page.drawText(line, { x: first ? contentX + labelWidth : contentX, y: lineY, size: 9.5, font: regularFont, color: black });
+    }
+    y = lineY - 30;
   }
-  
-  // Totals section
-  y -= 20;
-  const totalsX = 350;
-  
-  page.drawText("Sous-total :", {
-    x: totalsX,
-    y: y,
-    size: 10,
-    font: regularFont,
-    color: gray,
-  });
-  page.drawText(`${devisData.subtotal}€`, {
-    x: 480,
-    y: y,
-    size: 10,
-    font: regularFont,
-    color: darkGray,
-  });
-  
+
+  // ===== TOTAUX =====
+  const totalsX = 380;
+  const valuesX = 500;
+
+  page.drawText("Sous-total :", { x: totalsX, y, size: 10, font: regularFont, color: gray });
+  page.drawText(`${devisData.subtotal}€`, { x: valuesX, y, size: 10, font: regularFont, color: black });
+
   if (devisData.reduction > 0) {
-    y -= 18;
-    page.drawText("Reduction multishoot :", {
-      x: totalsX,
-      y: y,
-      size: 10,
-      font: regularFont,
-      color: gray,
-    });
-    page.drawText(`-${devisData.reduction}€`, {
-      x: 480,
-      y: y,
-      size: 10,
-      font: regularFont,
-      color: darkGray,
-    });
+    y -= 20;
+    page.drawText("Reduction multishoot :", { x: totalsX, y, size: 10, font: regularFont, color: gray });
+    page.drawText(`-${devisData.reduction}€`, { x: valuesX, y, size: 10, font: regularFont, color: black });
   }
-  
+
   if (devisData.express > 0) {
-    y -= 18;
-    page.drawText("Supplement express :", {
-      x: totalsX,
-      y: y,
-      size: 10,
-      font: regularFont,
-      color: gray,
-    });
-    page.drawText(`+${devisData.express}€`, {
-      x: 480,
-      y: y,
-      size: 10,
-      font: regularFont,
-      color: darkGray,
-    });
+    y -= 20;
+    page.drawText("Supplement express :", { x: totalsX, y, size: 10, font: regularFont, color: gray });
+    page.drawText(`+${devisData.express}€`, { x: valuesX, y, size: 10, font: regularFont, color: black });
   }
-  
-  y -= 10;
-  page.drawLine({
-    start: { x: totalsX, y: y },
-    end: { x: 545, y: y },
-    thickness: 2,
-    color: purple,
-  });
-  
-  y -= 25;
-  page.drawText("TOTAL :", {
-    x: totalsX,
-    y: y,
-    size: 14,
-    font: boldFont,
-    color: purple,
-  });
-  page.drawText(`${devisData.totalFinal}€`, {
-    x: 480,
-    y: y,
-    size: 14,
-    font: boldFont,
-    color: purple,
-  });
-  
+
+  y -= 16;
+  page.drawLine({ start: { x: totalsX, y }, end: { x: contentRight, y }, thickness: 2, color: black });
+
+  y -= 32;
+  page.drawText("TOTAL :", { x: totalsX, y, size: 15, font: boldFont, color: black });
+  page.drawText(`${devisData.totalFinal}€`, { x: valuesX - 8, y, size: 17, font: boldFont, color: black });
+
   // Footer
-  y -= 40;
-  page.drawText("Ce devis est valable 30 jours. Les prix sont exprimes en euros TTC.", {
-    x: 50,
-    y: y,
-    size: 9,
-    font: regularFont,
-    color: lightGray,
-  });
-  
-  y -= 15;
-  const footerText = "VizioCraft — contact@viziocraft.com — viziocraft.com";
-  const footerWidth = regularFont.widthOfTextAtSize(footerText, 9);
-  page.drawText(footerText, {
-    x: (width - footerWidth) / 2,
-    y: y,
-    size: 9,
-    font: regularFont,
-    color: lightGray,
-  });
-  
+  y = 65;
+  const noteText = "Ce devis est valable 30 jours. Les prix sont exprimes en euros TTC.";
+  const noteWidth = regularFont.widthOfTextAtSize(noteText, 8);
+  page.drawText(noteText, { x: (width - noteWidth) / 2, y, size: 8, font: regularFont, color: lightGray });
+
+  y -= 14;
+  const footerText = "VizioCraft — marketing@viziocraft.com — viziocraft.com";
+  const footerWidth = regularFont.widthOfTextAtSize(footerText, 8);
+  page.drawText(footerText, { x: (width - footerWidth) / 2, y, size: 8, font: regularFont, color: lightGray });
+
   const pdfBytes = await pdfDoc.save();
   return Buffer.from(pdfBytes);
 }
@@ -440,12 +315,13 @@ function buildInternalEmailBody(
 ): string {
   const lines: string[] = [];
 
-  lines.push(`<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 650px; margin: 0 auto; color: #333; background: #ffffff;">`);
-  
-  // Header
-  lines.push(`<div style="background: linear-gradient(135deg, #7b2d8e 0%, #2ba8e2 100%); padding: 32px; text-align: center;">`);
-  lines.push(`<h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; letter-spacing: -0.5px;">VIZIOCRAFT</h1>`);
-  lines.push(`<p style="margin: 8px 0 0 0; color: rgba(255,255,255,0.9); font-size: 13px;">Nouvelle demande de devis</p>`);
+  lines.push(`<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 650px; margin: 0 auto; color: #333; background: #ffffff; border: 1px solid #111111;">`);
+
+  // Header — logo VizioCraft (fond blanc, pas de dégradé)
+  lines.push(`<div style="padding: 20px 32px; text-align: left; border-bottom: 1px solid #e8e8e8;">`);
+  lines.push(`<img src="https://cdn.prod.website-files.com/6996b2b19f614702ad210f02/6996b52b771675ec516ec984_Asset%201%20(1).png" alt="VizioCraft" width="24" height="24" style="display: block; margin-bottom: 8px;" />`);
+  lines.push(`<h1 style="margin: 0; font-size: 16px; font-weight: 700; letter-spacing: -0.3px;"><span style="color: #7b2d8e;">VIZIO</span><span style="color: #2ba8e2;">CRAFT</span></h1>`);
+  lines.push(`<p style="margin: 2px 0 0 0; color: #999999; font-size: 11px;">Nouvelle demande de devis</p>`);
   lines.push(`</div>`);
 
   // Infos contact
@@ -526,7 +402,7 @@ function buildInternalEmailBody(
   // Footer
   lines.push(`<div style="padding: 24px 32px; text-align: center; background: #1a0b2e; color: #ffffff;">`);
   lines.push(`<p style="margin: 0; font-size: 12px; color: rgba(255,255,255,0.7);">VizioCraft — Votre équipe vidéo dédiée</p>`);
-  lines.push(`<p style="margin: 8px 0 0 0; font-size: 11px; color: rgba(255,255,255,0.5);">contact@viziocraft.com</p>`);
+  lines.push(`<p style="margin: 8px 0 0 0; font-size: 11px; color: rgba(255,255,255,0.5);">marketing@viziocraft.com</p>`);
   lines.push(`</div>`);
 
   lines.push(`</div>`);
@@ -534,10 +410,10 @@ function buildInternalEmailBody(
 }
 
 // ========================================
-// FORMAT EMAIL CLIENT (ultra-professionnel, sans emojis)
+// FORMAT EMAIL CLIENT (simplifié et professionnel)
 // ========================================
 function buildClientEmailBody(name: string, devisData: any): string {
-  const firstName = name?.split(" ")[0] || "Madame, Monsieur";
+  const firstName = name?.split(" ")[0] || "";
 
   return `
 <!DOCTYPE html>
@@ -547,92 +423,45 @@ function buildClientEmailBody(name: string, devisData: any): string {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Votre devis VizioCraft</title>
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #f5f5f5;">
-  
-  <table width="100%" cellpadding="0" cellspacing="0" style="padding: 40px 20px;">
+<body style="margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #ffffff;">
+
+  <table width="100%" cellpadding="0" cellspacing="0">
     <tr>
       <td align="center">
-        
-        <!-- Card principale -->
-        <table width="650" cellpadding="0" cellspacing="0" style="background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
-          
-          <!-- Header -->
+
+        <table width="560" cellpadding="0" cellspacing="0" style="padding: 32px 8px;">
+
+          <!-- Logo -->
           <tr>
-            <td style="background: linear-gradient(135deg, #7b2d8e 0%, #2ba8e2 100%); padding: 40px; text-align: center;">
-              <h1 style="margin: 0 0 8px 0; color: #ffffff; font-size: 32px; font-weight: 700; letter-spacing: -0.5px;">VIZIOCRAFT</h1>
-              <p style="margin: 0; color: rgba(255,255,255,0.95); font-size: 14px; font-weight: 500; letter-spacing: 0.5px;">Votre équipe vidéo dédiée</p>
+            <td style="padding: 0 0 24px 0;">
+              <img src="https://cdn.prod.website-files.com/6996b2b19f614702ad210f02/6996b52b771675ec516ec984_Asset%201%20(1).png" alt="VizioCraft" width="28" height="28" style="display: block;" />
             </td>
           </tr>
 
           <!-- Corps -->
           <tr>
-            <td style="padding: 40px;">
-              
-              <p style="margin: 0 0 16px 0; font-size: 18px; font-weight: 600; color: #1d1d1f;">
-                ${firstName},
-              </p>
-              
-              <p style="margin: 0 0 24px 0; font-size: 15px; line-height: 1.7; color: #555;">
-                Nous vous remercions pour votre demande de devis. Vous trouverez ci-joint le document détaillé de votre estimation personnalisée, calculée sur la base de votre configuration.
+            <td>
+
+              <p style="margin: 0 0 16px 0; font-size: 15px; color: #1d1d1f;">
+                Bonjour${firstName ? ` ${firstName}` : ""},
               </p>
 
-              <!-- Résumé rapide -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="background: #fafafa; border: 1px solid #e8e8e8; border-radius: 6px; padding: 24px; margin: 24px 0;">
-                <tr>
-                  <td>
-                    <p style="margin: 0 0 16px 0; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #7b2d8e;">Résumé de votre projet</p>
-                    
-                    <table width="100%" cellpadding="0" cellspacing="0">
-                      <tr>
-                        <td style="padding: 8px 0; font-size: 14px; color: #666;">Formule</td>
-                        <td style="padding: 8px 0; font-size: 14px; font-weight: 600; color: #333; text-align: right;">${devisData?.formula || "—"}</td>
-                      </tr>
-                      <tr>
-                        <td style="padding: 8px 0; font-size: 14px; color: #666;">Niveau</td>
-                        <td style="padding: 8px 0; font-size: 14px; font-weight: 600; color: #333; text-align: right;">${devisData?.niveau || "—"}</td>
-                      </tr>
-                      <tr>
-                        <td style="padding: 8px 0; font-size: 14px; color: #666;">Vidéos</td>
-                        <td style="padding: 8px 0; font-size: 14px; font-weight: 600; color: #333; text-align: right;">${devisData?.totalVideos || 0} format${(devisData?.totalVideos || 0) > 1 ? "s" : ""}</td>
-                      </tr>
-                    </table>
-
-                    <div style="margin: 20px 0 0 0; padding-top: 20px; border-top: 2px solid #7b2d8e;">
-                      <table width="100%">
-                        <tr>
-                          <td style="font-size: 16px; font-weight: 700; color: #7b2d8e;">MONTANT ESTIMÉ</td>
-                          <td style="font-size: 32px; font-weight: 800; color: #7b2d8e; text-align: right;">${devisData?.totalFinal || 0}€</td>
-                        </tr>
-                      </table>
-                    </div>
-                  </td>
-                </tr>
-              </table>
-
-              <p style="margin: 24px 0; font-size: 14px; line-height: 1.7; color: #555;">
-                Ce devis est une estimation basée sur votre configuration. Il peut être ajusté selon les spécificités détaillées de votre projet et reste valable 30 jours.
+              <p style="margin: 0 0 16px 0; font-size: 15px; line-height: 1.6; color: #333333;">
+                Merci d'avoir utilisé notre simulateur de devis VizioCraft.
               </p>
 
-              <div style="background: #f9f9f9; border-left: 4px solid #2ba8e2; padding: 20px; margin: 24px 0; border-radius: 4px;">
-                <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: 700; color: #2ba8e2;">Prochaine étape</p>
-                <p style="margin: 0; font-size: 14px; line-height: 1.7; color: #555;">
-                  Nous vous proposons de planifier un échange téléphonique de 15 minutes pour affiner votre projet, répondre à vos questions et confirmer les modalités de collaboration.
-                </p>
-              </div>
+              <p style="margin: 0 0 16px 0; font-size: 15px; line-height: 1.6; color: #333333;">
+                Vous trouverez en pièce jointe votre devis personnalisé.
+              </p>
 
-              <!-- CTA -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="margin: 32px 0;">
-                <tr>
-                  <td align="center">
-                    <a href="https://viziocraft.com/#contact" style="display: inline-block; background: linear-gradient(135deg, #7b2d8e 0%, #2ba8e2 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 4px; font-size: 15px; font-weight: 600; letter-spacing: 0.3px;">
-                      Planifier un échange
-                    </a>
-                  </td>
-                </tr>
-              </table>
+              <p style="margin: 0 0 20px 0; font-size: 15px; line-height: 1.6; color: #333333;">
+                Vous avez une question sur votre devis ou souhaitez aller plus loin ?<br>
+                📅 <a href="https://viziocraft.com/#contact" style="color: #7b2d8e; font-weight: 600; text-decoration: underline;">Prendre rendez-vous</a>
+              </p>
 
-              <p style="margin: 24px 0 0 0; font-size: 13px; line-height: 1.6; color: #888; text-align: center;">
-                Vous pouvez également répondre directement à cet email. Nous reviendrons vers vous sous 24 heures ouvrées.
+              <p style="margin: 24px 0 0 0; font-size: 15px; line-height: 1.6; color: #333333;">
+                À bientôt,<br>
+                L'équipe VizioCraft 🎬
               </p>
 
             </td>
@@ -640,12 +469,9 @@ function buildClientEmailBody(name: string, devisData: any): string {
 
           <!-- Footer -->
           <tr>
-            <td style="background: #1a0b2e; padding: 32px; text-align: center;">
-              <p style="margin: 0 0 4px 0; font-size: 15px; font-weight: 700; color: #ffffff;">VizioCraft</p>
-              <p style="margin: 0 0 16px 0; font-size: 12px; color: rgba(255,255,255,0.7);">Votre équipe vidéo dédiée</p>
-              <p style="margin: 0; font-size: 12px; color: rgba(255,255,255,0.6);">
-                <a href="mailto:contact@viziocraft.com" style="color: rgba(255,255,255,0.8); text-decoration: none;">contact@viziocraft.com</a> · 
-                <a href="https://viziocraft.com" style="color: rgba(255,255,255,0.8); text-decoration: none;">viziocraft.com</a>
+            <td style="padding: 32px 0 0 0;">
+              <p style="margin: 0; font-size: 12px; color: #999999;">
+                VizioCraft · <a href="mailto:marketing@viziocraft.com" style="color: #999999; text-decoration: none;">marketing@viziocraft.com</a>
               </p>
             </td>
           </tr>
