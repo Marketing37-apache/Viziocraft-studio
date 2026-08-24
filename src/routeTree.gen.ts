@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as PolitiqueConfidentialiteRouteImport } from './routes/politique-confidentialite'
 import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
+import { Route as DevisAdminRouteImport } from './routes/devis-admin'
 import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as CgvRouteImport } from './routes/cgv'
 import { Route as IndexRouteImport } from './routes/index'
@@ -28,6 +29,11 @@ const PolitiqueConfidentialiteRoute =
 const MentionsLegalesRoute = MentionsLegalesRouteImport.update({
   id: '/mentions-legales',
   path: '/mentions-legales',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DevisAdminRoute = DevisAdminRouteImport.update({
+  id: '/devis-admin',
+  path: '/devis-admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CookiesRoute = CookiesRouteImport.update({
@@ -70,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/cgv': typeof CgvRoute
   '/cookies': typeof CookiesRoute
+  '/devis-admin': typeof DevisAdminRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/politique-confidentialite': typeof PolitiqueConfidentialiteRoute
   '/devis/$variant': typeof DevisVariantRoute
@@ -81,6 +88,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/cgv': typeof CgvRoute
   '/cookies': typeof CookiesRoute
+  '/devis-admin': typeof DevisAdminRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/politique-confidentialite': typeof PolitiqueConfidentialiteRoute
   '/devis/$variant': typeof DevisVariantRoute
@@ -93,6 +101,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/cgv': typeof CgvRoute
   '/cookies': typeof CookiesRoute
+  '/devis-admin': typeof DevisAdminRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/politique-confidentialite': typeof PolitiqueConfidentialiteRoute
   '/devis/$variant': typeof DevisVariantRoute
@@ -106,6 +115,7 @@ export interface FileRouteTypes {
     | '/'
     | '/cgv'
     | '/cookies'
+    | '/devis-admin'
     | '/mentions-legales'
     | '/politique-confidentialite'
     | '/devis/$variant'
@@ -117,6 +127,7 @@ export interface FileRouteTypes {
     | '/'
     | '/cgv'
     | '/cookies'
+    | '/devis-admin'
     | '/mentions-legales'
     | '/politique-confidentialite'
     | '/devis/$variant'
@@ -128,6 +139,7 @@ export interface FileRouteTypes {
     | '/'
     | '/cgv'
     | '/cookies'
+    | '/devis-admin'
     | '/mentions-legales'
     | '/politique-confidentialite'
     | '/devis/$variant'
@@ -140,6 +152,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CgvRoute: typeof CgvRoute
   CookiesRoute: typeof CookiesRoute
+  DevisAdminRoute: typeof DevisAdminRoute
   MentionsLegalesRoute: typeof MentionsLegalesRoute
   PolitiqueConfidentialiteRoute: typeof PolitiqueConfidentialiteRoute
   DevisVariantRoute: typeof DevisVariantRoute
@@ -162,6 +175,13 @@ declare module '@tanstack/react-router' {
       path: '/mentions-legales'
       fullPath: '/mentions-legales'
       preLoaderRoute: typeof MentionsLegalesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/devis-admin': {
+      id: '/devis-admin'
+      path: '/devis-admin'
+      fullPath: '/devis-admin'
+      preLoaderRoute: typeof DevisAdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cookies': {
@@ -220,6 +240,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CgvRoute: CgvRoute,
   CookiesRoute: CookiesRoute,
+  DevisAdminRoute: DevisAdminRoute,
   MentionsLegalesRoute: MentionsLegalesRoute,
   PolitiqueConfidentialiteRoute: PolitiqueConfidentialiteRoute,
   DevisVariantRoute: DevisVariantRoute,

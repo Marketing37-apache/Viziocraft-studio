@@ -693,11 +693,15 @@ export function DevisBuilder({
   open,
   variant = "essentiel",
   onClose,
+  adminMode = false,
 }: {
   open: boolean;
   variant?: "essentiel" | "surmesure";
   onClose?: () => void;
+  adminMode?: boolean;
 }) {
+  // En mode admin, on force l'affichage des prix
+  const showPrices = adminMode || SHOW_PRICES;
   // Initialize with defaults first (server-side safe)
   const [quantities, setQuantities] = useState<Record<string, number>>(() => {
     const initial = { ...EMPTY_QTY };
@@ -1210,95 +1214,147 @@ export function DevisBuilder({
             {/* ── STEP 1 : Formats & quantités ── */}
             <Step n="1" title="Formats & quantités" theme={theme}>
 
-              {/* Onglets */}
-              <div className={`flex p-1 rounded-full border mb-4 sm:mb-6 ${theme.isDark ? "bg-white/5 border-white/10" : "bg-foreground/[0.03] border-foreground/5"}`}>
-                {FORMAT_CATEGORIES.map((cat) => {
-                  const isActive = activeTab === cat.id;
-                  const count = cat.formats.reduce((s, f) => s + (quantities[f.key] ?? 0), 0)
-                    + (cat.id === "pod" ? podShorts : 0);
-                  return (
-                    <button
-                      type="button"
-                      key={cat.id}
-                      onClick={() => setActiveTab(cat.id)}
-                      className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-1.5 sm:py-2 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer ${
-                        isActive
-                          ? variant === "surmesure"
-                            ? "bg-gradient-to-r from-[#a78bfa] to-[#ec4899] text-white shadow-sm"
-                            : "bg-[#a8632d] text-white shadow-sm"
-                          : theme.isDark
-                            ? "text-white/60 hover:text-white"
-                            : "text-[#1a1410]/60 hover:text-[#1a1410]"
-                      }`}
-                    >
-                      <CatIcon id={cat.id} className="w-3.5 h-3.5 shrink-0" />
-                      <span className="hidden sm:inline">{cat.title}</span>
-                      <span className="sm:hidden">
-                        {cat.id === "short" ? "Shorts" : cat.id === "long" ? "Long" : "Podcast"}
-                      </span>
-                      {count > 0 && (
-                        <span className={`min-w-[1.125rem] px-1 inline-flex items-center justify-center rounded-full text-[9px] font-extrabold ${
-                          isActive
-                            ? "bg-white text-black"
-                            : variant === "surmesure"
-                              ? "bg-[#a78bfa]/20 text-[#c4b5fd]"
-                              : "bg-[#a8632d]/10 text-[#a8632d]"
-                        }`}>
-                          {count}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Grille de cartes */}
-              {(() => {
-                const activeCategory = FORMAT_CATEGORIES.find((c) => c.id === activeTab);
-                if (!activeCategory) return null;
-                const isSolo = activeCategory.formats.length === 1;
-                const gridCols = isSolo ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3";
-                const isPodTab = activeTab === "pod";
-
-                return (
-                  <div key={activeTab}>
-                    <p className={`text-sm mb-4 ${theme.mutedText}`}>{activeCategory.subtitle}</p>
-                    <div className={`grid ${gridCols} gap-4`}>
-                      {activeCategory.formats.map((fmt) => {
+              {adminMode ? (
+                /* Mode Admin : Tous les formats affichés dans une grille complète */
+                <div className="space-y-8">
+                  {/* Prix unitaires affichés */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+                    {FORMAT_CATEGORIES.flatMap((cat) =>
+                      cat.formats.map((fmt) => {
                         const qty = quantities[fmt.key] ?? 0;
+                        const basePrice = BASE_PRICES[fmt.key] ?? 0;
                         const tickFn = fmt.key === "pd"
                           ? (d: number) => setQtyPod(d)
                           : (d: number) => setQty(fmt.key, d);
+                        
                         return (
-                          <FormatCard
-                            key={fmt.key}
-                            fmt={fmt}
-                            qty={qty}
-                            onTick={tickFn}
-                            theme={theme}
-                            variant={variant}
-                            solo={isSolo}
-                          />
+                          <div key={fmt.key} className="relative">
+                            <FormatCard
+                              fmt={fmt}
+                              qty={qty}
+                              onTick={tickFn}
+                              theme={theme}
+                              variant={variant}
+                            />
+                            {/* Prix unitaire en badge admin */}
+                            <div className="absolute -top-2 -right-2 bg-[#a78bfa] text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
+                              {basePrice}€
+                            </div>
+                          </div>
                         );
-                      })}
-                    </div>
-
-                    {/* Section shorts podcast — animée selon podQty */}
-                    {isPodTab && (
-                      <div className={`overflow-hidden transition-all duration-400 ease-in-out ${
-                        podQty > 0 ? "max-h-[300px] opacity-100 mt-5" : "max-h-0 opacity-0 mt-0 pointer-events-none"
-                      }`}>
-                        <PodcastShortsSection
-                          qty={podShorts}
-                          onTick={setPodShortsDelta}
-                          theme={theme}
-                          variant={variant}
-                        />
-                      </div>
+                      })
                     )}
                   </div>
-                );
-              })()}
+
+                  {/* Shorts podcast - toujours visible en mode admin si qty podcast > 0 */}
+                  {podQty > 0 && (
+                    <div className="relative">
+                      <PodcastShortsSection
+                        qty={podShorts}
+                        onTick={setPodShortsDelta}
+                        theme={theme}
+                        variant={variant}
+                      />
+                      <div className="absolute -top-2 -right-2 bg-[#a78bfa] text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
+                        10€
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                /* Mode Normal : Navigation par onglets */
+                <>
+                  {/* Onglets */}
+                  <div className={`flex p-1 rounded-full border mb-4 sm:mb-6 ${theme.isDark ? "bg-white/5 border-white/10" : "bg-foreground/[0.03] border-foreground/5"}`}>
+                    {FORMAT_CATEGORIES.map((cat) => {
+                      const isActive = activeTab === cat.id;
+                      const count = cat.formats.reduce((s, f) => s + (quantities[f.key] ?? 0), 0)
+                        + (cat.id === "pod" ? podShorts : 0);
+                      return (
+                        <button
+                          type="button"
+                          key={cat.id}
+                          onClick={() => setActiveTab(cat.id)}
+                          className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-1.5 sm:py-2 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer ${
+                            isActive
+                              ? variant === "surmesure"
+                                ? "bg-gradient-to-r from-[#a78bfa] to-[#ec4899] text-white shadow-sm"
+                                : "bg-[#a8632d] text-white shadow-sm"
+                              : theme.isDark
+                                ? "text-white/60 hover:text-white"
+                                : "text-[#1a1410]/60 hover:text-[#1a1410]"
+                          }`}
+                        >
+                          <CatIcon id={cat.id} className="w-3.5 h-3.5 shrink-0" />
+                          <span className="hidden sm:inline">{cat.title}</span>
+                          <span className="sm:hidden">
+                            {cat.id === "short" ? "Shorts" : cat.id === "long" ? "Long" : "Podcast"}
+                          </span>
+                          {count > 0 && (
+                            <span className={`min-w-[1.125rem] px-1 inline-flex items-center justify-center rounded-full text-[9px] font-extrabold ${
+                              isActive
+                                ? "bg-white text-black"
+                                : variant === "surmesure"
+                                  ? "bg-[#a78bfa]/20 text-[#c4b5fd]"
+                                  : "bg-[#a8632d]/10 text-[#a8632d]"
+                            }`}>
+                              {count}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Grille de cartes */}
+                  {(() => {
+                    const activeCategory = FORMAT_CATEGORIES.find((c) => c.id === activeTab);
+                    if (!activeCategory) return null;
+                    const isSolo = activeCategory.formats.length === 1;
+                    const gridCols = isSolo ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3";
+                    const isPodTab = activeTab === "pod";
+
+                    return (
+                      <div key={activeTab}>
+                        <p className={`text-sm mb-4 ${theme.mutedText}`}>{activeCategory.subtitle}</p>
+                        <div className={`grid ${gridCols} gap-4`}>
+                          {activeCategory.formats.map((fmt) => {
+                            const qty = quantities[fmt.key] ?? 0;
+                            const tickFn = fmt.key === "pd"
+                              ? (d: number) => setQtyPod(d)
+                              : (d: number) => setQty(fmt.key, d);
+                            return (
+                              <FormatCard
+                                key={fmt.key}
+                                fmt={fmt}
+                                qty={qty}
+                                onTick={tickFn}
+                                theme={theme}
+                                variant={variant}
+                                solo={isSolo}
+                              />
+                            );
+                          })}
+                        </div>
+
+                        {/* Section shorts podcast — animée selon podQty */}
+                        {isPodTab && (
+                          <div className={`overflow-hidden transition-all duration-400 ease-in-out ${
+                            podQty > 0 ? "max-h-[300px] opacity-100 mt-5" : "max-h-0 opacity-0 mt-0 pointer-events-none"
+                          }`}>
+                            <PodcastShortsSection
+                              qty={podShorts}
+                              onTick={setPodShortsDelta}
+                              theme={theme}
+                              variant={variant}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+                </>
+              )}
             </Step>
 
             {/* ── STEP 2 : Niveau de montage ── */}
@@ -1306,6 +1362,8 @@ export function DevisBuilder({
               <div className="grid grid-cols-3 gap-2 sm:gap-4">
                 {LEVELS.map((l, idx) => {
                   const on = lvl === idx;
+                  const mult = LEVEL_MULT[idx];
+                  const percentage = mult === 1 ? "Base" : `+${Math.round((mult - 1) * 100)}%`;
                   return (
                     <button
                       type="button"
@@ -1313,8 +1371,17 @@ export function DevisBuilder({
                       onClick={() => setLvl(idx)}
                       className={`rounded-xl border p-2.5 sm:p-4 text-left transition-all duration-200 ${on ? theme.btnActive : theme.btnInactive}`}
                     >
-                      <h4 className={`font-display text-[11px] sm:text-sm font-bold leading-tight ${theme.textPrimary}`}>{l.name}</h4>
-                      <p className={`text-[8px] sm:text-[11px] mt-0.5 leading-snug ${theme.textSecondary}`}>{l.multLabel}</p>
+                      <div className="flex items-start justify-between gap-2">
+                        <h4 className={`font-display text-[11px] sm:text-sm font-bold leading-tight ${theme.textPrimary}`}>{l.name}</h4>
+                        {adminMode && (
+                          <span className="shrink-0 rounded-full bg-purple-500/20 border border-purple-500/30 px-2 py-0.5 text-[9px] font-bold text-purple-300">
+                            ×{mult}
+                          </span>
+                        )}
+                      </div>
+                      <p className={`text-[8px] sm:text-[11px] mt-0.5 leading-snug ${theme.textSecondary}`}>
+                        {adminMode ? percentage : l.multLabel}
+                      </p>
                       {l.includes && (
                         <span className="hidden sm:inline-block mt-2 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400">
                           {l.includes}
@@ -1354,7 +1421,7 @@ export function DevisBuilder({
                       </span>
                       <span className={`flex-1 text-xs font-semibold ${theme.textPrimary}`}>{o.k}</span>
                       {/* SHOW_PRICES: prix option — masqué si false */}
-                      {SHOW_PRICES && (
+                      {showPrices && (
                         <span className={`text-[11px] font-bold ${theme.isDark ? "text-[#c4b5fd]" : "text-[#a8632d]"}`}>
                           +{o.p}€
                         </span>
@@ -1509,7 +1576,7 @@ export function DevisBuilder({
                     <RecapRow
                       key={l.key}
                       label={`${l.qty}× ${l.label} (${LEVELS[lvl].name})`}
-                      value={SHOW_PRICES ? `${l.total}€` : ""}
+                      value={showPrices ? `${l.total}€` : ""}
                       theme={theme}
                     />
                   ))}
@@ -1517,7 +1584,7 @@ export function DevisBuilder({
                     <RecapRow
                       key={o.k}
                       label={`Option : ${o.k} ×${pricing.totalVideos}`}
-                      value={SHOW_PRICES ? `+${o.p * pricing.totalVideos}€` : ""}
+                      value={showPrices ? `+${o.p * pricing.totalVideos}€` : ""}
                       theme={theme}
                     />
                   ))}
@@ -1551,7 +1618,7 @@ export function DevisBuilder({
               </div>
               <div className="text-right">
                 {/* SHOW_PRICES: badges collab/express et total animé — masqués si false */}
-                {SHOW_PRICES && (pricing.discAmt > 0 || pricing.expressAdd > 0) && pricing.subtotal > 0 && (
+                {showPrices && (pricing.discAmt > 0 || pricing.expressAdd > 0) && pricing.subtotal > 0 && (
                   <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mb-0.5 font-medium">
                     {[
                       pricing.discAmt > 0 ? "Collab -15%" : "",
@@ -1559,46 +1626,61 @@ export function DevisBuilder({
                     ].filter(Boolean).join(" · ")}
                   </p>
                 )}
-                {SHOW_PRICES && <AnimatedPrice total={pricing.total} />}
+                {showPrices && <AnimatedPrice total={pricing.total} />}
               </div>
             </div>
           </div>
 
-          <div className="space-y-3">
-            <p className={`text-[10px] font-bold uppercase tracking-[0.2em] ${theme.textMuted}`}>Vos coordonnées</p>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-              <Inp theme={theme} v={name} set={setName} ph="Nom complet *" />
-              <Inp theme={theme} v={email} set={setEmail} ph="Email *" type="email" />
-            </div>
-            <textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Précisions sur votre projet (facultatif)..."
-              rows={3}
-              className={`w-full rounded-xl border px-3 py-2.5 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 transition ${theme.inputBg}`}
-            />
-          </div>
+          {/* Section formulaire - cachée en mode admin */}
+          {!adminMode && (
+            <>
+              <div className="space-y-3">
+                <p className={`text-[10px] font-bold uppercase tracking-[0.2em] ${theme.textMuted}`}>Vos coordonnées</p>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+                  <Inp theme={theme} v={name} set={setName} ph="Nom complet *" />
+                  <Inp theme={theme} v={email} set={setEmail} ph="Email *" type="email" />
+                </div>
+                <textarea
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="Précisions sur votre projet (facultatif)..."
+                  rows={3}
+                  className={`w-full rounded-xl border px-3 py-2.5 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 transition ${theme.inputBg}`}
+                />
+              </div>
 
-          <button
-            type="submit"
-            disabled={status === "loading" || !name || !email || pricing.totalVideos === 0}
-            className={`inline-flex w-full items-center justify-center rounded-full ${theme.submit} px-6 py-4 text-sm font-semibold transition disabled:opacity-40`}
-          >
-            {status === "loading" ? "Envoi en cours…" : "Envoyer mon devis complet →"}
-          </button>
+              <button
+                type="submit"
+                disabled={status === "loading" || !name || !email || pricing.totalVideos === 0}
+                className={`inline-flex w-full items-center justify-center rounded-full ${theme.submit} px-6 py-4 text-sm font-semibold transition disabled:opacity-40`}
+              >
+                {status === "loading" ? "Envoi en cours…" : "Envoyer mon devis complet →"}
+              </button>
 
-          {status === "success" && (
-            <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-5 text-center">
-              <div className="mb-2 text-2xl">✓</div>
-              <p className="font-semibold text-emerald-700 mb-1">Votre devis a bien été envoyé</p>
-              <p className="text-sm text-emerald-600">
-                Vous recevrez votre devis détaillé par email d'ici quelques instants. Nous reviendrons vers vous sous 24 heures pour échanger sur votre projet.
-              </p>
-            </div>
+              {status === "success" && (
+                <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-5 text-center">
+                  <div className="mb-2 text-2xl">✓</div>
+                  <p className="font-semibold text-emerald-700 mb-1">Votre devis a bien été envoyé</p>
+                  <p className="text-sm text-emerald-600">
+                    Vous recevrez votre devis détaillé par email d'ici quelques instants. Nous reviendrons vers vous sous 24 heures pour échanger sur votre projet.
+                  </p>
+                </div>
+              )}
+              {status === "error" && (
+                <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-500">
+                  L&apos;envoi a échoué. Réessayez ou vérifiez vos informations.
+                </div>
+              )}
+            </>
           )}
-          {status === "error" && (
-            <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-500">
-              L&apos;envoi a échoué. Réessayez ou vérifiez vos informations.
+
+          {/* Mode admin - Message informatif */}
+          {adminMode && (
+            <div className="rounded-xl border border-purple-500/30 bg-purple-500/10 p-4 text-center">
+              <p className="font-semibold text-purple-300 mb-1">Prix unitaires affichés</p>
+              <p className="text-sm text-purple-400">
+                Tarifs de base sans réductions appliquées.
+              </p>
             </div>
           )}
         </div>
@@ -1617,7 +1699,7 @@ export function DevisBuilder({
               {pricing.totalVideos} vidéo{pricing.totalVideos > 1 ? "s" : ""} · {LEVELS[lvl].name}
             </span>
             {/* SHOW_PRICES: total barre mobile — masqué si false */}
-            {SHOW_PRICES && (
+            {showPrices && (
               <span className={`font-display text-xl font-bold tabular-nums ${theme.isDark ? "text-[#c4b5fd]" : "text-[#a8632d]"}`}>
                 {pricing.total}€
               </span>
