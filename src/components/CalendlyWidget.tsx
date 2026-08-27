@@ -22,7 +22,7 @@ export function CalendlyWidget() {
       {/* Widget Calendly intégré */}
       <div 
         className="calendly-inline-widget rounded-2xl overflow-hidden border border-foreground/15 bg-white shadow-sm" 
-        data-url="https://calendly.com/viziocraft-marketing/30min"
+        data-url="https://calendly.com/viziocraft/30min"
         style={{ minWidth: "320px", height: "700px" }}
       />
       
