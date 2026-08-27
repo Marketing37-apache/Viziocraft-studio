@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect, useRef } from "react";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
-import { ContactForm } from "@/components/ContactForm";
+import { CalendlyWidget } from "@/components/CalendlyWidget";
 import { Faq } from "@/components/Faq";
 import { MarqueeShorts, type ShortItem } from "@/components/MarqueeShorts";
 import { ServicesShowcase } from "@/components/ServicesShowcase";
@@ -510,11 +510,10 @@ function Index() {
               </span>
               <h3 className="mt-4 font-display text-xl sm:text-2xl lg:text-3xl">Réserver un appel de préparation</h3>
               <p className="mt-3 text-sm text-muted-foreground">
-                Quelques infos suffisent — on revient vers vous rapidement pour caler un appel et discuter
-                de votre projet (formats, volume, délais).
+                Choisissez votre créneau et réservez directement — on discute de votre projet et répondons à toutes vos questions.
               </p>
               <div className="mt-6 sm:mt-7">
-                <ContactForm />
+                <CalendlyWidget />
               </div>
             </div>
           </div>

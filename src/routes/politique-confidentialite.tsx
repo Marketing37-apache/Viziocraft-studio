@@ -35,7 +35,7 @@ function Page() {
 
         <h2>Sous-traitants</h2>
         <p>
-          Le formulaire de contact est traité par Formspree (services d'envoi d'email), conforme au RGPD.
+          Le système de réservation de rendez-vous est géré par Calendly, conforme au RGPD.
           Les vidéos intégrées au site proviennent de YouTube et Google Drive, susceptibles d'installer
           leurs propres cookies — voir leurs politiques respectives.
         </p>
@@ -43,7 +43,7 @@ function Page() {
         <h2>Vos droits</h2>
         <p>
           Conformément au RGPD, vous disposez d'un droit d'accès, de rectification, d'opposition et de
-          suppression de vos données. Pour exercer ces droits, contactez-nous via le formulaire du site.
+          suppression de vos données. Pour exercer ces droits, contactez-nous via le widget Calendly du site.
         </p>
       </LegalPage>
       <Footer />

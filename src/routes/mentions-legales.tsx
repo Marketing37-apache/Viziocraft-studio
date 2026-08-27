@@ -20,7 +20,7 @@ function Page() {
         </p>
         <p>
           Co-fondateurs : Charles Boucher, Alexandre Boucher.<br />
-          Email de contact : via le formulaire disponible sur la page Contact.
+          Email de contact : via le widget de réservation Calendly disponible sur la page d'accueil.
         </p>
 
         <h2>Hébergement</h2>
