@@ -410,7 +410,7 @@ function Index() {
                 <span className="font-display text-4xl">850 €</span>
                 <span className="text-sm text-white/70">/ mois</span>
               </div>
-              <p className="text-xs text-white/65">Jusqu'à 20 shorts + 4 longs formats</p>
+              <p className="text-xs text-white/65">Jusqu'à 20 shorts ou 4 longs formats</p>
               <ul className="mt-6 space-y-2.5 text-sm">
                 {["Tous formats inclus", "Support prioritaire", "Révisions illimitées", "Livraison continue", "Au-delà : tarif préférentiel"].map((f) => (
                   <li key={f} className="flex items-start gap-3"><CheckLight /> {f}</li>
