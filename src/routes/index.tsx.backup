@@ -8,9 +8,6 @@ import { MarqueeShorts, type ShortItem } from "@/components/MarqueeShorts";
 import { ServicesShowcase } from "@/components/ServicesShowcase";
 import { ProcessTimeline } from "@/components/ProcessTimeline";
 
-// Flag pour masquer temporairement l'offre "Montage continu"
-const SHOW_MONTAGE_CONTINU = false;
-
 export const Route = createFileRoute("/")({
   component: Index,
   head: () => ({
@@ -368,14 +365,14 @@ function Index() {
           <div className="max-w-3xl">
             <Eyebrow>Tarifs</Eyebrow>
             <h2 className="mt-4 font-display text-3xl tracking-tight sm:text-4xl lg:text-5xl">
-              {SHOW_MONTAGE_CONTINU ? 'Trois' : 'Deux'} manières de travailler <span className="text-brand-gradient">ensemble.</span>
+              Trois manières de travailler <span className="text-brand-gradient">ensemble.</span>
             </h2>
             <p className="mt-4 text-[15px] sm:text-base text-muted-foreground">
               Pas de surprises, pas de frais cachés. Les détails du devis se construisent à la demande.
             </p>
           </div>
 
-          <div className={`mt-10 sm:mt-12 grid gap-4 sm:gap-6 ${SHOW_MONTAGE_CONTINU ? 'lg:grid-cols-3' : 'lg:grid-cols-2 lg:max-w-4xl lg:mx-auto'}`}>
+          <div className="mt-10 sm:mt-12 grid gap-4 sm:gap-6 lg:grid-cols-3">
             {/* Essentiel — léger */}
             <div className="relative flex flex-col rounded-3xl border border-foreground/10 bg-card p-6 sm:p-8 transition hover:-translate-y-1 hover:shadow-[0_30px_60px_-25px_rgba(123,45,142,0.25)]">
               <span className="inline-flex w-fit items-center rounded-full bg-amber-100 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-amber-700">À la vidéo</span>
@@ -401,7 +398,6 @@ function Index() {
             </div>
 
             {/* Continu — populaire, dark */}
-            {SHOW_MONTAGE_CONTINU && (
             <div className="relative flex flex-col rounded-3xl border-2 border-transparent bg-[#1a0b2e] p-6 sm:p-8 text-white shadow-[0_40px_70px_-25px_rgba(123,45,142,0.55)] lg:scale-[1.03]">
               <div className="absolute -inset-px -z-10 rounded-3xl bg-brand-gradient opacity-50 blur-2xl" />
               <span className="absolute -top-3 left-8 rounded-full bg-brand-gradient px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-white shadow-lg">
@@ -427,7 +423,6 @@ function Index() {
                 Démarrer →
               </a>
             </div>
-            )}
 
             {/* Sur mesure */}
             <div className="relative flex flex-col rounded-3xl border border-foreground/10 bg-card p-6 sm:p-8 transition hover:-translate-y-1 hover:shadow-[0_30px_60px_-25px_rgba(123,45,142,0.25)]">
