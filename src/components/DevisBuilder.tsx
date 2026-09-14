@@ -22,7 +22,7 @@ const BASE_PRICES: Record<string, number> = {
   pd: 250,
 };
 
-/** Neuro = ×1 · Cinetic = ×1.25 · Domination = ×1.875 (Cinetic ×1.5) */
+/** Basic = ×1 · Standard = ×1.25 · Premium = ×1.875 (Standard ×1.5) */
 const LEVEL_MULT = [1, 1.25, 1.875] as const;
 const EXPRESS_RATE = 0.35;
 
@@ -31,7 +31,7 @@ const EXPRESS_RATE = 0.35;
  * Chaque unité est facturée au prix de sa tranche.
  * Le total est donc strictement croissant, sans rebond possible.
  *
- * Vérification clé (s1 Neuro) :
+ * Vérification clé (s1 Basic) :
  *   10 shorts → 9×28 + 1×24 = 276€  (moy. 27,6€)
  *   20 shorts → +10×24 = 492€       (moy. 24,6€  → ~25-26€ cible ✓)
  *   30 shorts → +10×21+1×17 = 719€  (one-shot) → ×0.85 = 611€ multishoot ✓
@@ -166,15 +166,15 @@ const MULTISHOOT_FREQUENCIES = [
 
 const LEVELS = [
   {
-    name: "Neuro",
+    name: "Basic",
     multLabel: "Tarif de base",
     includes: null as string | null,
     bullets: ["Cuts propres", "Sous-titres simples", "Sound design léger", "Hook optimisé", "Orthographe vérifiée"],
   },
   {
-    name: "Cinetic",
-    multLabel: "+25% vs Neuro",
-    includes: "Tout Neuro inclus",
+    name: "Standard",
+    multLabel: "+25% vs Basic",
+    includes: "Tout Basic inclus",
     bullets: [
       "Animations & zooms",
       "B-roll intégré",
@@ -184,9 +184,9 @@ const LEVELS = [
     ],
   },
   {
-    name: "Domination",
-    multLabel: "+50% vs Cinetic",
-    includes: "Tout Cinetic inclus",
+    name: "Premium",
+    multLabel: "+50% vs Standard",
+    includes: "Tout Standard inclus",
     bullets: ["Motion design", "Animations avancées", "Color grading cinéma", "Branding intégré"],
   },
 ];

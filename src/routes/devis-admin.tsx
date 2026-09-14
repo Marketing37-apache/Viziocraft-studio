@@ -27,9 +27,9 @@ const FORMATS = [
 
 /** Multiplicateurs de niveau, identiques à DevisBuilder.tsx */
 const LEVELS = [
-  { name: "Neuro", mult: 1 },
-  { name: "Cinetic", mult: 1.25 },
-  { name: "Domination", mult: 1.875 },
+  { name: "Basic", mult: 1 },
+  { name: "Standard", mult: 1.25 },
+  { name: "Premium", mult: 1.875 },
 ];
 
 /** Options, prix fixe par vidéo, indépendant du niveau */
