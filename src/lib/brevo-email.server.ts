@@ -4,6 +4,7 @@ import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 // API Key Brevo depuis les variables d'environnement
 const BREVO_API_KEY = process.env.BREVO_API_KEY || "";
 const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
+const BREVO_CONTACTS_URL = "https://api.brevo.com/v3/contacts";
 
 type SendDevisPayload = {
   name: string;
@@ -30,12 +31,19 @@ export const sendDevisEmails = createServerFn({ method: "POST" })
     const { name, email, company, message, devisData } = data;
 
     try {
-      // Génération du PDF
+      // ========================================
+      // ÉTAPE 1: Ajouter le contact dans Brevo
+      // ========================================
+      await addContactToBrevo(name, email, company, devisData);
+
+      // ========================================
+      // ÉTAPE 2: Génération du PDF
+      // ========================================
       const pdfBuffer = await generateDevisPDF(name, email, devisData);
       const pdfBase64 = pdfBuffer.toString("base64");
 
       // ========================================
-      // EMAIL 1 → TOI (marketing@viziocraft.com)
+      // ÉTAPE 3: EMAIL 1 → TOI (marketing@viziocraft.com)
       // ========================================
       const emailToYou = {
         sender: { name: "VizioCraft Devis", email: "marketing@viziocraft.com" },
@@ -60,7 +68,7 @@ export const sendDevisEmails = createServerFn({ method: "POST" })
       }
 
       // ========================================
-      // EMAIL 2 → CLIENT (avec PDF joint)
+      // ÉTAPE 4: EMAIL 2 → CLIENT (avec PDF joint)
       // ========================================
       const emailToClient = {
         sender: { name: "VizioCraft", email: "marketing@viziocraft.com" },
@@ -97,6 +105,65 @@ export const sendDevisEmails = createServerFn({ method: "POST" })
     }
   }
 );
+
+// ========================================
+// AJOUTER CONTACT DANS BREVO (pour les relances)
+// ========================================
+async function addContactToBrevo(
+  name: string, 
+  email: string, 
+  company?: string, 
+  devisData?: any
+): Promise<void> {
+  try {
+    // Préparer les attributs du contact
+    const attributes: Record<string, any> = {
+      FIRSTNAME: name.split(' ')[0] || name,
+      LASTNAME: name.split(' ').slice(1).join(' ') || '',
+    };
+
+    // Ajouter l'entreprise si fournie
+    if (company) {
+      attributes.COMPANY = company;
+    }
+
+    // Ajouter des infos du devis si disponibles
+    if (devisData) {
+      attributes.LAST_QUOTE_AMOUNT = devisData.totalFinal;
+      attributes.LAST_QUOTE_LEVEL = devisData.niveau;
+      attributes.LAST_QUOTE_TYPE = devisData.formula;
+      attributes.LAST_CONTACT_DATE = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
+    }
+
+    const contactPayload = {
+      email: email,
+      attributes: attributes,
+      listIds: [2], // ID de la liste "Prospects Devis" (à créer dans Brevo si besoin)
+      updateEnabled: true, // Met à jour le contact s'il existe déjà
+    };
+
+    const response = await fetch(BREVO_CONTACTS_URL, {
+      method: "POST",
+      headers: {
+        "api-key": BREVO_API_KEY,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(contactPayload),
+    });
+
+    // Même si ça fail (contact existant, etc.), on continue l'envoi d'email
+    if (!response.ok) {
+      const error = await response.text();
+      console.warn(`Avertissement ajout contact Brevo: ${error}`);
+      // On ne throw pas d'erreur, juste un warning
+    } else {
+      console.log(`Contact ${email} ajouté/mis à jour dans Brevo`);
+    }
+  } catch (error) {
+    console.warn(`Erreur ajout contact Brevo:`, error);
+    // On continue malgré l'erreur pour ne pas bloquer l'envoi d'email
+  }
+}
 
 // ========================================
 // GÉNÉRATION PDF DU DEVIS (création from scratch avec header stylé)
