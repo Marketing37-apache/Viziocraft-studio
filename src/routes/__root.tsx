@@ -110,22 +110,26 @@ function RootShell({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr">
       <head>
-        {/* GTM — chargé de façon asynchrone pour ne pas bloquer le thread principal */}
+        {/* Google Tag Manager */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `window.dataLayer=window.dataLayer||[];
-(function(){var s=document.createElement('script');s.async=true;
-s.src='https://www.googletagmanager.com/gtm.js?id=GTM-WQLN2XWD';
-document.head.appendChild(s);})();`,
+            __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-WQLN2XWD');`,
           }}
         />
+        {/* End Google Tag Manager */}
         <HeadContent />
         {/* Fonts avec display=swap pour chargement non-bloquant */}
         <link rel="preload" as="style" href={FONTS_URL} />
         <link rel="stylesheet" href={FONTS_URL} />
       </head>
       <body>
+        {/* Google Tag Manager (noscript) */}
         <noscript dangerouslySetInnerHTML={{ __html: '<iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WQLN2XWD" height="0" width="0" style="display:none;visibility:hidden"></iframe>' }} />
+        {/* End Google Tag Manager (noscript) */}
         {children}
         <Scripts />
       </body>
