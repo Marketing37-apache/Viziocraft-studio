@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { sendDevisEmails } from "@/lib/brevo-email.server";
 
 /**
- * SHOW_PRICES — contrôle l'affichage de tous les montants financiers dans le configurateur.
+ * SHOW_PRICES - contrôle l'affichage de tous les montants financiers dans le configurateur.
  * false = les prix sont masqués (logique de calcul conservée, email envoyé avec le total).
  * true  = comportement normal, tous les prix s'affichent.
  * Pour réactiver : passer à true.
@@ -13,38 +13,34 @@ const SHOW_PRICES = false;
 // const FORMSPREE = "https://formspree.io/f/maqkaznd";
 
 const BASE_PRICES: Record<string, number> = {
-  s1: 30,
-  s2: 35,
-  pb: 50,
-  l1: 200,
-  l2: 220,
-  l3: 260,
-  pd: 250,
+  short: 45,
+  ads: 48,
+  podcast: 400,
+  interview: 400,
+  vlog: 125,
+  documentaire: 150,
 };
-
-/** Basic = ×1 · Standard = ×1.25 · Premium = ×1.875 (Standard ×1.5) */
-const LEVEL_MULT = [1, 1.25, 1.875] as const;
 const EXPRESS_RATE = 0.35;
 
 /**
- * Tranches marginales pour les shorts — ancre s1 = 28€.
+ * Tranches marginales pour les shorts - ancre short = 45€.
  * Chaque unité est facturée au prix de sa tranche.
  * Le total est donc strictement croissant, sans rebond possible.
  *
- * Vérification clé (s1 Basic) :
- *   10 shorts → 9×28 + 1×24 = 276€  (moy. 27,6€)
- *   20 shorts → +10×24 = 492€       (moy. 24,6€  → ~25-26€ cible ✓)
- *   30 shorts → +10×21+1×17 = 719€  (one-shot) → ×0.85 = 611€ multishoot ✓
+ * Vérification clé (short) :
+ *   10 shorts → 9×45 + 1×38 = 443€  (moy. 44,3€)
+ *   20 shorts → +10×38 = 823€       (moy. 41,15€)
+ *   30 shorts → +10×33+1×27 = 1186€ (one-shot) → ×0.85 = 1008€ multishoot ✓
  */
 const SHORT_TIERS: { from: number; to: number; ref: number }[] = [
-  { from: 1,   to: 9,        ref: 28   },
-  { from: 10,  to: 19,       ref: 24   },
-  { from: 20,  to: 29,       ref: 21   },
-  { from: 30,  to: 49,       ref: 17   },
-  { from: 50,  to: 79,       ref: 16   },
-  { from: 80,  to: 119,      ref: 15   },
-  { from: 120, to: 149,      ref: 14   },
-  { from: 150, to: Infinity, ref: 13.5 },
+  { from: 1,   to: 9,        ref: 45   },
+  { from: 10,  to: 19,       ref: 38   },
+  { from: 20,  to: 29,       ref: 33   },
+  { from: 30,  to: 49,       ref: 27   },
+  { from: 50,  to: 79,       ref: 25   },
+  { from: 80,  to: 119,      ref: 23   },
+  { from: 120, to: 149,      ref: 22   },
+  { from: 150, to: Infinity, ref: 21   },
 ];
 
 /**
@@ -54,7 +50,7 @@ const SHORT_TIERS: { from: number; to: number; ref: number }[] = [
  */
 function calcShortTotal(basePrice: number, qty: number): { total: number; unitAvg: number } {
   if (qty <= 0) return { total: 0, unitAvg: basePrice };
-  const anchor = 28;
+  const anchor = 45; // Nouveau prix de référence pour short
   let total = 0;
   let remaining = qty;
   for (const tier of SHORT_TIERS) {
@@ -73,7 +69,7 @@ function calcShortTotal(basePrice: number, qty: number): { total: number; unitAv
 /**
  * Tranches marginales pour les longs formats.
  * Volumes faibles donc tranches courtes.
- * Ratios appliqués sur le prix de base de chaque format (l1=200, l2=220, l3=260).
+ * Ratios appliqués sur le prix de base de chaque format (podcast=400, interview=400, vlog=125, documentaire=150).
  *
  *  1-2  -> prix plein
  *  3-5  -> -5%
@@ -105,55 +101,28 @@ function calcLongTotal(basePrice: number, qty: number): { total: number; unitAvg
   return { total, unitAvg: Math.round((total / qty) * 100) / 100 };
 }
 
-/**
- * Podcast - -3% par episode supplementaire en tranches, plafonne a -20%.
- * Chaque episode i (0-indexe) coute basePrice x (1 - min(i x 0.03, 0.20)).
- * Total toujours croissant car chaque episode > 0 euros.
- */
-function calcPodTotal(basePrice: number, qty: number): { total: number; unitAvg: number } {
-  if (qty <= 0) return { total: 0, unitAvg: basePrice };
-  let total = 0;
-  for (let i = 0; i < qty; i++) {
-    const disc = Math.min(i * 0.03, 0.20);
-    total += Math.round(basePrice * (1 - disc));
-  }
-  return { total, unitAvg: Math.round((total / qty) * 100) / 100 };
-}
 
-/** 3 familles distinctes */
+
+/** 2 familles distinctes */
 const FORMAT_CATEGORIES = [
   {
     id: "short",
-    title: "Short / Reel",
-    subtitle: "Reels, TikTok, facecam, UGC, pub",
+    title: "Formats Courts",
+    subtitle: "Reels, TikTok, Ads",
     formats: [
-      { key: "s1", name: "Short Classique", desc: "Facecam & UGC — cut dynamique, sous-titres", dur: "-45s" },
-      { key: "s2", name: "Short Développé", desc: "Storytelling vertical plus développé", dur: "+45s" },
-      { key: "pb", name: "Short Publicitaire", desc: "Spot publicitaire — hook, CTA, rythme serré" },
+      { key: "short", name: "Short", desc: "Contenu vertical - Reels, TikTok, facecam, UGC", dur: "" },
+      { key: "ads", name: "Ads", desc: "Spot publicitaire - hook, CTA, rythme serré", dur: "" },
     ],
   },
   {
     id: "long",
-    title: "Long YouTube",
-    subtitle: "Vlog, tutoriel, review, documentaire",
+    title: "Formats Longs",
+    subtitle: "Contenus 0-15min",
     formats: [
-      { key: "l1", name: "Format classique", desc: "Capsules, tutos courts, review", dur: "-8 min" },
-      { key: "l2", name: "Format Standard", desc: "Vlog dense, entretien, documentary court", dur: "8–15 min" },
-      { key: "l3", name: "Format Long", desc: "Documentaire, masterclass, film de marque", dur: "+15 min" },
-    ],
-  },
-  {
-    id: "pod",
-    title: "Podcast / Interview",
-    subtitle: "Montage vidéo d'épisodes filmés",
-    formats: [
-      {
-        key: "pd",
-        name: "Podcast / Interview Filmé",
-        desc: "Multi-cam, sync audio, chapitrage — travail distinct du long YouTube",
-        dur: "20–90 min",
-        unitLabel: "épisode",
-      },
+      { key: "podcast", name: "Podcast", desc: "Épisode podcast filmé", dur: "0-15 min" },
+      { key: "interview", name: "Interview", desc: "Entretien filmé", dur: "0-15 min" },
+      { key: "vlog", name: "Vlog", desc: "Vlog personnel ou lifestyle", dur: "0-15 min" },
+      { key: "documentaire", name: "Documentaire", desc: "Contenu documentaire court", dur: "0-15 min" },
     ],
   },
 ] as const;
@@ -164,44 +133,17 @@ const MULTISHOOT_FREQUENCIES = [
   "En lot unique à la fin",
 ];
 
-const LEVELS = [
-  {
-    name: "Basic",
-    multLabel: "Tarif de base",
-    includes: null as string | null,
-    bullets: ["Cuts propres", "Sous-titres simples", "Sound design léger", "Hook optimisé", "Orthographe vérifiée"],
-  },
-  {
-    name: "Standard",
-    multLabel: "+25% vs Basic",
-    includes: "Tout Basic inclus",
-    bullets: [
-      "Animations & zooms",
-      "B-roll intégré",
-      "Transitions travaillées",
-      "Rythme dynamique",
-      "Qualité optimisée",
-    ],
-  },
-  {
-    name: "Premium",
-    multLabel: "+50% vs Standard",
-    includes: "Tout Standard inclus",
-    bullets: ["Motion design", "Animations avancées", "Color grading cinéma", "Branding intégré"],
-  },
-];
-
 const OPTIONS = [
-  { k: "Sous-titres animés", p: 8 },
-  { k: "Sound design", p: 5 },
-  { k: "Multi-format export", p: 8 },
-  { k: "Voix-off / narration", p: 15 },
+  { k: "Sous-titres animés", p: 15 },
+  { k: "Motion design", p: 30 },
+  { k: "Voix-off / narration", p: 20 },
+  { k: "Illustration", p: 15 },
 ];
 
 const ALL_KEYS = Object.keys(BASE_PRICES);
 const EMPTY_QTY = Object.fromEntries(ALL_KEYS.map((k) => [k, 0]));
 
-/* ─── useHoldCounter — incrément continu au maintien ─────────────────────── */
+/* --- useHoldCounter - incrément continu au maintien ---- */
 function useHoldCounter(
   onTick: (delta: number) => void,
   delta: number,
@@ -355,84 +297,74 @@ function catIconClass(theme: Theme, catId: string): string {
 }
 
 /**
- * Délais de livraison — 12 monteurs en relais 7j/7
+ * Délais de livraison - 12 monteurs en relais 7j/7
  * (logique par famille de contenu, goulot d'étranglement = le max)
  */
-function calcDeliveryStandard(quantities: Record<string, number>, podShorts: number): number {
-  const s1 = (quantities["s1"] ?? 0) + (quantities["s2"] ?? 0);
-  const pb = quantities["pb"] ?? 0;
-  const l1 = quantities["l1"] ?? 0;
-  const l2 = quantities["l2"] ?? 0;
-  const l3 = quantities["l3"] ?? 0;
-  const pd = quantities["pd"] ?? 0;
+function calcDeliveryStandard(quantities: Record<string, number>): number {
+  const short = (quantities["short"] ?? 0);
+  const ads = quantities["ads"] ?? 0;
+  const podcast = quantities["podcast"] ?? 0;
+  const interview = quantities["interview"] ?? 0;
+  const vlog = quantities["vlog"] ?? 0;
+  const documentaire = quantities["documentaire"] ?? 0;
 
-  let dS1 = 0;
-  if (s1 > 0) {
-    if      (s1 <= 8)   dS1 = 2;
-    else if (s1 <= 20)  dS1 = 3;
-    else if (s1 <= 35)  dS1 = 4;
-    else if (s1 <= 50)  dS1 = 5;
-    else if (s1 <= 70)  dS1 = 6;
-    else                dS1 = 8 + Math.floor((s1 - 70) / 15);
+  // Délais pour formats courts
+  let dShort = 0;
+  const totalShorts = short + ads;
+  if (totalShorts > 0) {
+    if      (totalShorts <= 8)   dShort = 2;
+    else if (totalShorts <= 20)  dShort = 3;
+    else if (totalShorts <= 35)  dShort = 4;
+    else if (totalShorts <= 50)  dShort = 5;
+    else if (totalShorts <= 70)  dShort = 6;
+    else                         dShort = 8 + Math.floor((totalShorts - 70) / 15);
   }
 
-  let dPb = 0;
-  if (pb > 0) {
-    if      (pb <= 8)   dPb = 2;
-    else if (pb <= 20)  dPb = 3;
-    else if (pb <= 35)  dPb = 4;
-    else if (pb <= 50)  dPb = 5;
-    else if (pb <= 70)  dPb = 6;
-    else                dPb = 8 + Math.floor((pb - 70) / 15);
+  // Délais pour podcasts
+  let dPodcast = 0;
+  if (podcast > 0) {
+    if      (podcast <= 2)   dPodcast = 3;
+    else if (podcast <= 6)   dPodcast = 5;
+    else if (podcast <= 12)  dPodcast = 7;
+    else                     dPodcast = 8 + Math.ceil((podcast - 12) / 2);
   }
 
-  let dL1 = 0;
-  if (l1 > 0) {
-    if      (l1 <= 3)   dL1 = 2;
-    else if (l1 <= 8)   dL1 = 4;
-    else if (l1 <= 12)  dL1 = 6;
-    else                dL1 = 6 + Math.ceil((l1 - 12) / 3);
+  // Délais pour interviews
+  let dInterview = 0;
+  if (interview > 0) {
+    if      (interview <= 2)   dInterview = 3;
+    else if (interview <= 6)   dInterview = 5;
+    else if (interview <= 12)  dInterview = 7;
+    else                       dInterview = 8 + Math.ceil((interview - 12) / 2);
   }
 
-  let dL2 = 0;
-  if (l2 > 0) {
-    if      (l2 <= 2)   dL2 = 3;
-    else if (l2 <= 6)   dL2 = 5;
-    else if (l2 <= 12)  dL2 = 7;
-    else                dL2 = 8 + Math.ceil((l2 - 12) / 2);
+  // Délais pour vlogs
+  let dVlog = 0;
+  if (vlog > 0) {
+    if      (vlog <= 3)   dVlog = 2;
+    else if (vlog <= 8)   dVlog = 4;
+    else if (vlog <= 12)  dVlog = 6;
+    else                  dVlog = 6 + Math.ceil((vlog - 12) / 3);
   }
 
-  let dL3 = 0;
-  if (l3 > 0) {
-    if      (l3 === 1)  dL3 = 6;
-    else if (l3 <= 4)   dL3 = 10;
-    else if (l3 <= 8)   dL3 = 14;
-    else                dL3 = 14 + Math.ceil((l3 - 8) * 2);
+  // Délais pour documentaires
+  let dDoc = 0;
+  if (documentaire > 0) {
+    if      (documentaire === 1)  dDoc = 6;
+    else if (documentaire <= 4)   dDoc = 10;
+    else if (documentaire <= 8)   dDoc = 14;
+    else                          dDoc = 14 + Math.ceil((documentaire - 8) * 2);
   }
 
-  let dPd = 0;
-  if (pd > 0) {
-    if      (pd === 1)  dPd = 4;
-    else if (pd <= 3)   dPd = 6;
-    else if (pd <= 6)   dPd = 9;
-    else if (pd <= 10)  dPd = 12;
-    else                dPd = 12 + Math.ceil((pd - 10) / 2);
-  }
-
-  const podShortDays = podShorts > 0
-    ? (podShorts <= 8 ? 1 : podShorts <= 20 ? 2 : 3)
-    : 0;
-
-  return Math.max(dS1, dPb, dL1, dL2, dL3, dPd + podShortDays);
+  return Math.max(dShort, dPodcast, dInterview, dVlog, dDoc);
 }
 
 function calcDeliveryDays(
   quantities: Record<string, number>,
-  podShorts: number,
   isExpress: boolean,
 ): string {
-  const standard = calcDeliveryStandard(quantities, podShorts);
-  if (standard === 0) return "—";
+  const standard = calcDeliveryStandard(quantities);
+  if (standard === 0) return "-";
 
   if (!isExpress) {
     if (standard <= 1) return "24h";
@@ -440,12 +372,11 @@ function calcDeliveryDays(
     return `${standard} jours`;
   }
 
-  const s1 = (quantities["s1"] ?? 0) + (quantities["s2"] ?? 0);
-  const pb = quantities["pb"] ?? 0;
-  const l3 = quantities["l3"] ?? 0;
-  const pd = quantities["pd"] ?? 0;
+  const totalShorts = (quantities["short"] ?? 0) + (quantities["ads"] ?? 0);
+  const documentaire = quantities["documentaire"] ?? 0;
+  const podcast = quantities["podcast"] ?? 0;
 
-  const expressBlocked = s1 > 70 || pb > 70 || l3 > 4 || pd > 6;
+  const expressBlocked = totalShorts > 70 || documentaire > 4 || podcast > 6;
   if (expressBlocked) {
     if (standard <= 1) return "24h";
     if (standard === 2) return "48h";
@@ -467,13 +398,12 @@ function formatLabel(key: string): string {
 }
 
 const FORMAT_HINTS: Record<string, string> = {
-  s1: "Facecam · UGC · cut dynamique",
-  s2: "Storytelling vertical développé",
-  pb: "Spot pub · hook fort · CTA",
-  l1: "Capsules · tutos courts · review",
-  l2: "Vlog dense · entretien · docu court",
-  l3: "Documentaire · masterclass · marque",
-  pd: "Multi-cam · sync audio · chapitrage",
+  short: "Facecam · UGC · cut dynamique",
+  ads: "Spot pub · hook fort · CTA",
+  podcast: "Multi-cam · sync audio · chapitrage",
+  interview: "Entretien professionnel · 2 caméras",
+  vlog: "Lifestyle · storytelling · montage fluide",
+  documentaire: "Enquête · voix-off · montage narratif",
 };
 
 /* ─── FormatCard ──────────────────────────────────────────────────────────── */
@@ -586,103 +516,24 @@ function FormatCard({
   }
 
   return (
-    <div className={`flex flex-col justify-between rounded-2xl border p-3.5 sm:p-5 transition-all duration-300 ${getCardStyle(active, theme.isDark)}`}>
-      <div className="space-y-2.5">
+    <div className={`flex flex-col justify-between rounded-2xl border p-4 sm:p-5 lg:p-6 transition-all duration-300 ${getCardStyle(active, theme.isDark)} min-h-[180px] sm:min-h-[200px]`}>
+      <div className="space-y-3">
         <div className="flex items-start justify-between gap-3">
-          <h4 className={`text-sm font-bold leading-tight font-display ${theme.textPrimary}`}>{fmt.name}</h4>
+          <h4 className={`text-sm sm:text-base font-bold leading-tight font-display ${theme.textPrimary}`}>{fmt.name}</h4>
           {"dur" in fmt && fmt.dur && (
-            <span className={`shrink-0 rounded-full px-2 py-0.5 text-[9px] font-bold border whitespace-nowrap ${durBadge}`}>
+            <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[9px] sm:text-[10px] font-bold border whitespace-nowrap ${durBadge}`}>
               {fmt.dur}
             </span>
           )}
         </div>
-        <p className={`text-[10px] font-semibold tracking-wide ${active ? activeAccent : theme.textMuted}`}>{hint}</p>
-        <p className={`text-[11px] leading-relaxed ${theme.textSecondary}`}>{fmt.desc}</p>
+        <p className={`text-[10px] sm:text-[11px] font-semibold tracking-wide ${active ? activeAccent : theme.textMuted}`}>{hint}</p>
+        <p className={`text-[11px] sm:text-xs leading-relaxed ${theme.textSecondary}`}>{fmt.desc}</p>
       </div>
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-foreground/5 pt-4">
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-foreground/5 pt-4">
         <span className={`text-[10px] uppercase tracking-wider font-bold ${theme.textMuted}`}>
           {"unitLabel" in fmt && fmt.unitLabel ? fmt.unitLabel : "Quantité"}
         </span>
         <Stepper size="sm" />
-      </div>
-    </div>
-  );
-}
-
-/* ─── PodcastShortsSection — shorts dérivés du podcast ───────────────────── */
-function PodcastShortsSection({
-  qty,
-  onTick,
-  theme,
-  variant,
-}: {
-  qty: number;
-  onTick: (d: number) => void;
-  theme: Theme;
-  variant: string;
-}) {
-  const active = qty > 0;
-  const stepperBtnBase = theme.isDark
-    ? "bg-white/5 text-white hover:bg-white/10"
-    : "bg-white border border-foreground/10 text-[#1a1410] hover:bg-foreground/5 shadow-xs";
-  const stepperBtnPlus = theme.isDark
-    ? "bg-white/10 text-white hover:bg-white/20"
-    : "bg-white border border-foreground/10 text-[#1a1410] hover:bg-foreground/5 shadow-xs";
-
-  return (
-    <div className={`mt-5 rounded-2xl border p-3.5 sm:p-5 transition-all duration-300 ${getCardStyle(active, theme.isDark)}`}>
-      <div className="flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1.5">
-            <h4 className={`text-sm font-bold font-display ${theme.textPrimary}`}>Shorts tirés du podcast</h4>
-            <span className={`rounded-full px-2 py-0.5 text-[9px] font-bold border ${
-              active
-                ? variant === "surmesure" ? "bg-[#a78bfa]/20 border-[#a78bfa]/35 text-[#c4b5fd]" : "bg-[#a8632d]/10 border-[#a8632d]/25 text-[#a8632d]"
-                : theme.isDark ? "bg-white/5 border-white/10 text-white/45" : "bg-foreground/5 border-foreground/10 text-[#1a1410]/45"
-            }`}>
-              10€ / clip
-            </span>
-          </div>
-          <p className={`mt-1.5 text-xs leading-relaxed ${theme.textSecondary}`}>
-            Clips verticaux extraits et reformatés depuis vos épisodes — prêts pour TikTok, Reels et YouTube Shorts.
-          </p>
-        </div>
-        <div className={`flex flex-col items-center gap-2 shrink-0 pt-4 sm:pt-0 sm:pl-5 border-t sm:border-t-0 sm:border-l ${
-          theme.isDark ? "border-white/[0.07]" : "border-foreground/8"
-        }`}>
-          <span className={`text-[10px] uppercase tracking-wider font-bold ${theme.textMuted}`}>Nombre de clips</span>
-          <div className={`flex items-center gap-2 rounded-full p-1 border ${theme.isDark ? "bg-white/5 border-white/5" : "bg-foreground/[0.03] border-foreground/5"}`}>
-            <StepperButton
-              delta={-1}
-              onTick={onTick}
-              disabled={qty === 0}
-              className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-bold transition disabled:opacity-20 cursor-pointer select-none ${stepperBtnBase}`}
-            >
-              -
-            </StepperButton>
-            <input
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              min={0}
-              value={qty}
-              onChange={(e) => {
-                const v = parseInt(e.target.value.replace(/\D/g, ""), 10);
-                if (!isNaN(v) && v >= 0) onTick(v - qty);
-                else if (e.target.value === "") onTick(-qty);
-              }}
-              className={`w-10 text-center font-display text-sm sm:text-base font-bold tabular-nums bg-transparent border-none outline-none [appearance:textfield] ${active ? theme.textPrimary : theme.textMuted}`}
-              aria-label="Nombre de clips podcast"
-            />
-            <StepperButton
-              delta={1}
-              onTick={onTick}
-              className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-bold transition cursor-pointer select-none ${stepperBtnPlus}`}
-            >
-              +
-            </StepperButton>
-          </div>
-        </div>
       </div>
     </div>
   );
@@ -705,7 +556,7 @@ export function DevisBuilder({
   // Initialize with defaults first (server-side safe)
   const [quantities, setQuantities] = useState<Record<string, number>>(() => {
     const initial = { ...EMPTY_QTY };
-    initial["s1"] = 1; // Default: short classique = 1, everything else = 0
+    initial["short"] = 1; // Default: short = 1, everything else = 0
     return initial;
   });
   
@@ -721,14 +572,7 @@ export function DevisBuilder({
     }
   }, []);
   
-  // Shorts dérivés du podcast (section spéciale)
-  const [podShorts, setPodShorts] = useState(0);
-  
-  // Load from localStorage after mount
-  useEffect(() => {
-    const saved = localStorage.getItem('devis-podShorts');
-    if (saved) setPodShorts(parseInt(saved, 10));
-  }, []);
+  // Shorts dérivés du podcast (section spéciale) - SUPPRIMÉ
 
   const [activeTab, setActiveTab] = useState<string>("short");
   
@@ -737,12 +581,7 @@ export function DevisBuilder({
     if (saved) setActiveTab(saved);
   }, []);
   
-  const [lvl, setLvl] = useState(0);
-  
-  useEffect(() => {
-    const saved = localStorage.getItem('devis-lvl');
-    if (saved) setLvl(parseInt(saved, 10));
-  }, []);
+  // Niveau supprimé - plus utilisé
   
   const [opts, setOpts] = useState<Record<string, boolean>>({});
   
@@ -790,16 +629,8 @@ export function DevisBuilder({
   }, [quantities]);
 
   useEffect(() => {
-    localStorage.setItem('devis-podShorts', podShorts.toString());
-  }, [podShorts]);
-
-  useEffect(() => {
     localStorage.setItem('devis-activeTab', activeTab);
   }, [activeTab]);
-
-  useEffect(() => {
-    localStorage.setItem('devis-lvl', lvl.toString());
-  }, [lvl]);
 
   useEffect(() => {
     localStorage.setItem('devis-opts', JSON.stringify(opts));
@@ -833,56 +664,36 @@ export function DevisBuilder({
   // Reset express si la commande devient trop lourde pour l'offrir
   useEffect(() => {
     if (!express) return;
-    const s1total = (quantities["s1"] ?? 0) + (quantities["s2"] ?? 0);
-    const pbTotal = quantities["pb"] ?? 0;
-    const l3Total = quantities["l3"] ?? 0;
-    const pdTotal = quantities["pd"] ?? 0;
-    if (s1total > 70 || pbTotal > 70 || l3Total > 4 || pdTotal > 6) {
+    const totalShorts = (quantities["short"] ?? 0) + (quantities["ads"] ?? 0);
+    const documentaire = quantities["documentaire"] ?? 0;
+    const podcast = quantities["podcast"] ?? 0;
+    if (totalShorts > 70 || documentaire > 4 || podcast > 6) {
       setExpress(false);
     }
-  }, [quantities, podShorts, express]);
+  }, [quantities, express]);
 
   const theme = useMemo(() => buildTheme(variant === "surmesure"), [variant]);
 
   const pricing = useMemo(() => {
-    const mult = LEVEL_MULT[lvl];
-
     const lineItems = ALL_KEYS.filter((k) => quantities[k] > 0).map((key) => {
       const qty = quantities[key];
       const basePrice = BASE_PRICES[key];
 
       let calcResult: { total: number; unitAvg: number };
-      if (key === "s1" || key === "s2" || key === "pb") {
+      if (key === "short" || key === "ads") {
         calcResult = calcShortTotal(basePrice, qty);
-      } else if (key === "l1" || key === "l2" || key === "l3") {
+      } else if (key === "podcast" || key === "interview" || key === "vlog" || key === "documentaire") {
         calcResult = calcLongTotal(basePrice, qty);
-      } else if (key === "pd") {
-        calcResult = calcPodTotal(basePrice, qty);
       } else {
         calcResult = { total: basePrice * qty, unitAvg: basePrice };
       }
 
-      const total = Math.round(calcResult.total * mult);
-      const unitFinal = Math.round(calcResult.unitAvg * mult);
+      const total = calcResult.total;
+      const unitFinal = calcResult.unitAvg;
       return { key, label: formatLabel(key), qty, unitBase: basePrice, unitFinal, total };
     });
 
-    // Shorts dérivés du podcast (10€ base, mêmes tranches que les shorts classiques)
-    const podShortItems = podShorts > 0
-      ? (() => {
-          const { total: psTotal, unitAvg: psAvg } = calcShortTotal(10, podShorts);
-          return [{
-            key: "pod-short",
-            label: "Clips courts (podcast)",
-            qty: podShorts,
-            unitBase: 10,
-            unitFinal: Math.round(psAvg * mult),
-            total: Math.round(psTotal * mult),
-          }];
-        })()
-      : [];
-
-    const allItems = [...lineItems, ...podShortItems];
+    const allItems = lineItems;
     const totalVideos = allItems.reduce((s, l) => s + l.qty, 0);
     const videoTotal = allItems.reduce((s, l) => s + l.total, 0);
 
@@ -898,7 +709,7 @@ export function DevisBuilder({
     const total = afterDisc + expressAdd;
 
     const selectedOptions = OPTIONS.filter((o) => opts[o.k]);
-    const delivery = calcDeliveryDays(quantities, podShorts, express);
+    const delivery = calcDeliveryDays(quantities, express);
 
     return {
       lineItems: allItems,
@@ -915,7 +726,7 @@ export function DevisBuilder({
       selectedOptions,
       delivery,
     };
-  }, [quantities, podShorts, lvl, opts, express, duration]);
+  }, [quantities, opts, express, duration]);
 
   function setQty(key: string, delta: number) {
     setQuantities((prev) => ({
@@ -924,21 +735,8 @@ export function DevisBuilder({
     }));
   }
 
-  // Quand on passe podcast à 0, on remet aussi podShorts à 0
-  function setQtyPod(delta: number) {
-    setQuantities((prev) => {
-      const next = Math.max(0, (prev["pd"] ?? 0) + delta);
-      if (next === 0) setPodShorts(0);
-      return { ...prev, pd: next };
-    });
-  }
-
-  function setPodShortsDelta(delta: number) {
-    setPodShorts((prev) => Math.max(0, prev + delta));
-  }
-
   /**
-   * Corps du mail interne (reçu par VizioCraft) — version structurée.
+   * Corps du mail interne (reçu par VizioCraft) - version structurée.
    * Lisible d'un coup d'œil, sans bruit.
    */
   function buildInternalEmailBody(): string {
@@ -957,7 +755,7 @@ export function DevisBuilder({
       lines.push("  (aucun format)");
     } else {
       lineItems.forEach((l) => {
-        lines.push(`  • ${l.qty}× ${l.label}  —  niveau ${LEVELS[lvl].name}`);
+        lines.push(`  • ${l.qty}× ${l.label}`);
       });
     }
 
@@ -969,10 +767,10 @@ export function DevisBuilder({
     lines.push(
       "",
       "COLLABORATION",
-      `  ${duration === "multishoot" ? `Multishoot mensuel — ${frequency}` : "One shot"}`,
+      `  ${duration === "multishoot" ? `Multishoot mensuel - ${frequency}` : "One shot"}`,
       "",
       "DÉLAI DE LIVRAISON",
-      `  ${express ? `Express prioritaire` : `Standard — ${pricing.delivery}`}`,
+      `  ${express ? `Express prioritaire` : `Standard - ${pricing.delivery}`}`,
       "",
       sep,
       `TOTAL ESTIME : ${total}€`,
@@ -1024,7 +822,7 @@ export function DevisBuilder({
     if (lineItems.length > 0) {
       lines.push("  FORMATS");
       lineItems.forEach((l) => {
-        lines.push(row(`  ${l.qty}× ${l.label}`, `niveau ${LEVELS[lvl].name}`));
+        lines.push(row(`  ${l.qty}× ${l.label}`, `${l.total}€`));
       });
     }
 
@@ -1035,7 +833,7 @@ export function DevisBuilder({
 
     lines.push(
       "",
-      row("  Collaboration", duration === "multishoot" ? `Mensuelle — ${frequency}` : "One shot"),
+      row("  Collaboration", duration === "multishoot" ? `Mensuelle - ${frequency}` : "One shot"),
       row("  Délai estimé", express ? "Express prioritaire" : pricing.delivery),
       "",
       "────────────────────────────────────",
@@ -1057,7 +855,7 @@ export function DevisBuilder({
       "════════════════════════════════════",
       "",
       "Une question avant l'appel ?",
-      "Réponds directement à cet email — on te revient sous 24h.",
+      "Réponds directement à cet email - on te revient sous 24h.",
       "",
       "À très vite,",
       "L'équipe VizioCraft",
@@ -1072,11 +870,9 @@ export function DevisBuilder({
   // Function to reset form to defaults
   function resetForm() {
     const initial = { ...EMPTY_QTY };
-    initial["s1"] = 1;
+    initial["short"] = 1;
     setQuantities(initial);
-    setPodShorts(0);
     setActiveTab("short");
-    setLvl(0);
     setOpts({});
     setExpress(false);
     setDuration("multishoot");
@@ -1089,9 +885,7 @@ export function DevisBuilder({
     
     // Clear localStorage
     localStorage.removeItem('devis-quantities');
-    localStorage.removeItem('devis-podShorts');
     localStorage.removeItem('devis-activeTab');
-    localStorage.removeItem('devis-lvl');
     localStorage.removeItem('devis-opts');
     localStorage.removeItem('devis-express');
     localStorage.removeItem('devis-duration');
@@ -1115,8 +909,7 @@ export function DevisBuilder({
     // Préparation des données pour Brevo
     const devisData = {
       formula: variant === "surmesure" ? "Production sur mesure" : "Montage essentiel",
-      niveau: LEVELS[lvl].name,
-      collaboration: duration === "multishoot" ? `Multishoot mensuel — ${frequency}` : "One shot",
+      collaboration: duration === "multishoot" ? `Multishoot mensuel - ${frequency}` : "One shot",
       videos: pricing.lineItems.map((l) => ({
         type: l.label,
         qty: l.qty,
@@ -1166,16 +959,14 @@ export function DevisBuilder({
   const summaryLine =
     pricing.totalVideos === 0
       ? "Sélectionnez vos formats ci-dessus."
-      : `${pricing.totalVideos} vidéo${pricing.totalVideos > 1 ? "s" : ""} — ${LEVELS[lvl].name}${
-          duration === "multishoot" ? " — Multishoot mensuel" : " — One shot"
-        }${express ? " — Express" : ` — ${pricing.delivery}`}`;
-
-  const podQty = quantities["pd"] ?? 0;
+      : `${pricing.totalVideos} vidéo${pricing.totalVideos > 1 ? "s" : ""}${
+          duration === "multishoot" ? " - Multishoot mensuel" : " - One shot"
+        }${express ? " - Express" : ` - ${pricing.delivery}`}`;
 
   return (
-    <div id="devis-builder" className="w-full pb-24 lg:pb-0">
-      <form onSubmit={submit} className="grid gap-4 sm:gap-6 lg:grid-cols-[1.25fr_1fr] items-start">
-        <div className={`rounded-2xl sm:rounded-[2rem] border ${theme.containerBg} p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-10 shadow-xl relative`}>
+    <div id="devis-builder" className="w-full pb-24 lg:pb-0 max-w-[100rem] mx-auto px-4 sm:px-6">
+      <form onSubmit={submit} className="grid gap-6 sm:gap-8 lg:grid-cols-[1.3fr_1fr] xl:grid-cols-[1.4fr_1fr] items-start">
+        <div className={`rounded-2xl sm:rounded-[2rem] border ${theme.containerBg} p-6 sm:p-8 lg:p-12 xl:p-14 space-y-8 sm:space-y-12 shadow-xl relative`}>
           {onClose && (
             <button
               type="button"
@@ -1209,7 +1000,7 @@ export function DevisBuilder({
             </div>
           </header>
 
-          <div className="space-y-6 sm:space-y-10 border-t border-foreground/10 pt-5 sm:pt-8">
+          <div className="space-y-8 sm:space-y-12 border-t border-foreground/10 pt-6 sm:pt-10">
 
             {/* ── STEP 1 : Formats & quantités ── */}
             <Step n="1" title="Formats & quantités" theme={theme}>
@@ -1218,14 +1009,12 @@ export function DevisBuilder({
                 /* Mode Admin : Tous les formats affichés dans une grille complète */
                 <div className="space-y-8">
                   {/* Prix unitaires affichés */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6">
                     {FORMAT_CATEGORIES.flatMap((cat) =>
                       cat.formats.map((fmt) => {
                         const qty = quantities[fmt.key] ?? 0;
                         const basePrice = BASE_PRICES[fmt.key] ?? 0;
-                        const tickFn = fmt.key === "pd"
-                          ? (d: number) => setQtyPod(d)
-                          : (d: number) => setQty(fmt.key, d);
+                        const tickFn = (d: number) => setQty(fmt.key, d);
                         
                         return (
                           <div key={fmt.key} className="relative">
@@ -1246,52 +1035,38 @@ export function DevisBuilder({
                     )}
                   </div>
 
-                  {/* Shorts podcast - toujours visible en mode admin si qty podcast > 0 */}
-                  {podQty > 0 && (
-                    <div className="relative">
-                      <PodcastShortsSection
-                        qty={podShorts}
-                        onTick={setPodShortsDelta}
-                        theme={theme}
-                        variant={variant}
-                      />
-                      <div className="absolute -top-2 -right-2 bg-[#a78bfa] text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg">
-                        10€
-                      </div>
-                    </div>
-                  )}
+                  {/* Shorts podcast - supprimé car plus de système de clips dérivés */}
                 </div>
               ) : (
                 /* Mode Normal : Navigation par onglets */
                 <>
                   {/* Onglets */}
-                  <div className={`flex p-1 rounded-full border mb-4 sm:mb-6 ${theme.isDark ? "bg-white/5 border-white/10" : "bg-foreground/[0.03] border-foreground/5"}`}>
+                  <div className={`flex p-1.5 rounded-full border mb-6 sm:mb-8 ${theme.isDark ? "bg-white/5 border-white/10" : "bg-foreground/[0.03] border-foreground/5"}`}>
                     {FORMAT_CATEGORIES.map((cat) => {
                       const isActive = activeTab === cat.id;
-                      const count = cat.formats.reduce((s, f) => s + (quantities[f.key] ?? 0), 0)
-                        + (cat.id === "pod" ? podShorts : 0);
+                      const count = cat.formats.reduce((s, f) => s + (quantities[f.key] ?? 0), 0);
                       return (
                         <button
                           type="button"
                           key={cat.id}
                           onClick={() => setActiveTab(cat.id)}
-                          className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-1.5 sm:py-2 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer ${
+                          className={`flex-1 flex items-center justify-center gap-2 sm:gap-2.5 py-2 sm:py-2.5 px-3 sm:px-4 rounded-full text-sm font-semibold transition-all duration-200 cursor-pointer ${
                             isActive
                               ? variant === "surmesure"
-                                ? "bg-gradient-to-r from-[#a78bfa] to-[#ec4899] text-white shadow-sm"
-                                : "bg-[#a8632d] text-white shadow-sm"
+                                ? "bg-gradient-to-r from-[#a78bfa] to-[#ec4899] text-white shadow-md"
+                                : "bg-[#a8632d] text-white shadow-md"
                               : theme.isDark
                                 ? "text-white/60 hover:text-white"
                                 : "text-[#1a1410]/60 hover:text-[#1a1410]"
                           }`}
                         >
-                          <CatIcon id={cat.id} className="w-3.5 h-3.5 shrink-0" />
+                          <CatIcon id={cat.id} className="w-4 h-4 shrink-0" />
                           <span className="hidden sm:inline">{cat.title}</span>
                           <span className="sm:hidden">
-                            {cat.id === "short" ? "Shorts" : cat.id === "long" ? "Long" : "Podcast"}
+                            {cat.id === "short" ? "Courts" : "Longs"}
                           </span>
                           {count > 0 && (
-                            <span className={`min-w-[1.125rem] px-1 inline-flex items-center justify-center rounded-full text-[9px] font-extrabold ${
+                            <span className={`min-w-[1.25rem] px-1.5 inline-flex items-center justify-center rounded-full text-[10px] font-extrabold ${
                               isActive
                                 ? "bg-white text-black"
                                 : variant === "surmesure"
@@ -1310,19 +1085,18 @@ export function DevisBuilder({
                   {(() => {
                     const activeCategory = FORMAT_CATEGORIES.find((c) => c.id === activeTab);
                     if (!activeCategory) return null;
-                    const isSolo = activeCategory.formats.length === 1;
-                    const gridCols = isSolo ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3";
-                    const isPodTab = activeTab === "pod";
-
+                    const isSolo = false; // Plus de formats solo maintenant
+                    // Optimisation des grilles pour une meilleure utilisation de l'espace
+                    const gridCols = activeCategory.id === "long" 
+                      ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2" 
+                      : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2";
                     return (
                       <div key={activeTab}>
-                        <p className={`text-sm mb-4 ${theme.mutedText}`}>{activeCategory.subtitle}</p>
-                        <div className={`grid ${gridCols} gap-4`}>
+                        <p className={`text-sm mb-6 ${theme.mutedText}`}>{activeCategory.subtitle}</p>
+                        <div className={`grid ${gridCols} gap-5 sm:gap-6`}>
                           {activeCategory.formats.map((fmt) => {
                             const qty = quantities[fmt.key] ?? 0;
-                            const tickFn = fmt.key === "pd"
-                              ? (d: number) => setQtyPod(d)
-                              : (d: number) => setQty(fmt.key, d);
+                            const tickFn = (d: number) => setQty(fmt.key, d);
                             return (
                               <FormatCard
                                 key={fmt.key}
@@ -1337,19 +1111,7 @@ export function DevisBuilder({
                           })}
                         </div>
 
-                        {/* Section shorts podcast — animée selon podQty */}
-                        {isPodTab && (
-                          <div className={`overflow-hidden transition-all duration-400 ease-in-out ${
-                            podQty > 0 ? "max-h-[300px] opacity-100 mt-5" : "max-h-0 opacity-0 mt-0 pointer-events-none"
-                          }`}>
-                            <PodcastShortsSection
-                              qty={podShorts}
-                              onTick={setPodShortsDelta}
-                              theme={theme}
-                              variant={variant}
-                            />
-                          </div>
-                        )}
+                        {/* Section shorts podcast - supprimée */}
                       </div>
                     );
                   })()}
@@ -1357,52 +1119,9 @@ export function DevisBuilder({
               )}
             </Step>
 
-            {/* ── STEP 2 : Niveau de montage ── */}
-            <Step n="2" title="Niveau de montage" theme={theme}>
-              <div className="grid grid-cols-3 gap-2 sm:gap-4">
-                {LEVELS.map((l, idx) => {
-                  const on = lvl === idx;
-                  const mult = LEVEL_MULT[idx];
-                  const percentage = mult === 1 ? "Base" : `+${Math.round((mult - 1) * 100)}%`;
-                  return (
-                    <button
-                      type="button"
-                      key={l.name}
-                      onClick={() => setLvl(idx)}
-                      className={`rounded-xl border p-2.5 sm:p-4 text-left transition-all duration-200 ${on ? theme.btnActive : theme.btnInactive}`}
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <h4 className={`font-display text-[11px] sm:text-sm font-bold leading-tight ${theme.textPrimary}`}>{l.name}</h4>
-                        {adminMode && (
-                          <span className="shrink-0 rounded-full bg-purple-500/20 border border-purple-500/30 px-2 py-0.5 text-[9px] font-bold text-purple-300">
-                            ×{mult}
-                          </span>
-                        )}
-                      </div>
-                      <p className={`text-[8px] sm:text-[11px] mt-0.5 leading-snug ${theme.textSecondary}`}>
-                        {adminMode ? percentage : l.multLabel}
-                      </p>
-                      {l.includes && (
-                        <span className="hidden sm:inline-block mt-2 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400">
-                          {l.includes}
-                        </span>
-                      )}
-                      <ul className="hidden sm:block mt-3 space-y-0.5">
-                        {l.bullets.map((b) => (
-                          <li key={b} className={`text-[10px] pl-2.5 relative before:content-['·'] before:absolute before:left-0 ${theme.textSecondary}`}>
-                            {b}
-                          </li>
-                        ))}
-                      </ul>
-                    </button>
-                  );
-                })}
-              </div>
-            </Step>
-
-            {/* ── STEP 3 : Options ── */}
-            <Step n="3" title="Options complémentaires" hint="par vidéo · optionnel" theme={theme}>
-              <div className="grid gap-2 sm:grid-cols-2">
+            {/* ── STEP 2 : Options ── */}
+            <Step n="2" title="Options complémentaires" hint="par vidéo · optionnel" theme={theme}>
+              <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
                 {OPTIONS.map((o) => {
                   const on = !!opts[o.k];
                   return (
@@ -1410,7 +1129,7 @@ export function DevisBuilder({
                       type="button"
                       key={o.k}
                       onClick={() => setOpts((p) => ({ ...p, [o.k]: !p[o.k] }))}
-                      className={`flex items-center gap-3 rounded-xl border px-3.5 py-3 text-left transition duration-300 ${getCardStyle(on, theme.isDark)}`}
+                      className={`flex items-center gap-3 sm:gap-4 rounded-xl border px-4 py-3.5 text-left transition duration-300 ${getCardStyle(on, theme.isDark)}`}
                     >
                       <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border text-[9px] ${
                         on
@@ -1420,7 +1139,7 @@ export function DevisBuilder({
                         {on ? "✓" : ""}
                       </span>
                       <span className={`flex-1 text-xs font-semibold ${theme.textPrimary}`}>{o.k}</span>
-                      {/* SHOW_PRICES: prix option — masqué si false */}
+                      {/* SHOW_PRICES: prix option - masqué si false */}
                       {showPrices && (
                         <span className={`text-[11px] font-bold ${theme.isDark ? "text-[#c4b5fd]" : "text-[#a8632d]"}`}>
                           +{o.p}€
@@ -1432,9 +1151,9 @@ export function DevisBuilder({
               </div>
             </Step>
 
-            {/* ── STEP 4 : Durée de collaboration ── */}
-            <Step n="4" title="Durée de collaboration" theme={theme}>
-              <div className="grid gap-4 sm:grid-cols-2">
+            {/* ── STEP 3 : Durée de collaboration ── */}
+            <Step n="3" title="Durée de collaboration" theme={theme}>
+              <div className="grid gap-4 sm:gap-5 lg:grid-cols-1 xl:grid-cols-2">
                 {[
                   {
                     key: "one-shot" as const,
@@ -1451,7 +1170,7 @@ export function DevisBuilder({
                     type="button"
                     key={d.key}
                     onClick={() => setDuration(d.key)}
-                    className={`rounded-xl border p-4 text-left transition-all ${duration === d.key ? theme.btnActive : theme.btnInactive}`}
+                    className={`rounded-xl border p-4 sm:p-5 text-left transition-all ${duration === d.key ? theme.btnActive : theme.btnInactive}`}
                   >
                     <h4 className={`font-semibold text-sm ${theme.textPrimary}`}>{d.label}</h4>
                     {duration === d.key && d.key === "multishoot" && (
@@ -1494,11 +1213,10 @@ export function DevisBuilder({
             {false && (
             <Step n="5" title="Délai de livraison" theme={theme}>
               {(() => {
-                const s1total = (quantities["s1"] ?? 0) + (quantities["s2"] ?? 0) + podShorts;
-                const pbTotal = quantities["pb"] ?? 0;
-                const l3Total = quantities["l3"] ?? 0;
-                const pdTotal = quantities["pd"] ?? 0;
-                const expressBlocked = s1total > 70 || pbTotal > 70 || l3Total > 4 || pdTotal > 6;
+                const totalShorts = (quantities["short"] ?? 0) + (quantities["ads"] ?? 0);
+                const documentaire = quantities["documentaire"] ?? 0;
+                const podcast = quantities["podcast"] ?? 0;
+                const expressBlocked = totalShorts > 70 || documentaire > 4 || podcast > 6;
 
                 // Si express était sélectionné mais que la commande est devenue trop lourde, on reset
                 if (expressBlocked && express) {
@@ -1520,7 +1238,7 @@ export function DevisBuilder({
                         t: "Express prioritaire",
                         s: expressBlocked
                           ? "Non disponible pour ce volume"
-                          : calcDeliveryDays(quantities, podShorts, true),
+                          : calcDeliveryDays(quantities, true),
                         sub: expressBlocked
                           ? "Volume trop important pour ce délai"
                           : `+${Math.round(EXPRESS_RATE * 100)}% du total`,
@@ -1557,25 +1275,25 @@ export function DevisBuilder({
         </div>
 
         {/* ── PANNEAU RÉCAP ── */}
-        <div id="devis-recap" className={`rounded-2xl sm:rounded-[2rem] border ${theme.containerBg} p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-5 shadow-xl lg:sticky lg:top-28 ${theme.panelGlow}`}>
+        <div id="devis-recap" className={`rounded-2xl sm:rounded-[2rem] border ${theme.containerBg} p-6 sm:p-8 lg:p-10 xl:p-12 space-y-5 sm:space-y-6 shadow-xl lg:sticky lg:top-28 ${theme.panelGlow}`}>
           <div>
             <h4 className={`font-display text-xl sm:text-2xl font-bold ${theme.textPrimary}`}>Votre estimation</h4>
             <p className={`text-xs mt-1 ${theme.mutedText}`}>{summaryLine}</p>
           </div>
 
           <div className={`rounded-2xl border ${theme.nestedBorder} ${theme.recapBg} overflow-hidden`}>
-            <div className="px-4 py-3 border-b border-foreground/10">
-              <p className={`text-xs font-semibold ${theme.textPrimary}`}>Récapitulatif du devis</p>
+            <div className="px-5 py-4 border-b border-foreground/10">
+              <p className={`text-sm font-semibold ${theme.textPrimary}`}>Récapitulatif du devis</p>
             </div>
-            <div className="p-4 space-y-0.5 text-xs">
+            <div className="p-5 space-y-1 text-sm">
               {pricing.lineItems.length === 0 ? (
-                <p className={`opacity-50 py-2 text-center ${theme.textSecondary}`}>Aucun format sélectionné.</p>
+                <p className={`opacity-50 py-3 text-center ${theme.textSecondary}`}>Aucun format sélectionné.</p>
               ) : (
                 <>
                   {pricing.lineItems.map((l) => (
                     <RecapRow
                       key={l.key}
-                      label={`${l.qty}× ${l.label} (${LEVELS[lvl].name})`}
+                      label={`${l.qty}× ${l.label}`}
                       value={showPrices ? `${l.total}€` : ""}
                       theme={theme}
                     />
@@ -1588,7 +1306,7 @@ export function DevisBuilder({
                       theme={theme}
                     />
                   ))}
-                  {/* SHOW_PRICES: ligne réduction — masquée si false */}
+                  {/* SHOW_PRICES: ligne réduction - masquée si false */}
                   {SHOW_PRICES && pricing.discAmt > 0 && (
                     <RecapRow
                       label="Reduction multishoot mensuel"
@@ -1597,29 +1315,29 @@ export function DevisBuilder({
                       theme={theme}
                     />
                   )}
-                  {/* SHOW_PRICES: supplément express — masqué si false */}
+                  {/* SHOW_PRICES: supplément express - masqué si false */}
                   {SHOW_PRICES && pricing.expressAdd > 0 && (
                     <RecapRow label="Supplément express prioritaire" value={`+${pricing.expressAdd}€`} accent="warn" theme={theme} />
                   )}
                 </>
               )}
             </div>
-            <div className="border-t border-foreground/10 px-4 py-4 flex items-end justify-between gap-3">
-              <div className={`text-[11px] space-y-0.5 ${theme.textSecondary}`}>
-                {/* SHOW_PRICES: sous-total barré — masqué si false */}
+            <div className="border-t border-foreground/10 px-5 py-5 flex items-end justify-between gap-4">
+              <div className={`text-xs space-y-1 ${theme.textSecondary}`}>
+                {/* SHOW_PRICES: sous-total barré - masqué si false */}
                 {SHOW_PRICES && pricing.subtotal > 0 && pricing.discAmt + pricing.expressAdd > 0 && (
                   <span className="line-through block opacity-60">{pricing.subtotal}€</span>
                 )}
                 {pricing.totalVideos > 0 && (
                   <span>
-                    {pricing.totalVideos} vidéo{pricing.totalVideos > 1 ? "s" : ""} · {LEVELS[lvl].name}
+                    {pricing.totalVideos} vidéo{pricing.totalVideos > 1 ? "s" : ""}
                   </span>
                 )}
               </div>
               <div className="text-right">
-                {/* SHOW_PRICES: badges collab/express et total animé — masqués si false */}
+                {/* SHOW_PRICES: badges collab/express et total animé - masqués si false */}
                 {showPrices && (pricing.discAmt > 0 || pricing.expressAdd > 0) && pricing.subtotal > 0 && (
-                  <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mb-0.5 font-medium">
+                  <p className="text-xs text-emerald-600 dark:text-emerald-400 mb-1 font-medium">
                     {[
                       pricing.discAmt > 0 ? "Collab -15%" : "",
                       pricing.expressAdd > 0 ? "Express +35%" : "",
@@ -1634,9 +1352,9 @@ export function DevisBuilder({
           {/* Section formulaire - cachée en mode admin */}
           {!adminMode && (
             <>
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <p className={`text-[10px] font-bold uppercase tracking-[0.2em] ${theme.textMuted}`}>Vos coordonnées</p>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
                   <Inp theme={theme} v={name} set={setName} ph="Nom complet *" />
                   <Inp theme={theme} v={email} set={setEmail} ph="Email *" type="email" />
                 </div>
@@ -1644,30 +1362,30 @@ export function DevisBuilder({
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Précisions sur votre projet (facultatif)..."
-                  rows={3}
-                  className={`w-full rounded-xl border px-3 py-2.5 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 transition ${theme.inputBg}`}
+                  rows={4}
+                  className={`w-full rounded-xl border px-4 py-3 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 transition ${theme.inputBg}`}
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={status === "loading" || !name || !email || pricing.totalVideos === 0}
-                className={`inline-flex w-full items-center justify-center rounded-full ${theme.submit} px-6 py-4 text-sm font-semibold transition disabled:opacity-40`}
+                className={`inline-flex w-full items-center justify-center rounded-full ${theme.submit} px-8 py-4 sm:py-5 text-sm sm:text-base font-semibold transition disabled:opacity-40`}
               >
                 {status === "loading" ? "Envoi en cours…" : "Envoyer mon devis complet →"}
               </button>
 
               {status === "success" && (
-                <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-5 text-center">
-                  <div className="mb-2 text-2xl">✓</div>
-                  <p className="font-semibold text-emerald-700 mb-1">Votre devis a bien été envoyé</p>
-                  <p className="text-sm text-emerald-600">
+                <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-6 text-center">
+                  <div className="mb-3 text-3xl">✓</div>
+                  <p className="font-semibold text-emerald-700 mb-2 text-base">Votre devis a bien été envoyé</p>
+                  <p className="text-sm text-emerald-600 leading-relaxed">
                     Vous recevrez votre devis détaillé par email d'ici quelques instants. Nous reviendrons vers vous sous 24 heures pour échanger sur votre projet.
                   </p>
                 </div>
               )}
               {status === "error" && (
-                <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-500">
+                <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-5 text-sm text-red-500">
                   L&apos;envoi a échoué. Réessayez ou vérifiez vos informations.
                 </div>
               )}
@@ -1676,8 +1394,8 @@ export function DevisBuilder({
 
           {/* Mode admin - Message informatif */}
           {adminMode && (
-            <div className="rounded-xl border border-purple-500/30 bg-purple-500/10 p-4 text-center">
-              <p className="font-semibold text-purple-300 mb-1">Prix unitaires affichés</p>
+            <div className="rounded-xl border border-purple-500/30 bg-purple-500/10 p-5 text-center">
+              <p className="font-semibold text-purple-300 mb-2 text-base">Prix unitaires affichés</p>
               <p className="text-sm text-purple-400">
                 Tarifs de base sans réductions appliquées.
               </p>
@@ -1688,19 +1406,19 @@ export function DevisBuilder({
 
       {pricing.totalVideos > 0 && status !== "success" && (
         <div
-          className={`lg:hidden fixed bottom-0 inset-x-0 z-50 border-t backdrop-blur-xl flex items-center justify-between gap-3 px-4 py-3 shadow-[0_-4px_20px_-8px_rgba(0,0,0,0.2)] ${
+          className={`lg:hidden fixed bottom-0 inset-x-0 z-50 border-t backdrop-blur-xl flex items-center justify-between gap-4 px-5 py-4 shadow-[0_-4px_20px_-8px_rgba(0,0,0,0.2)] ${
             variant === "surmesure"
               ? "bg-[#0d0a1a]/95 border-white/10"
               : "bg-white/95 border-foreground/10"
           }`}
         >
           <div className="flex flex-col min-w-0">
-            <span className={`text-[10px] font-medium ${theme.textMuted}`}>
-              {pricing.totalVideos} vidéo{pricing.totalVideos > 1 ? "s" : ""} · {LEVELS[lvl].name}
+            <span className={`text-[11px] font-medium ${theme.textMuted}`}>
+              {pricing.totalVideos} vidéo{pricing.totalVideos > 1 ? "s" : ""}
             </span>
-            {/* SHOW_PRICES: total barre mobile — masqué si false */}
+            {/* SHOW_PRICES: total barre mobile - masqué si false */}
             {showPrices && (
-              <span className={`font-display text-xl font-bold tabular-nums ${theme.isDark ? "text-[#c4b5fd]" : "text-[#a8632d]"}`}>
+              <span className={`font-display text-2xl font-bold tabular-nums ${theme.isDark ? "text-[#c4b5fd]" : "text-[#a8632d]"}`}>
                 {pricing.total}€
               </span>
             )}
@@ -1708,7 +1426,7 @@ export function DevisBuilder({
           <button
             type="button"
             onClick={() => document.getElementById("devis-recap")?.scrollIntoView({ behavior: "smooth", block: "start" })}
-            className={`shrink-0 rounded-full px-4 py-2.5 text-xs font-semibold text-white ${
+            className={`shrink-0 rounded-full px-5 py-3 text-sm font-semibold text-white ${
               variant === "surmesure"
                 ? "bg-gradient-to-r from-[#a78bfa] to-[#ec4899]"
                 : "bg-[#1a1410]"
@@ -1739,7 +1457,7 @@ function RecapRow({
       ? "text-amber-600 dark:text-amber-400"
       : theme.textSecondary;
   return (
-    <div className={`flex justify-between gap-2 sm:gap-3 py-1 sm:py-1.5 ${textColor}`}>
+    <div className={`flex justify-between gap-3 sm:gap-4 py-1.5 sm:py-2 ${textColor}`}>
       <span className="opacity-90 min-w-0 flex-1 leading-snug">{label}</span>
       <span className="font-semibold tabular-nums shrink-0">{value}</span>
     </div>
@@ -1768,13 +1486,13 @@ function Step({
   theme: Theme;
 }) {
   return (
-    <section className="space-y-4">
-      <p className={`text-xs font-bold uppercase tracking-[0.18em] flex items-center gap-2.5 flex-wrap ${theme.textPrimary}`}>
-        <span className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-black ${theme.stepNumBg}`}>
+    <section className="space-y-5 sm:space-y-6">
+      <p className={`text-xs sm:text-sm font-bold uppercase tracking-[0.18em] flex items-center gap-3 flex-wrap ${theme.textPrimary}`}>
+        <span className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-black ${theme.stepNumBg}`}>
           {n}
         </span>
         {title}
-        {hint && <span className={`text-[10px] normal-case font-medium opacity-75 ${theme.textSecondary}`}>{hint}</span>}
+        {hint && <span className={`text-[10px] sm:text-[11px] normal-case font-medium opacity-75 ${theme.textSecondary}`}>{hint}</span>}
       </p>
       <div>{children}</div>
     </section>
@@ -1800,7 +1518,7 @@ function Inp({
       onChange={(e) => set(e.target.value)}
       type={type}
       placeholder={ph}
-      className={`rounded-xl border px-3.5 py-3 text-xs placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 transition ${theme.inputBg}`}
+      className={`rounded-xl border px-4 py-3.5 text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 transition ${theme.inputBg}`}
     />
   );
 }

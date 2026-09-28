@@ -13,7 +13,6 @@ type SendDevisPayload = {
   message?: string;
   devisData: {
     formula: string;
-    niveau: string;
     collaboration: string;
     videos: Array<{ type: string; qty: number; unitPrice: number; total: number }>;
     options: string[];
@@ -49,7 +48,7 @@ export const sendDevisEmails = createServerFn({ method: "POST" })
         sender: { name: "VizioCraft Devis", email: "marketing@viziocraft.com" },
         to: [{ email: "marketing@viziocraft.com", name: "Marketing VizioCraft" }],
         replyTo: { email: email, name: name || "" },
-        subject: `Nouveau devis — ${name || "Prospect"} — ${devisData.totalFinal}€`,
+        subject: `Nouveau devis - ${name || "Prospect"} - ${devisData.totalFinal}€`,
         htmlContent: buildInternalEmailBody(name, email, company || "", message || "", devisData),
       };
 
@@ -130,7 +129,6 @@ async function addContactToBrevo(
     // Ajouter des infos du devis si disponibles
     if (devisData) {
       attributes.LAST_QUOTE_AMOUNT = devisData.totalFinal;
-      attributes.LAST_QUOTE_LEVEL = devisData.niveau;
       attributes.LAST_QUOTE_TYPE = devisData.formula;
       attributes.LAST_CONTACT_DATE = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
     }
@@ -250,8 +248,6 @@ async function generateDevisPDF(name: string, email: string, devisData: any): Pr
   y -= 24;
   page.drawText(`Formule : ${devisData.formula}`, { x: contentX, y, size: 10, font: regularFont, color: darkGray });
   y -= 16;
-  page.drawText(`Niveau de montage : ${devisData.niveau}`, { x: contentX, y, size: 10, font: regularFont, color: darkGray });
-  y -= 16;
   page.drawText(`Collaboration : ${devisData.collaboration}`, { x: contentX, y, size: 10, font: regularFont, color: darkGray });
 
   y -= 34;
@@ -361,7 +357,7 @@ async function generateDevisPDF(name: string, email: string, devisData: any): Pr
   page.drawText(noteText, { x: (width - noteWidth) / 2, y, size: 8, font: regularFont, color: lightGray });
 
   y -= 14;
-  const footerText = "VizioCraft — marketing@viziocraft.com — viziocraft.com";
+  const footerText = "VizioCraft - marketing@viziocraft.com - viziocraft.com";
   const footerWidth = regularFont.widthOfTextAtSize(footerText, 8);
   page.drawText(footerText, { x: (width - footerWidth) / 2, y, size: 8, font: regularFont, color: lightGray });
 
@@ -370,7 +366,7 @@ async function generateDevisPDF(name: string, email: string, devisData: any): Pr
 }
 
 // ========================================
-// FORMAT EMAIL INTERNE (pour toi) — VERSION PRO
+// FORMAT EMAIL INTERNE (pour toi) - VERSION PRO
 // ========================================
 function buildInternalEmailBody(
   name: string,
@@ -383,7 +379,7 @@ function buildInternalEmailBody(
 
   lines.push(`<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 650px; margin: 0 auto; color: #333; background: #ffffff; border: 1px solid #111111;">`);
 
-  // Header — logo VizioCraft (fond blanc, pas de dégradé)
+  // Header - logo VizioCraft (fond blanc, pas de dégradé)
   lines.push(`<div style="padding: 20px 32px; text-align: left; border-bottom: 1px solid #e8e8e8;">`);
   lines.push(`<img src="https://cdn.prod.website-files.com/6996b2b19f614702ad210f02/6996b52b771675ec516ec984_Asset%201%20(1).png" alt="VizioCraft" width="24" height="24" style="display: block; margin-bottom: 8px;" />`);
   lines.push(`<h1 style="margin: 0; font-size: 16px; font-weight: 700; letter-spacing: -0.3px;"><span style="color: #7b2d8e;">VIZIO</span><span style="color: #2ba8e2;">CRAFT</span></h1>`);
@@ -412,7 +408,6 @@ function buildInternalEmailBody(
     lines.push(`<h2 style="margin: 0 0 16px 0; font-size: 16px; font-weight: 700; color: #7b2d8e; text-transform: uppercase; letter-spacing: 0.5px;">Configuration du projet</h2>`);
     lines.push(`<table style="width: 100%; border-collapse: collapse;">`);
     lines.push(`<tr><td style="padding: 8px 0; color: #666; width: 180px; font-size: 14px;">Formule</td><td style="padding: 8px 0; font-weight: 600; font-size: 14px;">${devisData.formula}</td></tr>`);
-    lines.push(`<tr><td style="padding: 8px 0; color: #666; font-size: 14px;">Niveau de montage</td><td style="padding: 8px 0; font-weight: 600; font-size: 14px;">${devisData.niveau}</td></tr>`);
     lines.push(`<tr><td style="padding: 8px 0; color: #666; font-size: 14px;">Collaboration</td><td style="padding: 8px 0; font-size: 14px;">${devisData.collaboration}</td></tr>`);
     lines.push(`</table>`);
     lines.push(`</div>`);
@@ -467,7 +462,7 @@ function buildInternalEmailBody(
 
   // Footer
   lines.push(`<div style="padding: 24px 32px; text-align: center; background: #1a0b2e; color: #ffffff;">`);
-  lines.push(`<p style="margin: 0; font-size: 12px; color: rgba(255,255,255,0.7);">VizioCraft — Votre équipe vidéo dédiée</p>`);
+  lines.push(`<p style="margin: 0; font-size: 12px; color: rgba(255,255,255,0.7);">VizioCraft - Votre équipe vidéo dédiée</p>`);
   lines.push(`<p style="margin: 8px 0 0 0; font-size: 11px; color: rgba(255,255,255,0.5);">marketing@viziocraft.com</p>`);
   lines.push(`</div>`);
 
