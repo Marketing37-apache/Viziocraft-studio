@@ -17,7 +17,7 @@ const BASE_PRICES: Record<string, number> = {
   ads: 48,
   podcast: 400,
   interview: 400,
-  vlog: 125,
+  vlog: 150,
   documentaire: 150,
 };
 const EXPRESS_RATE = 0.35;
@@ -69,7 +69,7 @@ function calcShortTotal(basePrice: number, qty: number): { total: number; unitAv
 /**
  * Tranches marginales pour les longs formats.
  * Volumes faibles donc tranches courtes.
- * Ratios appliqués sur le prix de base de chaque format (podcast=400, interview=400, vlog=125, documentaire=150).
+ * Ratios appliqués sur le prix de base de chaque format (podcast=400, interview=400, vlog=150, documentaire=150).
  *
  *  1-2  -> prix plein
  *  3-5  -> -5%

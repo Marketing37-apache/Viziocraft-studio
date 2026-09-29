@@ -19,7 +19,7 @@ const FORMATS = [
   { key: "ads", name: "Ads", dur: "Spot publicitaire", base: 48 },
   { key: "podcast", name: "Podcast", dur: "0-15 min", base: 400 },
   { key: "interview", name: "Interview", dur: "0-15 min", base: 400 },
-  { key: "vlog", name: "Vlog", dur: "0-15 min", base: 125 },
+  { key: "vlog", name: "Vlog", dur: "0-15 min", base: 150 },
   { key: "documentaire", name: "Documentaire", dur: "0-15 min", base: 150 },
 ];
 
