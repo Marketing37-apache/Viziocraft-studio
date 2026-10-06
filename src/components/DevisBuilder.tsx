@@ -913,8 +913,14 @@ export function DevisBuilder({
       videos: pricing.lineItems.map((l) => ({
         type: l.label,
         qty: l.qty,
-        unitPrice: l.unitFinal,
+        unitPrice: l.unitFinal, // Prix moyen après remises (pour compatibilité)
         total: l.total,
+        // Prix de depart avant remise de volume, et montant de la remise.
+        // Servent uniquement a l'affichage (PDF + recap interne) : le total
+        // et le prix final restent strictement inchanges.
+        unitBase: l.unitBase, // Prix unitaire de base AVANT remises
+        baseTotal: Math.round(l.unitBase * l.qty), // Total au prix de base
+        discount: Math.round((l.unitBase * l.qty) - l.total), // Remise appliquée
       })),
       options: pricing.selectedOptions.map((o) => o.k),
       totalVideos: pricing.totalVideos,

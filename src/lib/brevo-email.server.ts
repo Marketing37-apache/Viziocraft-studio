@@ -14,7 +14,18 @@ type SendDevisPayload = {
   devisData: {
     formula: string;
     collaboration: string;
-    videos: Array<{ type: string; qty: number; unitPrice: number; total: number }>;
+    videos: Array<{
+      type: string;
+      qty: number;
+      unitPrice: number;
+      total: number;
+      /** Prix unitaire de depart, avant remise de volume (affichage). */
+      unitBase?: number;
+      /** Total au prix de depart, avant remise de volume (affichage). */
+      baseTotal?: number;
+      /** Montant de la remise de volume appliquee a cette ligne (affichage). */
+      discount?: number;
+    }>;
     options: string[];
     totalVideos: number;
     subtotal: number;
@@ -277,12 +288,48 @@ async function generateDevisPDF(name: string, email: string, devisData: any): Pr
     for (const video of devisData.videos) {
       const formatText = video.type.length > 42 ? video.type.substring(0, 39) + "..." : video.type;
 
+      // Affichage du prix de depart (avant remise) quand l'information est
+      // disponible, sinon on retombe sur l'ancien prix unitaire.
+      // Le total affiche reste toujours le total reel apres remises.
+      const hasBase =
+        typeof video.unitBase === "number" &&
+        typeof video.baseTotal === "number" &&
+        typeof video.discount === "number" &&
+        !isNaN(video.unitBase) &&
+        !isNaN(video.baseTotal) &&
+        !isNaN(video.discount);
+      // CORRECTION: Toujours afficher le prix unitaire de base s'il est disponible
+      const unitShown = (typeof video.unitBase === "number" && !isNaN(video.unitBase)) ? 
+        (video.unitBase as number) : video.unitPrice;
+      const baseTotal = hasBase ? (video.baseTotal as number) : 0;
+      const discount = hasBase ? (video.discount as number) : 0;
+
       page.drawText(formatText, { x: col1, y, size: 9.5, font: regularFont, color: black });
       page.drawText(String(video.qty), { x: col2, y, size: 9.5, font: regularFont, color: black });
-      page.drawText(`${video.unitPrice}€`, { x: col3, y, size: 9.5, font: regularFont, color: black });
+      page.drawText(`${unitShown}€`, { x: col3, y, size: 9.5, font: regularFont, color: black });
       page.drawText(`${video.total}€`, { x: col4, y, size: 9.5, font: regularFont, color: black });
 
-      y -= 22;
+      y -= 12;
+
+      if (hasBase) {
+        // Ligne de detail : d'ou vient le total de la ligne.
+        const baseTxt = `prix de depart ${baseTotal}€`;
+        page.drawText(baseTxt, { x: col1, y, size: 8, font: regularFont, color: gray });
+        if (discount > 0) {
+          const pct = baseTotal > 0 ? Math.round((discount / baseTotal) * 100) : 0;
+          const sep = " · ";
+          const x2 = col1 + regularFont.widthOfTextAtSize(baseTxt + sep, 8);
+          page.drawText(`${sep}remise volume -${discount}€ (-${pct} %)`, {
+            x: x2,
+            y,
+            size: 8,
+            font: regularFont,
+            color: rgb(0.15, 0.68, 0.38),
+          });
+        }
+      }
+
+      y -= 16;
 
       if (y < 180) break;
     }
@@ -426,10 +473,32 @@ function buildInternalEmailBody(
       
       devisData.videos.forEach((v: any, idx: number) => {
         const bgColor = idx % 2 === 0 ? "#fafafa" : "#ffffff";
+        const hasBase =
+          typeof v.unitBase === "number" &&
+          typeof v.baseTotal === "number" &&
+          typeof v.discount === "number" &&
+          !isNaN(v.unitBase) &&
+          !isNaN(v.baseTotal) &&
+          !isNaN(v.discount);
+        // CORRECTION: Toujours afficher le prix unitaire de base s'il est disponible
+        const unitShown = (typeof v.unitBase === "number" && !isNaN(v.unitBase)) ? 
+          v.unitBase : v.unitPrice;
+        const baseTotal = hasBase ? v.baseTotal : 0;
+        const discount = hasBase ? v.discount : 0;
+        const pct = baseTotal > 0 ? Math.round((discount / baseTotal) * 100) : 0;
+
+        const detail = hasBase
+          ? `<div style="margin-top: 4px; font-size: 12px; color: #999;">prix de départ ${baseTotal}€` +
+            (discount > 0
+              ? ` <span style="color: #27ae60;">· remise volume -${discount}€ (-${pct} %)</span>`
+              : "") +
+            `</div>`
+          : "";
+
         lines.push(`<tr style="background: ${bgColor};">`);
-        lines.push(`<td style="padding: 12px 8px; font-size: 14px; color: #333;">${v.type}</td>`);
+        lines.push(`<td style="padding: 12px 8px; font-size: 14px; color: #333;">${v.type}${detail}</td>`);
         lines.push(`<td style="padding: 12px 8px; text-align: center; font-weight: 600; font-size: 14px; color: #333;">${v.qty}</td>`);
-        lines.push(`<td style="padding: 12px 8px; text-align: right; font-size: 14px; color: #666;">${v.unitPrice}€</td>`);
+        lines.push(`<td style="padding: 12px 8px; text-align: right; font-size: 14px; color: #666;">${unitShown}€</td>`);
         lines.push(`<td style="padding: 12px 8px; text-align: right; font-weight: 700; font-size: 14px; color: #7b2d8e;">${v.total}€</td>`);
         lines.push(`</tr>`);
       });
