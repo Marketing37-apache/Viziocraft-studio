@@ -5,7 +5,7 @@ const CDN2 = "https://cdn.prod.website-files.com/6996b2b29f614702ad210f72";
 const STEPS = [
   {
     n: "01",
-    kicker: "Étape 01 — Découverte",
+    kicker: "Découverte",
     title: "L'appel de préparation",
     desc: "On analyse votre besoin, votre positionnement, votre direction artistique. On verrouille ensemble la cible, le ton, et les formats.",
     duration: "30 min",
@@ -14,7 +14,7 @@ const STEPS = [
   },
   {
     n: "02",
-    kicker: "Étape 02 — Validation",
+    kicker: "Validation",
     title: "Démarrage du projet",
     desc: "Une première vidéo réelle, sur votre contenu, dans votre style. C'est la preuve avant tout engagement.",
     duration: "72h",
@@ -23,7 +23,7 @@ const STEPS = [
   },
   {
     n: "03",
-    kicker: "Étape 03 — Production",
+    kicker: "Production",
     title: "La production en continu",
     desc: "On déploie plusieurs monteurs en parallèle pour scaler votre volume sans jamais sacrifier la qualité.",
     duration: "En continu",
@@ -32,7 +32,7 @@ const STEPS = [
   },
   {
     n: "04",
-    kicker: "Étape 04 — Communication",
+    kicker: "Communication",
     title: "Communiquer simplement",
     desc: "WhatsApp + Frame.io. Pas d'emails, pas de tickets, pas d'attente. Une review à la seconde près, une réponse en moins de 2h.",
     duration: "7j/7",
@@ -41,86 +41,140 @@ const STEPS = [
   },
 ];
 
-function StepRow({ s, i }: { s: (typeof STEPS)[number]; i: number }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
+export function ProcessTimeline() {
+  const [active, setActive] = useState(0);
+  const listRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    if (!ref.current) return;
-    const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } },
-      { threshold: 0.2 }
+    const root = listRef.current;
+    if (!root || typeof IntersectionObserver === "undefined") return;
+    const items = Array.from(root.querySelectorAll<HTMLElement>("[data-step]"));
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            const idx = Number((e.target as HTMLElement).dataset.step);
+            if (!Number.isNaN(idx)) setActive(idx);
+          }
+        });
+      },
+      { rootMargin: "-45% 0px -45% 0px", threshold: 0 },
     );
-    obs.observe(ref.current);
-    return () => obs.disconnect();
+    items.forEach((el) => io.observe(el));
+    return () => io.disconnect();
   }, []);
 
-  const reverse = i % 2 === 1;
+  const step = STEPS[active];
 
   return (
-    <div
-      ref={ref}
-      className="relative grid items-center gap-6 sm:gap-10 lg:grid-cols-12 lg:gap-16"
-    >
-      {/* Image side */}
-      <div
-        className={`relative lg:col-span-7 ${reverse ? "lg:order-2" : ""}`}
-        style={{
-          opacity: visible ? 1 : 0,
-          transform: visible ? "translateY(0) translateX(0)" : `translateY(20px)`,
-          transition: "opacity 900ms ease, transform 900ms cubic-bezier(.2,.7,.2,1)",
-        }}
-      >
-        <div className="relative">
-          <div className="absolute -inset-4 -z-10 rounded-[2.5rem] bg-brand-gradient opacity-15 blur-3xl" />
-          <div className="relative overflow-hidden rounded-2xl sm:rounded-[2rem] border border-foreground/10 shadow-[0_20px_50px_-20px_rgba(123,45,142,0.35)] sm:shadow-[0_40px_80px_-30px_rgba(123,45,142,0.4)]">
-            <img
-              src={s.img}
-              alt={s.title}
-              loading="lazy"
-              className="aspect-[4/3] w-full object-cover transition duration-[1500ms] hover:scale-105"
-            />
-            <span className="absolute right-3 top-3 sm:right-4 sm:top-4 rounded-full bg-white/95 px-2.5 py-1 sm:px-3 sm:py-1.5 text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.18em] text-primary backdrop-blur">
-              ⏱ {s.duration}
-            </span>
+    <div className="mt-12 grid gap-10 lg:mt-16 lg:grid-cols-12 lg:gap-14">
+      {/* --- Panneau sticky : l'image scrube avec le scroll --- */}
+      <div className="hidden lg:col-span-5 lg:block">
+        <div className="sticky top-28">
+          <div
+            data-reveal="scale"
+            className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-black shadow-[0_40px_90px_-40px_rgba(123,45,142,0.7)]"
+          >
+            <div className="relative aspect-[4/3] w-full">
+              {STEPS.map((s, i) => (
+                <img
+                  key={s.n}
+                  src={s.img}
+                  alt={s.title}
+                  loading={i === 0 ? "eager" : "lazy"}
+                  className="absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                  style={{ opacity: i === active ? 1 : 0 }}
+                />
+              ))}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#07060b] via-transparent to-transparent" />
+              <div className="absolute inset-0 safe-frame" aria-hidden />
+
+              <div className="absolute left-4 top-4 flex items-center gap-2 rounded-full border border-white/15 bg-black/50 px-3 py-1.5 backdrop-blur">
+                <span className="rec-dot h-1.5 w-1.5 rounded-full bg-[#ff3b30]" />
+                <span className="font-label text-white/80">{step.duration}</span>
+              </div>
+
+              <div className="absolute bottom-4 left-4 right-4">
+                <div className="flex items-end justify-between gap-4">
+                  <span className="font-display text-5xl font-bold leading-none text-white/95">
+                    {step.n}
+                  </span>
+                  <span className="font-label text-white/60">{step.kicker}</span>
+                </div>
+                <div className="mt-3 flex gap-1.5">
+                  {STEPS.map((s, i) => (
+                    <span
+                      key={s.n}
+                      className="h-[3px] flex-1 overflow-hidden rounded-full bg-white/20"
+                    >
+                      <span
+                        className="block h-full origin-left bg-gradient-to-r from-[#7B2D8E] to-[#2BA8E2] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                        style={{ transform: `scaleX(${i <= active ? 1 : 0})` }}
+                      />
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Text side */}
-      <div
-        className={`lg:col-span-5 ${reverse ? "lg:order-1" : ""}`}
-        style={{
-          opacity: visible ? 1 : 0,
-          transform: visible ? "translateY(0)" : "translateY(20px)",
-          transition: "opacity 900ms ease 150ms, transform 900ms cubic-bezier(.2,.7,.2,1) 150ms",
-        }}
-      >
-        <div className="flex items-center gap-3">
-          <span className="font-display text-4xl sm:text-5xl font-bold text-brand-gradient">{s.n}</span>
-          <span className="h-px flex-1 bg-foreground/15" />
-        </div>
-        <p className="mt-3 sm:mt-4 text-xs font-semibold uppercase tracking-[0.22em] text-primary">{s.kicker}</p>
-        <h3 className="mt-2 font-display text-2xl sm:text-3xl lg:text-4xl tracking-tight">{s.title}</h3>
-        <p className="mt-3 sm:mt-4 text-[15px] sm:text-base leading-relaxed text-muted-foreground">{s.desc}</p>
-        <ul className="mt-4 sm:mt-6 space-y-2 sm:space-y-2.5">
-          {s.bullets.map((b) => (
-            <li key={b} className="flex items-center gap-3 text-sm text-foreground/85">
-              <span className="shrink-0 flex h-5 w-5 items-center justify-center rounded-full bg-brand-gradient text-[10px] text-white">✓</span>
-              {b}
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  );
-}
+      {/* --- Étapes --- */}
+      <div ref={listRef} className="lg:col-span-7">
+        {STEPS.map((s, i) => (
+          <article
+            key={s.n}
+            data-step={i}
+            data-reveal="up"
+            style={{ ["--rd" as string]: `${i * 40}ms` }}
+            className={`border-t border-white/10 py-9 first:border-t-0 first:pt-0 sm:py-12 ${
+              i === active ? "" : "lg:opacity-55"
+            } transition-opacity duration-500`}
+          >
+            {/* Image inline (mobile) */}
+            <div className="relative mb-6 overflow-hidden rounded-2xl border border-white/10 lg:hidden">
+              <img
+                src={s.img}
+                alt={s.title}
+                loading="lazy"
+                className="aspect-[16/10] w-full object-cover"
+              />
+              <div className="absolute left-3 top-3 flex items-center gap-2 rounded-full border border-white/15 bg-black/50 px-2.5 py-1 backdrop-blur">
+                <span className="rec-dot h-1.5 w-1.5 rounded-full bg-[#ff3b30]" />
+                <span className="font-label text-white/80">{s.duration}</span>
+              </div>
+            </div>
 
-export function ProcessTimeline() {
-  return (
-    <div className="mt-10 sm:mt-16 lg:mt-20 space-y-14 sm:space-y-24 lg:space-y-36">
-      {STEPS.map((s, i) => (
-        <StepRow key={s.n} s={s} i={i} />
-      ))}
+            <div className="flex items-center gap-3">
+              <span className="font-display text-4xl font-bold leading-none text-brand-gradient sm:text-5xl">
+                {s.n}
+              </span>
+              <span className="h-px flex-1 bg-white/12" />
+              <span className="font-label text-white/40">{s.duration}</span>
+            </div>
+
+            <p className="font-label mt-5 text-[#8ec9f0]">{s.kicker}</p>
+            <h3 className="mt-2.5 font-display text-2xl tracking-tight text-white sm:text-3xl lg:text-4xl">
+              {s.title}
+            </h3>
+            <p className="mt-3.5 max-w-xl text-[15px] leading-relaxed text-white/60 sm:text-base">
+              {s.desc}
+            </p>
+
+            <ul className="mt-5 flex flex-wrap gap-2">
+              {s.bullets.map((b) => (
+                <li
+                  key={b}
+                  className="rounded-full border border-white/12 bg-white/[0.04] px-3 py-1.5 text-xs text-white/75"
+                >
+                  {b}
+                </li>
+              ))}
+            </ul>
+          </article>
+        ))}
+      </div>
     </div>
   );
 }

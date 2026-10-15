@@ -15,9 +15,13 @@ export function ContactForm() {
         body: new FormData(form),
         headers: { Accept: "application/json" },
       });
-      if (res.ok) { setStatus("success"); form.reset(); }
-      else setStatus("error");
-    } catch { setStatus("error"); }
+      if (res.ok) {
+        setStatus("success");
+        form.reset();
+      } else setStatus("error");
+    } catch {
+      setStatus("error");
+    }
   }
 
   return (
@@ -27,10 +31,23 @@ export function ContactForm() {
 
       <div className="grid gap-5 sm:grid-cols-2">
         <Field label="Votre nom" name="Nom" required maxLength={100} placeholder="Jean Dupont" />
-        <Field label="Email" name="Email" type="email" required maxLength={255} placeholder="vous@marque.com" />
+        <Field
+          label="Email"
+          name="Email"
+          type="email"
+          required
+          maxLength={255}
+          placeholder="vous@marque.com"
+        />
       </div>
 
-      <Field label="Téléphone (optionnel)" name="Téléphone" type="tel" maxLength={30} placeholder="+33 6 12 34 56 78" />
+      <Field
+        label="Téléphone (optionnel)"
+        name="Téléphone"
+        type="tel"
+        maxLength={30}
+        placeholder="+33 6 12 34 56 78"
+      />
 
       <div>
         <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -61,7 +78,7 @@ export function ContactForm() {
 
       {status === "success" && (
         <p className="rounded-2xl border border-emerald-500/30 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-          Merci ! Votre message est bien arrivé — on revient vers vous sous 24h.
+          Merci ! Votre message est bien arrivé - on revient vers vous sous 24h.
         </p>
       )}
       {status === "error" && (
@@ -77,7 +94,9 @@ function Field(props: React.InputHTMLAttributes<HTMLInputElement> & { label: str
   const { label, ...rest } = props;
   return (
     <div>
-      <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</label>
+      <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        {label}
+      </label>
       <input
         {...rest}
         className="mt-2 w-full rounded-2xl border border-foreground/15 bg-white px-4 py-3 text-sm placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"

@@ -1,12 +1,24 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useEffect, useRef } from "react";
-import { Nav } from "@/components/Nav";
+import { useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { Footer } from "@/components/Footer";
 import { CalendlyWidget } from "@/components/CalendlyWidget";
-import { Faq } from "@/components/Faq";
-import { MarqueeShorts, type ShortItem } from "@/components/MarqueeShorts";
-import { ServicesShowcase } from "@/components/ServicesShowcase";
-import { ProcessTimeline } from "@/components/ProcessTimeline";
+import { Faq, type FaqItem } from "@/components/Faq";
+import { WorkGallery } from "@/components/WorkGallery";
+import { Process } from "@/components/Process";
+import { WarmContext, WorkTile } from "@/components/WorkTile";
+import { bySlug } from "@/data/work";
+import { IntroLoader } from "@/components/IntroLoader";
+import { Atmosphere } from "@/components/Atmosphere";
+import { HoverVideo, landscapePosters, type Poster } from "@/components/HoverVideo";
+import { VideoLightbox } from "@/components/VideoLightbox";
+import {
+  CountUp,
+  MaskLines,
+  useMagnetic,
+  useMarquee,
+  useTilt,
+  useViewProgress,
+} from "@/lib/motion";
 
 // Flag pour masquer temporairement l'offre "Montage continu"
 const SHOW_MONTAGE_CONTINU = false;
@@ -15,177 +27,58 @@ export const Route = createFileRoute("/")({
   component: Index,
   head: () => ({
     meta: [
-      { title: "VizioCraft — Agence de montage vidéo" },
-      { name: "description", content: "Votre équipe vidéo dédiée. Shorts, ads, podcasts, motion design. +100 clients, +5000 vidéos produites." },
-      { property: "og:title", content: "VizioCraft — Agence de montage vidéo" },
-      { property: "og:description", content: "Votre équipe vidéo dédiée. Production scalable, qualité constante." },
+      { title: "VizioCraft - L'équipe montage vidéo qui pense chaque seconde" },
+      {
+        name: "description",
+        content:
+          "Agence de montage vidéo : shorts, ads, podcasts et formats longs produits avec rapidité, cohérence et exigence. +100 clients, +5000 vidéos.",
+      },
+      { property: "og:title", content: "VizioCraft - Votre équipe monteur vidéo dédiée" },
+      {
+        property: "og:description",
+        content: "Production scalable, qualité constante. +5000 vidéos livrées.",
+      },
+    ],
+    links: [
+      {
+        rel: "preload",
+        as: "image",
+        href: PRESENTATION_POSTERS[0].src,
+        fetchPriority: "high",
+      },
     ],
   }),
 });
 
 const CDN = "https://cdn.prod.website-files.com/6996b2b19f614702ad210f02";
 const CONTACT_FRAME = `${CDN}/6999a130299153a6ec0f8c4a_Frame%201.avif`;
+const FOUNDER_A = `${CDN}/69998b87a516cf380be00adc_Frame%201.avif`;
+const FOUNDER_B = `${CDN}/69998b8714bfe203a0795193_Frame%202.avif`;
 const PRESENTATION_YT = "S3AOQxL4Uio";
-const YOUTUBE_PREVIEW_PARAMS = "rel=0&modestbranding=1&playsinline=1&mute=1&autoplay=1&loop=1&controls=0&cc_load_policy=0&hl=en";
-
-// ——— Shorts: 2 rows, IDs strictly disjoint so no video appears twice ———
-const SHORTS_ROW_A: ShortItem[] = [
-  { id: "fYZlCGaTZZQ", client: "Lucas Lopez" },
-  { id: "5ih7ZJrXex4", client: "Charles Gastaud" },
-  { id: "35wShzz4Q3I", client: "Alexandre Chiabai" },
-  { id: "b_H7IeJACgY", client: "Lucas Lopez" },
-  { id: "GX0OZoAc3PA", client: "Charles Gastaud" },
-  { id: "Xf8aGmVyXug", client: "Alexandre Chiabai" },
-  { id: "1LWLid6Ti9k", client: "Lucas Lopez" },
-  { id: "pCLNrvOxidM", client: "Charles Gastaud" },
+/* Miniature du hero : une image plein cadre extraite de la vidéo (1280x720, webp, ~35 Ko).
+   Pour en changer : maxres1 / maxres2 / maxres3, ou le chemin d'une image maison. */
+const PRESENTATION_POSTERS: Poster[] = [
+  { src: `https://i.ytimg.com/vi_webp/${PRESENTATION_YT}/maxres2.webp`, fit: "cover" },
+  ...landscapePosters(PRESENTATION_YT),
 ];
 
-const SHORTS_ROW_B: ShortItem[] = [
-  { id: "JeT1A74eKJg", client: "Lucas Lopez" },
-  { id: "WqHwSrR6au4", client: "Charles Gastaud" },
-  { id: "VUNMpRiNfls", client: "Alexandre Chiabai" },
-  { id: "6qo98rySnN4", client: "Charles Gastaud" },
-  { id: "9IMKEdqbsHk", client: "Alexandre Chiabai" },
-  { id: "ZwUqyHgPFFU", client: "Charles Gastaud" },
-  { id: "Y-npl-g31jI", client: "Alexandre Chiabai" },
-  { id: "BUvgiUuO0EU", client: "Charles Gastaud" },
+const FORMAT_TAGS = [
+  "Reels",
+  "YouTube",
+  "TikTok",
+  "Ads",
+  "Podcasts",
+  "Motion design",
+  "Corporate",
+  "Shorts",
+  "Branding",
+  "Documentaire",
 ];
 
-type LongVideo = {
-  id: string;
-  href: string;
-  title: string;
-};
-
-const LONGS: LongVideo[] = [
-  { id: "RAEwopIOhl4", href: "https://youtu.be/RAEwopIOhl4", title: "Charles Gastaud" },
-  { id: "UneFJeRYauM", href: "https://youtu.be/UneFJeRYauM", title: "Money Radar" },
-  { id: "H26IYt_--U4", href: "https://youtu.be/H26IYt_--U4", title: "Wintalk" },
-  { id: "OULQ8fWfWcY", href: "https://youtu.be/OULQ8fWfWcY", title: "Charles Gastaud" },
-  { id: "JYUGfNoyDKs", href: "https://youtu.be/JYUGfNoyDKs", title: "Money Radar" },
-  { id: "cpMIan0t_-g", href: "https://youtu.be/cpMIan0t_-g", title: "Wintalk" },
-  { id: "e2ikEj51qFc", href: "https://youtu.be/e2ikEj51qFc", title: "Charles Gastaud" },
-  { id: "eNTcHq-q2xc", href: "https://youtu.be/eNTcHq-q2xc", title: "Wintalk" },
-  { id: "8uI05E19ezk", href: "https://youtu.be/8uI05E19ezk", title: "Charles Gastaud" },
-  { id: "dAA3ZO3PfDw", href: "https://youtu.be/dAA3ZO3PfDw", title: "Wintalk" },
-  { id: "4w09cFQANXg", href: "https://youtu.be/4w09cFQANXg", title: "Wintalk" },
-];
-
-function LongCard({ video }: { video: LongVideo }) {
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const [isInViewport, setIsInViewport] = useState(false);
-
-  useEffect(() => {
-    if (!wrapRef.current) return;
-    const obs = new IntersectionObserver(
-      ([e]) => {
-        setIsInViewport(e.isIntersecting);
-      },
-      { 
-        rootMargin: "200px", // Compromis perf/fluidité
-        threshold: 0.01 
-      }
-    );
-    obs.observe(wrapRef.current);
-    return () => obs.disconnect();
-  }, []);
-
-  // Suppression sous-titres + langue EN pour éviter auto-activation
-  const params = `autoplay=1&mute=1&loop=1&playlist=${video.id}&controls=0&modestbranding=1&playsinline=1&rel=0&showinfo=0&iv_load_policy=3&cc_load_policy=0&hl=en`;
-
-  return (
-    <div className="group block min-w-[260px] sm:min-w-[320px] md:min-w-[380px]">
-      <div
-        ref={wrapRef}
-        className="relative aspect-video overflow-hidden rounded-2xl border border-foreground/10 bg-black shadow-[0_20px_50px_-20px_rgba(0,0,0,0.4)] transition group-hover:shadow-[0_30px_80px_-20px_rgba(123,45,142,0.5)]"
-      >
-        <img
-          src={`https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`}
-          alt={video.title}
-          loading="lazy"
-          className="absolute inset-0 h-[125%] w-[125%] -left-[12.5%] -top-[12.5%] object-cover"
-        />
-        {isInViewport && (
-          <iframe
-            src={`https://www.youtube.com/embed/${video.id}?${params}`}
-            title={video.title}
-            allow="autoplay; encrypted-media; picture-in-picture"
-            loading="lazy"
-            className="absolute inset-0 h-[125%] w-[125%] -left-[12.5%] -top-[12.5%] pointer-events-none"
-          />
-        )}
-        <a
-          href={video.href}
-          target="_blank"
-          rel="noreferrer"
-          aria-label={`Voir ${video.title} sur YouTube`}
-          className="absolute inset-0 z-10 pointer-events-none group-hover:pointer-events-auto"
-        />
-      </div>
-    </div>
-  );
-}
-
-function LongsCarousel({ items }: { items: LongVideo[] }) {
-  const loop = [...items, ...items, ...items];
-  const duration = Math.max(80, items.length * 18);
-  return (
-    <div
-      className="group/marquee relative mx-auto max-w-6xl overflow-hidden px-4 sm:px-8 lg:px-12"
-      style={{ maskImage: "linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent)" }}
-    >
-      <div
-        className="flex gap-4 sm:gap-5 w-max group-hover/marquee:[animation-play-state:paused]"
-        style={{ animation: `marquee-left-long ${duration}s linear infinite`, willChange: "transform" }}
-      >
-        {loop.map((video, index) => (
-          <LongCard key={`${video.id}-${index}`} video={video} />
-        ))}
-      </div>
-      <style>{`
-        @keyframes marquee-left-long { from { transform: translateX(0); } to { transform: translateX(-33.333%); } }
-      `}</style>
-    </div>
-  );
-}
-
-// Formats marquee — replaces the static trust band
-const FORMAT_TAGS = ["Reels", "YouTube", "TikTok", "Ads", "Podcasts", "Motion design", "Corporate", "Shorts", "Branding", "Documentaire"];
-
-function FormatsMarquee() {
-  const loop = [...FORMAT_TAGS, ...FORMAT_TAGS, ...FORMAT_TAGS];
-  return (
-    <div
-      className="relative overflow-hidden border-y border-foreground/5 bg-muted/30 py-5"
-      style={{ maskImage: "linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent)" }}
-    >
-      <div className="flex w-max gap-10 animate-fmtmarquee">
-        {loop.map((tag, i) => (
-          <span key={i} className="flex items-center gap-10 text-xs uppercase tracking-[0.24em] text-muted-foreground">
-            {tag}
-            <span className="h-1 w-1 rounded-full bg-foreground/30" />
-          </span>
-        ))}
-      </div>
-      <style>{`
-        @keyframes fmtmarquee { from { transform: translateX(0); } to { transform: translateX(-33.333%); } }
-        .animate-fmtmarquee { animation: fmtmarquee 50s linear infinite; }
-      `}</style>
-    </div>
-  );
-}
-
-const FAQS = [
+/* Les 4 questions qui décident un client. Affichées d'emblée. */
+const FAQ_FEATURED: FaqItem[] = [
   {
-    q: "Je publie 3-4 vidéos par semaine, vous pouvez vraiment tenir la cadence sans baisser la qualité ?",
-    a: "Oui — on est plus de 20 monteurs dans l'équipe. Quand un client a besoin de volume, on déploie 2 ou 3 monteurs en parallèle avec un chef de projet qui garantit la cohérence. Aujourd'hui certains clients sortent jusqu'à 30 vidéos/mois avec nous sans aucune perte de qualité.",
-  },
-  {
-    q: "J'ai déjà un style très spécifique, comment vous l'apprenez sans devoir tout reprendre ?",
-    a: "On commence toujours par une vidéo test sur votre vrai contenu, dans votre vrai style. Vous validez la DA, on verrouille les standards (sous-titres, rythme, b-rolls, sound design), et le reste de la production suit cette charte précise. Vous n'avez pas à expliquer 10 fois.",
-  },
-  {
-    q: "Combien de temps entre l'envoi du rush et la vidéo livrée ?",
+    q: "Combien de temps entre l'envoi des rushs et la vidéo livrée ?",
     a: "72h en standard pour les premières vidéos. Une fois en production continue, on livre souvent dès le lendemain. Si c'est urgent, on a une option 24h express et on peut prioriser sans déstabiliser le reste du planning.",
   },
   {
@@ -193,370 +86,869 @@ const FAQS = [
     a: "On ajuste. Vous laissez vos commentaires directement sur la timeline via Frame.io (à la seconde près), on retravaille et on renvoie. En offre ponctuelle 2 retours sont inclus, en abonnement les retours sont illimités dans la limite du raisonnable.",
   },
   {
-    q: "Vous travaillez avec qui ? Des créateurs, des marques ?",
-    a: "Les deux. On a aujourd'hui +100 clients actifs : créateurs de contenu, podcasteurs, marques B2B, agences. Plus de 5000 vidéos produites au total. On adapte notre process à chaque profil — pas la même approche pour une YouTubeur que pour une agence de pub.",
-  },
-  {
-    q: "Au quotidien, comment on communique ? J'ai pas envie d'une chaîne d'emails interminable.",
-    a: "Justement non. On utilise WhatsApp pour les échanges rapides et Frame.io pour les retours précis sur la vidéo. Vous avez un interlocuteur fixe (chef de projet) qui vous répond en moins de 2h, 7j/7.",
-  },
-  {
-    q: "Vous êtes basés à Madagascar — c'est compliqué pour la communication ?",
-    a: "Pas du tout. On est sur le même fuseau horaire (GMT+3, 1h de décalage avec la France en été). Tous les fondateurs et chefs de projet sont francophones natifs. Pour beaucoup de clients on est plus réactifs que leur ancienne agence parisienne.",
-  },
-  {
     q: "Pourquoi vos tarifs sont 3× moins chers qu'une agence en France ?",
-    a: "Charges et coûts opérationnels plus bas à Madagascar — c'est tout. La qualité, l'équipement et l'expertise sont exactement les mêmes (souvent meilleurs car on est spécialistes vidéo, pas une agence généraliste). On reverse la différence à nos clients, pas en marges.",
+    a: "Charges et coûts opérationnels plus bas à Madagascar, c'est tout. La qualité, l'équipement et l'expertise sont exactement les mêmes (souvent meilleurs car on est spécialistes vidéo, pas une agence généraliste). On reverse la différence à nos clients, pas en marges.",
   },
   {
-    q: "Qui est propriétaire des fichiers finaux ?",
-    a: "Vous. 100 %. Vous récupérez les exports finaux, et sur demande on vous envoie aussi les projets sources (Premiere, After Effects). Aucune clause de rétention.",
-  },
-  {
-    q: "Concrètement, comment on démarre ?",
-    a: "Vous remplissez le formulaire en bas de page. On vous appelle sous 24h pour comprendre votre besoin, on monte une vidéo test sur votre contenu, vous validez, et on lance la production.",
+    q: "3 à 4 vidéos par semaine : vous tenez vraiment la cadence ?",
+    a: "Oui, on est plus de 20 monteurs dans l'équipe. Quand un client a besoin de volume, on déploie 2 ou 3 monteurs en parallèle avec un chef de projet qui garantit la cohérence. Aujourd'hui certains clients sortent jusqu'à 30 vidéos par mois avec nous sans aucune perte de qualité.",
   },
 ];
 
-function Index() {
+/* Le reste, replié derrière "Voir les autres questions". */
+const FAQ_MORE: FaqItem[] = [
+  {
+    q: "J'ai déjà un style très spécifique, comment vous l'apprenez ?",
+    a: "On commence toujours par une vidéo test sur votre vrai contenu, dans votre vrai style. Vous validez la DA, on verrouille les standards (sous-titres, rythme, b-rolls, sound design), et le reste de la production suit cette charte précise. Vous n'avez pas à expliquer 10 fois.",
+  },
+  {
+    q: "Vous travaillez avec qui ? Des créateurs, des marques ?",
+    a: "Les deux. On a aujourd'hui +100 clients actifs : créateurs de contenu, podcasteurs, marques B2B, agences. Plus de 5000 vidéos produites au total. On adapte notre process à chaque profil : pas la même approche pour une YouTubeuse que pour une agence de pub.",
+  },
+  {
+    q: "Au quotidien, comment on communique ?",
+    a: "Sans chaîne d'emails interminable. On utilise WhatsApp pour les échanges rapides et Frame.io pour les retours précis sur la vidéo. Vous avez un interlocuteur fixe (chef de projet) qui vous répond en moins de 2h, 7j/7.",
+  },
+  {
+    q: "Vous êtes basés à Madagascar : c'est compliqué pour communiquer ?",
+    a: "Pas du tout. On est sur un fuseau très proche (GMT+3, 1h de décalage avec la France en été). Tous les fondateurs et chefs de projet sont francophones natifs. Pour beaucoup de clients on est plus réactifs que leur ancienne agence parisienne.",
+  },
+  {
+    q: "Qui est propriétaire des fichiers finaux ?",
+    a: "Vous, à 100 %. Vous récupérez les exports finaux, et sur demande on vous envoie aussi les projets sources (Premiere, After Effects). Aucune clause de rétention.",
+  },
+  {
+    q: "Concrètement, comment on démarre ?",
+    a: "Vous réservez un appel en bas de page. On prend 30 minutes pour comprendre votre besoin, on monte une vidéo test sur votre contenu, vous validez, et on lance la production.",
+  },
+];
+
+/* Délai d'entrée : attend la fin de l'intro quand elle est jouée. */
+const after = (ms: number): CSSProperties =>
+  ({ ["--rd"]: `calc(var(--intro-delay, 0ms) + ${ms}ms)` }) as CSSProperties;
+
+function SectionLabel({ children }: { children: ReactNode }) {
   return (
-    <main className="overflow-x-hidden">
-      <Nav />
+    <span className="font-label inline-flex items-center gap-2.5 text-ink/65">
+      <span className="h-1.5 w-1.5 rounded-full bg-brand" />
+      {children}
+    </span>
+  );
+}
 
-      {/* HERO */}
-      <section className="surface-ink relative overflow-hidden pt-24 pb-14 sm:pt-32 sm:pb-20 lg:pt-44 lg:pb-32">
-        <div className="grain" />
-        <div className="relative mx-auto max-w-7xl px-5 sm:px-6 lg:px-10">
-          <div className="grid items-center gap-10 sm:gap-12 lg:grid-cols-[1.1fr_1fr]">
-            <div className="fade-in">
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-3 py-1.5 text-[11px] sm:px-4 sm:text-xs font-medium text-white/80 backdrop-blur">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                Agence de montage vidéo · Disponibles 7j/7
-              </span>
-              <h1 className="mt-5 sm:mt-6 font-display text-[2.2rem] leading-[1.06] tracking-tight sm:text-5xl lg:text-7xl text-white">
-                Votre équipe monteur vidéo <span className="text-brand-gradient">dédiée.</span>
-              </h1>
-              <p className="mt-5 sm:mt-6 max-w-xl text-[15px] sm:text-lg leading-relaxed text-white/75">
-                Shorts, publicités, podcasts et branding vidéo produits avec rapidité,
-                cohérence et exigence, pensés pour scaler votre contenu sans compromis.
-              </p>
-              <div className="mt-7 sm:mt-9 flex flex-wrap gap-3">
-                <a href="#showreel" className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3.5 sm:px-7 sm:py-4 text-sm font-semibold text-[#1a0b2e] hover:opacity-90 transition">
-                  Voir nos réalisations
-                </a>
-                <a href="/devis/surmesure" className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-5 py-3.5 sm:px-7 sm:py-4 text-sm font-semibold text-white backdrop-blur hover:bg-white/10 transition">
-                  <span>Calculer mon devis</span>
-                  <span className="hidden sm:inline text-white/50 text-xs font-normal">· Estimer mon projet en 2 min</span>
-                </a>
-              </div>
-              <dl className="mt-10 sm:mt-14 grid grid-cols-3 gap-3 sm:gap-6 border-t border-white/10 pt-7 sm:pt-8">
-                <Stat k="+100" v="Clients satisfaits" />
-                <Stat k="+5000" v="Vidéos produites" />
-                <Stat k="7j/7" v="Production en continu" />
-              </dl>
-            </div>
+function Arrow({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={`btn-arrow ${className}`}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      aria-hidden
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14M13 6l6 6-6 6" />
+    </svg>
+  );
+}
 
-            <div className="relative">
-              <div className="absolute -inset-6 -z-10 rounded-[2rem] bg-brand-gradient opacity-30 blur-3xl" />
-              <div className="overflow-hidden rounded-2xl border border-white/15 bg-black shadow-2xl">
-                <div className="aspect-video">
-                  <iframe
-                    src={`https://www.youtube.com/embed/${PRESENTATION_YT}?${YOUTUBE_PREVIEW_PARAMS}&playlist=${PRESENTATION_YT}`}
-                    title="Présentation VizioCraft"
-                    allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
-                    allowFullScreen
-                    loading="lazy"
-                    className="h-full w-full"
-                  />
-                </div>
-              </div>
-              <p className="mt-3 text-xs text-white/55 text-center">Présentation de l'agence · 2 min</p>
-            </div>
-          </div>
-        </div>
-      </section>
+/* ------------------------- HERO ------------------------- */
 
-      {/* Formats marquee — auto-scroll */}
-      <FormatsMarquee />
+function Hero() {
+  const magnetic = useMagnetic<HTMLAnchorElement>(0.25);
+  const [warm, setWarm] = useState(false);
+  const warmed = useRef(false);
 
-      {/* SHOWREEL — auto-scrolling marquees */}
-      <section id="showreel" className="relative py-14 sm:py-20 lg:py-32">
-        <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-10">
-          <div className="max-w-3xl">
-            <Eyebrow>Réalisations récentes</Eyebrow>
-            <h2 className="mt-4 font-display text-3xl tracking-tight sm:text-4xl lg:text-5xl">
-              Le travail parle <span className="text-brand-gradient">pour nous.</span>
-            </h2>
-            <p className="mt-3 max-w-xl text-[15px] sm:text-base text-muted-foreground">
-              Une sélection de shorts et de formats longs produits pour nos créateurs et marques.
-            </p>
-          </div>
+  /* La scène vidéo grandit à mesure qu'elle entre dans l'écran. */
+  const stageRef = useViewProgress<HTMLDivElement>(
+    (p, el) => el.style.setProperty("--p", p.toFixed(4)),
+    { start: 1, end: 0.3 },
+  );
+
+  return (
+    <section
+      id="top"
+      className="after-intro relative pt-[104px] sm:pt-[124px] lg:pt-[136px]"
+      /* dès que la souris bouge, on prépare le lecteur : la lecture au survol sera immédiate */
+      onPointerMove={(e) => {
+        if (warmed.current || e.pointerType !== "mouse") return;
+        warmed.current = true;
+        setWarm(true);
+      }}
+    >
+      <div className="shell">
+        <div
+          className="flex items-center justify-between gap-4"
+          data-reveal="fade"
+          style={after(0)}
+        >
+          <span className="flex items-center gap-2.5">
+            <span className="live-dot h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            <span className="font-label text-ink/65">Agence de montage vidéo</span>
+          </span>
+          <span className="font-label hidden text-ink/60 sm:block">
+            +100 clients · +5000 vidéos livrées
+          </span>
         </div>
 
-          {/* Shorts — verticaux */}
-          <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-10">
-            <div className="mt-8 sm:mt-10 flex items-end justify-between gap-4">
-              <div>
-                <span className="inline-flex items-center gap-2 rounded-full bg-brand-soft px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-primary">
-                  <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                  Shorts · Reels · TikTok
-                </span>
-              </div>
-            </div>
-          </div>
-          <div className="mt-6 sm:mt-8 space-y-4 sm:space-y-5">
-            <MarqueeShorts items={SHORTS_ROW_A} direction="left" speed={90} />
-          </div>
+        <div className="mt-5 grid gap-8 sm:mt-7 lg:grid-cols-12 lg:items-end lg:gap-10">
+          <h1
+            data-reveal="fade"
+            style={after(0)}
+            className="whitespace-nowrap font-display text-[clamp(2.6rem,13.2vw,6rem)] font-bold leading-[0.88] tracking-[-0.055em] text-ink lg:col-span-8 lg:text-[min(8.7vw,17.5vh,7.85rem)]"
+          >
+            <MaskLines
+              delay={80}
+              step={110}
+              lines={[
+                <span className="inline-flex items-center gap-[0.16em]">
+                  Votre équipe
+                  <span
+                    aria-hidden
+                    className="inline-flex shrink-0 items-center rounded-full bg-white/70 p-[0.045em] shadow-[0_10px_30px_-14px_rgba(12,10,18,0.5)] ring-1 ring-ink/10"
+                  >
+                    <img
+                      src={FOUNDER_A}
+                      alt=""
+                      className="h-[0.56em] w-[0.56em] rounded-full object-cover"
+                    />
+                    <img
+                      src={FOUNDER_B}
+                      alt=""
+                      className="-ml-[0.16em] h-[0.56em] w-[0.56em] rounded-full object-cover ring-2 ring-white"
+                    />
+                    <span className="-ml-[0.16em] hidden h-[0.56em] w-[0.56em] items-center justify-center rounded-full bg-ink ring-2 ring-white sm:flex">
+                      <span className="text-[0.17em] font-semibold tracking-normal text-white">
+                        +20
+                      </span>
+                    </span>
+                  </span>
+                </span>,
+                <>monteur vidéo</>,
+                <span className="relative inline-block">
+                  <em className="font-em pr-[0.08em] text-[1.07em] text-brand-gradient">dédiée.</em>
+                  <svg
+                    aria-hidden
+                    viewBox="0 0 300 20"
+                    preserveAspectRatio="none"
+                    className="scribble absolute -bottom-[0.02em] left-0 h-[0.13em] w-[96%]"
+                    fill="none"
+                    style={{ ["--sd" as string]: "calc(var(--intro-delay, 0ms) + 950ms)" }}
+                  >
+                    <path
+                      d="M3 13C52 5 98 16 148 10s96-9 149-1"
+                      pathLength={1}
+                      stroke="url(#vz-scribble)"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      vectorEffect="non-scaling-stroke"
+                    />
+                    <defs>
+                      <linearGradient id="vz-scribble" x1="0" x2="1" y1="0" y2="0">
+                        <stop offset="0" stopColor="#7b2d8e" />
+                        <stop offset="1" stopColor="#2ba8e2" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </span>,
+              ]}
+            />
+          </h1>
 
-          {/* Longs — horizontaux */}
-          <div className="mx-auto mt-14 sm:mt-20 lg:mt-24 max-w-7xl px-5 sm:px-6 lg:px-10">
-            <div className="flex items-end justify-between gap-4">
-              <div>
-                <span className="inline-flex items-center gap-2 rounded-full bg-brand-soft px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-primary">
-                  <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                  Formats longs · YouTube · Podcasts
-                </span>
-                <h3 className="mt-3 font-display text-xl sm:text-2xl lg:text-3xl tracking-tight">
-                  Des vidéos longues qui <span className="text-brand-gradient">tiennent l'attention.</span>
-                </h3>
-              </div>
-            </div>
-          </div>
-          <div className="mt-6 sm:mt-8">
-            <LongsCarousel items={LONGS} />
-          </div>
-      </section>
-
-
-      {/* SERVICES — floating cards */}
-      <section id="services" className="relative bg-muted/40 py-14 sm:py-20 lg:py-32">
-        <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-10">
-          <div className="max-w-3xl">
-            <Eyebrow>Services</Eyebrow>
-            <h2 className="mt-4 font-display text-3xl tracking-tight sm:text-4xl lg:text-5xl">
-              Une production vidéo pensée pour <span className="text-brand-gradient">scaler votre contenu.</span>
-            </h2>
-            <p className="mt-4 sm:mt-5 text-[15px] sm:text-lg text-muted-foreground">
-              Sous-titres, b-rolls, animations, IA, quelle que soit votre DA, nous adaptons
-              chaque contenu à votre identité et à votre audience.
+          <div className="lg:col-span-4 lg:pb-[1.2vh]">
+            <p
+              data-reveal="up"
+              style={after(420)}
+              className="max-w-md text-[16px] leading-relaxed text-ink/70 sm:text-[17px]"
+            >
+              Shorts, publicités, podcasts et formats longs produits avec une seule obsession :
+              capter l'attention dès la première seconde, et la tenir jusqu'à la dernière.
             </p>
-          </div>
-          <ServicesShowcase />
-        </div>
-      </section>
 
-      {/* PROCESS — timeline */}
-      <section id="process" className="relative py-14 sm:py-20 lg:py-32">
-        <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-10">
-          <div className="mx-auto max-w-3xl text-center">
-            <Eyebrow>Comment ça se passe</Eyebrow>
-            <h2 className="mt-4 font-display text-3xl tracking-tight sm:text-4xl lg:text-5xl">
-              Un workflow rapide, structuré, et <span className="text-brand-gradient">fiable.</span>
-            </h2>
-            <p className="mt-4 sm:mt-5 text-[15px] sm:text-base text-muted-foreground">
-              Une méthode éprouvée en 4 étapes, pensée pour garantir cohérence et qualité constante,
-              projet après projet.
-            </p>
-          </div>
-          <ProcessTimeline />
-        </div>
-      </section>
-
-      {/* TARIFS */}
-      <section id="tarifs" className="relative bg-muted/40 py-14 sm:py-20 lg:py-32">
-        <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-10">
-          <div className="max-w-3xl">
-            <Eyebrow>Tarifs</Eyebrow>
-            <h2 className="mt-4 font-display text-3xl tracking-tight sm:text-4xl lg:text-5xl">
-              {SHOW_MONTAGE_CONTINU ? 'Trois' : 'Deux'} manières de travailler <span className="text-brand-gradient">ensemble.</span>
-            </h2>
-            <p className="mt-4 text-[15px] sm:text-base text-muted-foreground">
-              Pas de surprises, pas de frais cachés. Les détails du devis se construisent à la demande.
-            </p>
-          </div>
-
-          <div className={`mt-10 sm:mt-12 grid gap-4 sm:gap-6 ${SHOW_MONTAGE_CONTINU ? 'lg:grid-cols-3' : 'lg:grid-cols-2 lg:max-w-4xl lg:mx-auto'}`}>
-            {/* Essentiel — léger */}
-            <div className="relative flex flex-col rounded-3xl border border-foreground/10 bg-card p-6 sm:p-8 transition hover:-translate-y-1 hover:shadow-[0_30px_60px_-25px_rgba(123,45,142,0.25)]">
-              <span className="inline-flex w-fit items-center rounded-full bg-amber-100 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-amber-700">À la vidéo</span>
-              <h3 className="mt-4 font-display text-2xl">Montage essentiel</h3>
-              <p className="mt-1 text-sm text-muted-foreground">Pour tester sans engagement</p>
-              <div className="mt-6 flex items-baseline gap-1">
-                <span className="font-display text-4xl">30–250€</span>
-                <span className="text-sm text-muted-foreground">/ vidéo</span>
-              </div>
-              <p className="text-xs text-muted-foreground">Selon type et durée</p>
-              <ul className="mt-6 space-y-2.5 text-sm">
-                {["Short, long format, podcast, pub", "Niveau de montage au choix", "Options à la carte", "Révisions incluses"].map((f) => (
-                  <li key={f} className="flex items-start gap-3"><Check /> {f}</li>
-                ))}
-              </ul>
-              <Link
-                to="/devis/$variant"
-                params={{ variant: "surmesure" }}
-                className="mt-8 inline-flex items-center justify-center gap-2 rounded-full border border-foreground/15 bg-transparent px-5 py-3 text-sm font-semibold transition hover:border-primary hover:bg-brand-soft hover:text-primary"
-              >
-                Calculer mon devis →
-              </Link>
-            </div>
-
-            {/* Continu — populaire, dark */}
-            {SHOW_MONTAGE_CONTINU && (
-            <div className="relative flex flex-col rounded-3xl border-2 border-transparent bg-[#1a0b2e] p-6 sm:p-8 text-white shadow-[0_40px_70px_-25px_rgba(123,45,142,0.55)] lg:scale-[1.03]">
-              <div className="absolute -inset-px -z-10 rounded-3xl bg-brand-gradient opacity-50 blur-2xl" />
-              <span className="absolute -top-3 left-8 rounded-full bg-brand-gradient px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-white shadow-lg">
-                Le plus populaire
-              </span>
-              <span className="inline-flex w-fit items-center rounded-full bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-white/90">Abonnement</span>
-              <h3 className="mt-4 font-display text-2xl">Montage continu</h3>
-              <p className="mt-1 text-sm text-white/65">Production sans interruption</p>
-              <div className="mt-6 flex items-baseline gap-1">
-                <span className="font-display text-4xl">850 €</span>
-                <span className="text-sm text-white/70">/ mois</span>
-              </div>
-              <p className="text-xs text-white/65">Jusqu'à 20 shorts ou 4 longs formats</p>
-              <ul className="mt-6 space-y-2.5 text-sm">
-                {["Tous formats inclus", "Support prioritaire", "Révisions illimitées", "Livraison continue", "Au-delà : tarif préférentiel"].map((f) => (
-                  <li key={f} className="flex items-start gap-3"><CheckLight /> {f}</li>
-                ))}
-              </ul>
+            <div
+              className="mt-6 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center"
+              data-reveal="up"
+              style={after(520)}
+            >
               <a
-                href="#contact"
-                className="mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-[#1a0b2e] hover:opacity-90"
+                ref={magnetic}
+                href="#showreel"
+                className="btn-vz rounded-full bg-ink px-6 py-4 text-[14.5px] font-semibold text-white shadow-[0_22px_44px_-22px_rgba(12,10,18,0.75)]"
               >
-                Démarrer →
+                Voir les réalisations
+                <Arrow />
+              </a>
+              <a
+                href="/devis/surmesure"
+                className="btn-vz rounded-full border border-ink/15 bg-white/60 px-6 py-4 text-[14.5px] font-semibold text-ink backdrop-blur"
+                style={{ ["--btn-fill" as string]: "#0c0a12" }}
+              >
+                Calculer mon devis
+                <span className="font-label opacity-60">2 min</span>
               </a>
             </div>
-            )}
-
-            {/* Sur mesure */}
-            <div className="relative flex flex-col rounded-3xl border border-foreground/10 bg-card p-6 sm:p-8 transition hover:-translate-y-1 hover:shadow-[0_30px_60px_-25px_rgba(123,45,142,0.25)]">
-              <span className="inline-flex w-fit items-center rounded-full bg-brand-soft px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary">Sur mesure</span>
-              <h3 className="mt-4 font-display text-2xl">Production personnalisée</h3>
-              <p className="mt-1 text-sm text-muted-foreground">Entièrement à la carte</p>
-              <div className="mt-6 flex items-baseline gap-1">
-                <span className="font-display text-4xl">Prix</span>
-                <span className="text-sm text-muted-foreground">calculé live</span>
-              </div>
-              <p className="text-xs text-muted-foreground">One shot ou multishoot mensuel</p>
-              <ul className="mt-6 space-y-2.5 text-sm">
-                {["Chaque type + quantité au choix", "Réduction multishoot disponible", "Devis détaillé par mail"].map((f) => (
-                  <li key={f} className="flex items-start gap-3"><Check /> {f}</li>
-                ))}
-              </ul>
-              <Link
-                to="/devis/$variant"
-                params={{ variant: "surmesure" }}
-                className="mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-brand-gradient px-5 py-3 text-sm font-semibold text-white glow-brand hover:opacity-95"
-              >
-                Calculer mon devis →
-              </Link>
-            </div>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* FAQ */}
-      <section id="faq" className="relative py-14 sm:py-20 lg:py-32">
-        <div className="mx-auto max-w-5xl px-5 sm:px-6 lg:px-10">
-          <div className="max-w-2xl">
-            <Eyebrow>Vos questions, nos réponses</Eyebrow>
-            <h2 className="mt-4 font-display text-3xl tracking-tight sm:text-4xl lg:text-5xl">
-              Les vraies <span className="text-brand-gradient">questions</span> que nos clients nous posent.
-            </h2>
-            <p className="mt-4 text-[15px] sm:text-base text-muted-foreground">
-              Vous ne trouvez pas votre réponse ? Posez-la directement dans le formulaire — on revient sous 24h.
-            </p>
-          </div>
-          <Faq items={FAQS} />
-        </div>
-      </section>
-
-      {/* CONTACT */}
-      <section id="contact" className="relative overflow-hidden py-14 sm:py-20 lg:py-32">
-        <div className="absolute inset-0 -z-10">
-          <div className="absolute -left-32 top-20 h-[500px] w-[500px] rounded-full bg-[radial-gradient(closest-side,rgba(123,45,142,0.18),transparent)] blur-3xl" />
-          <div className="absolute -right-32 bottom-20 h-[500px] w-[500px] rounded-full bg-[radial-gradient(closest-side,rgba(43,168,226,0.18),transparent)] blur-3xl" />
-        </div>
-
-        <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-10">
-          <div className="grid gap-10 sm:gap-12 lg:grid-cols-[1fr_1.05fr] lg:items-stretch">
-            <div className="relative flex flex-col">
-              <Eyebrow>Contact</Eyebrow>
-              <h2 className="mt-4 font-display text-3xl tracking-tight sm:text-4xl lg:text-5xl">
-                Discutons de votre <span className="text-brand-gradient">projet.</span>
-              </h2>
-              <p className="mt-4 sm:mt-5 text-[15px] sm:text-base text-muted-foreground">
-                VizioCraft est une société basée à Madagascar, fondée par deux frères passionnés
-                par la création de contenu. Notre mission : offrir une solution concrète aux pros
-                qui veulent produire vite et bien, sans compromis sur la qualité.
-              </p>
-
-              <div className="mt-6 sm:mt-8 grid grid-cols-2 gap-3 sm:gap-4">
-                <BigStat k="+100" v="Clients satisfaits" />
-                <BigStat k="+5000" v="Vidéos produites" />
-              </div>
-
-              <div className="relative mt-6 sm:mt-8 flex-1 hidden sm:block">
-                <div className="absolute -inset-3 -z-10 rounded-[2rem] bg-brand-gradient opacity-25 blur-2xl" />
-                <div className="relative h-full max-h-[420px] lg:max-h-none overflow-hidden rounded-[2rem] border border-foreground/10 shadow-2xl">
-                  <img src={CONTACT_FRAME} alt="Les fondateurs VizioCraft" className="h-full w-full object-cover" />
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#1a0b2e] via-[#1a0b2e]/60 to-transparent p-6 text-white sm:p-8">
-                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white/70">Charles & Alexandre</p>
-                    <p className="mt-1 font-display text-xl sm:text-2xl">Vos interlocuteurs directs, du premier appel au dernier rendu.</p>
-                  </div>
-                </div>
-              </div>
+      {/* Scène vidéo, taille modérée : la présentation au centre, deux réalisations
+          verticales en satellites. Miniatures d'abord, lecture au survol, son au clic. */}
+      <div className="shell mt-10 sm:mt-12 lg:mt-[6vh]">
+        <div
+          ref={stageRef}
+          className="hero-stage relative mx-auto w-full max-w-[1120px]"
+          data-reveal="scale"
+          style={after(300)}
+        >
+          <WarmContext.Provider value={warm}>
+            <div className="hero-sat hero-sat--left hidden lg:block">
+              <WorkTile
+                work={bySlug("ugc-boutique")}
+                compact
+                className="rounded-[20px] shadow-[0_40px_80px_-40px_rgba(12,10,18,0.75)] ring-1 ring-ink/10"
+              />
             </div>
+            <div className="hero-sat hero-sat--right hidden lg:block">
+              <WorkTile
+                work={bySlug("reel-sport")}
+                compact
+                className="rounded-[20px] shadow-[0_40px_80px_-40px_rgba(12,10,18,0.75)] ring-1 ring-ink/10"
+              />
+            </div>
+          </WarmContext.Provider>
 
-            <div className="rounded-[2rem] border border-foreground/10 bg-card p-6 sm:p-8 lg:p-10 shadow-[0_40px_80px_-30px_rgba(123,45,142,0.3)]">
-              <span className="inline-flex items-center gap-2 rounded-full bg-brand-soft px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-primary">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> Réponse sous 24h
+          <div className="hero-stage-inner relative z-[2] mx-auto w-full lg:w-[min(66%,calc((100svh-250px)*16/9))]">
+            <HoverVideo
+              id={PRESENTATION_YT}
+              title="Présentation de l'agence VizioCraft"
+              ariaLabel="Lire la présentation de l'agence VizioCraft, 2 minutes"
+              posters={PRESENTATION_POSTERS}
+              eager
+              intent={40}
+              warm={warm}
+              zoom={1.035}
+              className="aspect-video w-full rounded-[20px] shadow-[0_50px_100px_-50px_rgba(12,10,18,0.7)] ring-1 ring-ink/10 sm:rounded-[26px]"
+            >
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-0 z-[3] bg-gradient-to-t from-[#0c0a12]/65 via-transparent to-transparent transition-opacity duration-700 group-data-[state=playing]/hv:opacity-40"
+              />
+              <span className="pointer-events-none absolute inset-x-0 bottom-0 z-[4] flex items-end justify-between gap-4 p-4 sm:p-6">
+                <span className="flex items-center gap-3 sm:gap-4">
+                  <span className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white text-ink shadow-[0_14px_36px_-12px_rgba(12,10,18,0.7)] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/hv:scale-110 sm:h-14 sm:w-14">
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="h-[38%] w-[38%] translate-x-[6%]"
+                      fill="currentColor"
+                      aria-hidden
+                    >
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </span>
+                  <span className="text-left">
+                    <span className="block font-display text-[16px] font-semibold leading-tight tracking-tight text-white sm:text-[19px]">
+                      Présentation de l'agence
+                    </span>
+                    <span className="font-label mt-1 block text-white/80">
+                      <span className="group-data-[state=playing]/hv:hidden">
+                        2 min ·{" "}
+                        <span className="[@media(hover:none)]:hidden">Survolez pour lire</span>
+                        <span className="[@media(hover:hover)]:hidden">Touchez pour lire</span>
+                      </span>
+                      <span className="hidden group-data-[state=playing]/hv:inline">
+                        Cliquez pour le son
+                      </span>
+                    </span>
+                  </span>
+                </span>
+                <span className="font-label hidden rounded-full bg-white/15 px-3 py-1.5 text-white backdrop-blur xl:block">
+                  Charles &amp; Alexandre, fondateurs
+                </span>
               </span>
-              <h3 className="mt-4 font-display text-xl sm:text-2xl lg:text-3xl">Réserver un appel de préparation</h3>
-              <p className="mt-3 text-sm text-muted-foreground">
-                Choisissez votre créneau et réservez directement — on discute de votre projet et répondons à toutes vos questions.
-              </p>
-              <div className="mt-6 sm:mt-7">
-                <CalendlyWidget />
+            </HoverVideo>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------- TICKER FORMATS ------------------------- */
+
+function FormatsTicker() {
+  const loop = [...FORMAT_TAGS, ...FORMAT_TAGS, ...FORMAT_TAGS];
+  const { trackRef } = useMarquee<HTMLDivElement>({
+    speed: 34,
+    direction: "left",
+    count: FORMAT_TAGS.length,
+    scrollBoost: 0.35,
+    draggable: false,
+  });
+
+  return (
+    <div
+      aria-hidden
+      className="relative mt-14 overflow-hidden border-y border-ink/10 py-4 sm:mt-20 sm:py-5"
+      style={{
+        maskImage: "linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent)",
+        WebkitMaskImage: "linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent)",
+      }}
+    >
+      <div ref={trackRef} className="flex w-max items-center will-change-transform">
+        {loop.map((tag, i) => (
+          <span key={`${tag}-${i}`} className="flex items-center">
+            <span className="font-label px-6 text-ink/60 sm:px-9">{tag}</span>
+            <span className="h-1 w-1 rotate-45 bg-brand" />
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------- MANIFESTE ------------------------- */
+
+const MANIFESTE: { t: string; em?: boolean }[] = [
+  ..."Nous ne vendons pas des heures de montage. Nous vendons des".split(" ").map((t) => ({ t })),
+  { t: "secondes", em: true },
+  { t: "d'attention,", em: true },
+  ..."et nous les défendons, une par une, jusqu'à ce que votre audience ne puisse plus regarder ailleurs."
+    .split(" ")
+    .map((t) => ({ t })),
+];
+
+function Manifeste() {
+  /* Chaque mot s'encre à mesure que le paragraphe traverse l'écran. */
+  const ref = useViewProgress<HTMLParagraphElement>(
+    (p, el) => {
+      const words = el.querySelectorAll<HTMLElement>(".ink-word");
+      const on = Math.round(p * words.length);
+      words.forEach((w, i) => w.classList.toggle("is-on", i < on));
+    },
+    { start: 0.86, end: 0.34 },
+  );
+
+  const stats = [
+    { k: <CountUp to={100} prefix="+" />, v: "Clients accompagnés" },
+    { k: <CountUp to={5000} prefix="+" />, v: "Vidéos livrées" },
+    { k: <CountUp to={20} suffix="+" />, v: "Monteurs dans l'équipe" },
+    { k: <CountUp to={72} suffix="h" />, v: "Livraison standard" },
+  ];
+
+  return (
+    <section className="relative pt-24 sm:pt-32 lg:pt-44">
+      <div className="shell">
+        <SectionLabel>Manifeste</SectionLabel>
+        <p
+          ref={ref}
+          className="mt-6 max-w-[21ch] font-display text-[clamp(2rem,5.6vw,5rem)] font-semibold leading-[1.02] tracking-[-0.045em] text-ink sm:max-w-[24ch] lg:max-w-[26ch]"
+        >
+          {MANIFESTE.map((w, i) => (
+            <span key={i}>
+              <span
+                className={`ink-word inline-block ${
+                  w.em ? "font-em pr-[0.05em] text-[1.06em] text-brand-gradient" : ""
+                }`}
+              >
+                {w.t}
+              </span>{" "}
+            </span>
+          ))}
+        </p>
+
+        <div className="mt-12 grid gap-10 border-t border-ink/10 pt-8 sm:mt-16 lg:grid-cols-12 lg:gap-10 lg:pt-10">
+          <p
+            className="max-w-md text-[15.5px] leading-relaxed text-ink/70 sm:text-[17px] lg:col-span-4"
+            data-reveal="up"
+          >
+            Un hook raté coûte une vue. Une coupe mal placée coûte un abonné. C'est pour ça que nos
+            monteurs travaillent avec un chef de projet, une charte verrouillée et zéro
+            approximation.
+          </p>
+
+          <dl className="grid grid-cols-2 gap-x-6 gap-y-9 lg:col-span-8 lg:grid-cols-4">
+            {stats.map((s, i) => (
+              <div
+                key={s.v}
+                data-reveal="up"
+                style={{ ["--rd" as string]: `${i * 80}ms` }}
+                className="border-l border-ink/15 pl-4 sm:pl-5"
+              >
+                <dt className="font-label text-ink/60">{s.v}</dt>
+                <dd className="mt-2 font-display text-[clamp(2.3rem,4.3vw,3.7rem)] font-bold leading-none tracking-[-0.05em] text-ink tabular-nums">
+                  {s.k}
+                </dd>
               </div>
+            ))}
+          </dl>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------- TARIFS ------------------------- */
+
+function Check({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={`mt-0.5 h-4 w-4 shrink-0 ${className}`}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      aria-hidden
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.5l5 5 10-11" />
+    </svg>
+  );
+}
+
+function PriceCard({
+  badge,
+  title,
+  sub,
+  price,
+  priceUnit,
+  note,
+  features,
+  cta,
+  href,
+  to,
+  dark = false,
+  index = 0,
+}: {
+  badge: string;
+  title: string;
+  sub: string;
+  price: ReactNode;
+  priceUnit: string;
+  note: string;
+  features: string[];
+  cta: string;
+  href?: string;
+  to?: string;
+  dark?: boolean;
+  index?: number;
+}) {
+  const ref = useTilt<HTMLDivElement>(3);
+
+  const ctaClass = `btn-vz w-full rounded-full px-5 py-4 text-[14.5px] font-semibold ${
+    dark ? "bg-white text-ink" : "bg-ink text-white"
+  }`;
+
+  return (
+    <div
+      data-reveal="up"
+      style={{ ["--rd" as string]: `${index * 110}ms` }}
+      className="[perspective:1400px]"
+    >
+      <div
+        ref={ref}
+        className={`tilt spotlight relative flex h-full flex-col overflow-hidden rounded-[28px] border p-6 sm:p-9 ${
+          dark
+            ? "ink border-white/10 bg-[#0c0a12] shadow-[0_50px_100px_-50px_rgba(123,45,142,0.75)]"
+            : "border-ink/10 bg-white shadow-[0_40px_90px_-60px_rgba(12,10,18,0.45)]"
+        }`}
+        style={
+          dark
+            ? ({
+                ["--spot-a"]: "rgba(177, 108, 232, 0.3)",
+                ["--spot-b"]: "rgba(43, 168, 226, 0.14)",
+              } as CSSProperties)
+            : undefined
+        }
+      >
+        {dark && (
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -right-24 -top-28 h-72 w-72 rounded-full bg-[radial-gradient(closest-side,rgba(123,45,142,0.7),transparent)] blur-2xl"
+          />
+        )}
+
+        <div className="relative z-10 flex h-full flex-col">
+          <div className="flex items-center justify-between gap-3">
+            <span
+              className={`font-label rounded-full px-3 py-1.5 ${
+                dark ? "bg-white/10 text-white" : "bg-ink/[0.06] text-ink"
+              }`}
+            >
+              {badge}
+            </span>
+            <span className={`font-label ${dark ? "text-white/60" : "text-ink/55"}`}>
+              0{index + 1}
+            </span>
+          </div>
+
+          <h3
+            className={`mt-7 font-display text-[1.7rem] font-bold leading-none tracking-[-0.04em] sm:text-[2rem] ${
+              dark ? "text-white" : "text-ink"
+            }`}
+          >
+            {title}
+          </h3>
+          <p className={`mt-2 text-[15px] ${dark ? "text-white/65" : "text-ink/65"}`}>{sub}</p>
+
+          <div className="mt-8 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <span
+              className={`font-display text-[clamp(2.9rem,6.4vw,4.6rem)] font-bold leading-[0.9] tracking-[-0.055em] ${
+                dark ? "text-white" : "text-ink"
+              }`}
+            >
+              {price}
+            </span>
+            <span className={`text-[15px] ${dark ? "text-white/65" : "text-ink/65"}`}>
+              {priceUnit}
+            </span>
+          </div>
+          <p className={`font-label mt-3 ${dark ? "text-white/55" : "text-ink/55"}`}>{note}</p>
+
+          <ul
+            className={`mt-7 space-y-3 border-t pt-7 text-[15px] ${
+              dark ? "border-white/12 text-white/80" : "border-ink/10 text-ink/80"
+            }`}
+          >
+            {features.map((f) => (
+              <li key={f} className="flex items-start gap-3">
+                <Check className={dark ? "text-[#c9a4f0]" : "text-brand"} />
+                {f}
+              </li>
+            ))}
+          </ul>
+
+          <div className="mt-auto pt-9">
+            {to ? (
+              <Link
+                to={to}
+                params={{ variant: "surmesure" }}
+                className={ctaClass}
+                style={dark ? ({ ["--btn-hover-color"]: "#fff" } as CSSProperties) : undefined}
+              >
+                {cta}
+                <Arrow />
+              </Link>
+            ) : (
+              <a href={href ?? "#contact"} className={ctaClass}>
+                {cta}
+                <Arrow />
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Tarifs() {
+  return (
+    <section id="tarifs" className="relative scroll-mt-24 pt-24 sm:pt-32 lg:pt-44">
+      <div className="shell">
+        <div className="grid gap-6 lg:grid-cols-12 lg:items-end lg:gap-10">
+          <div className="lg:col-span-8" data-reveal="up">
+            <SectionLabel>Tarifs</SectionLabel>
+            <h2 className="mt-5 font-display text-[clamp(2.5rem,7.4vw,6.2rem)] font-bold leading-[0.9] tracking-[-0.05em] text-ink">
+              {SHOW_MONTAGE_CONTINU ? "Trois" : "Deux"} manières de travailler{" "}
+              <em className="font-em pr-[0.06em] text-[1.06em] text-brand-gradient">ensemble.</em>
+            </h2>
+          </div>
+          <div
+            className="lg:col-span-4 lg:pb-2"
+            data-reveal="up"
+            style={{ ["--rd" as string]: "120ms" }}
+          >
+            <p className="max-w-md text-[15.5px] leading-relaxed text-ink/70 sm:text-[17px]">
+              Pas de surprises, pas de frais cachés. Le devis se construit en direct, à la minute
+              près.
+            </p>
+            <ul className="mt-4 flex flex-wrap gap-2">
+              {["Sans engagement", "Facture pro", "Réponse < 24h"].map((t) => (
+                <li
+                  key={t}
+                  className="font-label rounded-full border border-ink/12 bg-white/60 px-3 py-1.5 text-ink/70"
+                >
+                  {t}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div
+          className={`mt-10 grid gap-4 sm:mt-14 sm:gap-5 ${
+            SHOW_MONTAGE_CONTINU ? "lg:grid-cols-3" : "lg:grid-cols-2"
+          }`}
+        >
+          <PriceCard
+            index={0}
+            badge="À la vidéo"
+            title="Montage essentiel"
+            sub="Pour tester sans engagement"
+            price="30 à 250 €"
+            priceUnit="/ vidéo"
+            note="Selon le type et la durée"
+            features={[
+              "Short, long format, podcast, pub",
+              "Niveau de montage au choix",
+              "Options à la carte",
+              "Révisions incluses",
+            ]}
+            to="/devis/$variant"
+            cta="Calculer mon devis"
+          />
+
+          {SHOW_MONTAGE_CONTINU && (
+            <PriceCard
+              index={1}
+              badge="Le plus populaire · Abonnement"
+              title="Montage continu"
+              sub="Production sans interruption"
+              price="850 €"
+              priceUnit="/ mois"
+              note="Jusqu'à 20 shorts ou 4 longs formats"
+              features={[
+                "Tous formats inclus",
+                "Support prioritaire",
+                "Révisions illimitées",
+                "Livraison continue",
+                "Au-delà : tarif préférentiel",
+              ]}
+              href="#contact"
+              cta="Démarrer"
+            />
+          )}
+
+          <PriceCard
+            index={SHOW_MONTAGE_CONTINU ? 2 : 1}
+            dark
+            badge="Sur mesure"
+            title="Production personnalisée"
+            sub="Entièrement à la carte"
+            price="Prix"
+            priceUnit="calculé en direct"
+            note="One shot ou multishoot mensuel"
+            features={[
+              "Chaque type + quantité au choix",
+              "Réduction multishoot disponible",
+              "Devis détaillé par mail",
+              "Un chef de projet attitré",
+            ]}
+            to="/devis/$variant"
+            cta="Configurer mon devis"
+          />
+        </div>
+
+        <p className="font-label mt-7 text-center text-ink/55">
+          Prix hors taxes · Devis ferme envoyé sous 24h · Paiement à la livraison
+        </p>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------- FAQ ------------------------- */
+
+function FaqSection() {
+  return (
+    <section id="faq" className="relative scroll-mt-24 pt-24 sm:pt-32 lg:pt-44">
+      <div className="shell">
+        {/* Le titre vit dans la marge : la liste ne prend que la hauteur utile */}
+        <div className="grid gap-8 lg:grid-cols-12 lg:gap-10">
+          <div className="lg:col-span-4" data-reveal="up">
+            <div className="lg:sticky lg:top-28">
+              <SectionLabel>FAQ</SectionLabel>
+              <h2 className="mt-5 font-display text-[clamp(2.2rem,4.6vw,3.8rem)] font-bold leading-[0.92] tracking-[-0.05em] text-ink">
+                Les vraies{" "}
+                <em className="font-em pr-[0.06em] text-[1.06em] text-brand-gradient">
+                  questions.
+                </em>
+              </h2>
+              <p className="mt-4 max-w-xs text-[15px] leading-relaxed text-ink/70">
+                Celles que nos clients posent avant de signer. Une autre en tête ?{" "}
+                <a href="#contact" className="link-sweep font-semibold text-ink">
+                  Posez-la en direct
+                </a>
+                .
+              </p>
+            </div>
+          </div>
+          <div className="lg:col-span-8" data-reveal="up" style={{ ["--rd" as string]: "120ms" }}>
+            <Faq featured={FAQ_FEATURED} more={FAQ_MORE} />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------- BANDEAU ------------------------- */
+
+function KineticBand() {
+  const phrases = [
+    "Vous avez un projet",
+    "Nous avons l'équipe",
+    "On en parle ?",
+    "Réponse sous 24h",
+  ];
+  const loop = [...phrases, ...phrases, ...phrases];
+  const { trackRef, setPaused } = useMarquee<HTMLDivElement>({
+    speed: 70,
+    direction: "left",
+    count: phrases.length,
+    scrollBoost: 0.5,
+    draggable: false,
+  });
+
+  return (
+    <div className="relative mt-24 overflow-x-clip py-6 sm:mt-32 lg:mt-40">
+      <a
+        href="#contact"
+        aria-label="Vous avez un projet ? Parlons-en : aller à la prise de rendez-vous"
+        data-cursor="Parlons"
+        className="ink relative -mx-4 block -rotate-[1.4deg] bg-[#0c0a12] py-6 shadow-[0_40px_90px_-50px_rgba(12,10,18,0.9)] sm:py-8"
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+      >
+        <div
+          ref={trackRef}
+          aria-hidden
+          className="flex w-max items-center gap-8 will-change-transform sm:gap-12"
+        >
+          {loop.map((p, i) => (
+            <span key={`${p}-${i}`} className="flex items-center gap-8 sm:gap-12">
+              <span
+                className={`whitespace-nowrap text-[clamp(1.9rem,5.2vw,4rem)] leading-none text-white ${
+                  i % 2 === 0
+                    ? "font-display font-bold tracking-[-0.045em]"
+                    : "font-em text-[clamp(2.1rem,5.8vw,4.4rem)]"
+                }`}
+              >
+                {p}
+              </span>
+              <span className="h-2.5 w-2.5 rotate-45 bg-brand-gradient" />
+            </span>
+          ))}
+        </div>
+      </a>
+    </div>
+  );
+}
+
+/* ------------------------- CONTACT ------------------------- */
+
+function Contact() {
+  return (
+    <section id="contact" className="relative scroll-mt-24 pb-20 pt-20 sm:pb-28 sm:pt-28 lg:pt-36">
+      <div className="shell">
+        <div className="grid gap-10 lg:grid-cols-12 lg:items-start lg:gap-12">
+          <div className="lg:sticky lg:top-24 lg:col-span-6">
+            <div data-reveal="fade">
+              <SectionLabel>Contact</SectionLabel>
+              <h2 className="mt-5 font-display text-[clamp(2.7rem,8vw,6.6rem)] font-bold leading-[0.88] tracking-[-0.055em] text-ink">
+                <MaskLines
+                  step={110}
+                  lines={[
+                    <>Discutons de</>,
+                    <>
+                      votre{" "}
+                      <em className="font-em pr-[0.08em] text-[1.07em] text-brand-gradient">
+                        projet.
+                      </em>
+                    </>,
+                  ]}
+                />
+              </h2>
+            </div>
+
+            <p
+              className="mt-6 max-w-lg text-[15.5px] leading-relaxed text-ink/70 sm:text-[17px]"
+              data-reveal="up"
+              style={{ ["--rd" as string]: "200ms" }}
+            >
+              VizioCraft est une société basée à Madagascar, fondée par deux frères passionnés par
+              la création de contenu. Notre mission : offrir une solution concrète aux pros qui
+              veulent produire vite et bien, sans compromis sur la qualité.
+            </p>
+
+            <figure
+              className="relative mt-8 overflow-hidden rounded-[24px] ring-1 ring-ink/10 sm:rounded-[28px]"
+              data-reveal="scale"
+              style={{ ["--rd" as string]: "280ms" }}
+            >
+              <img
+                src={CONTACT_FRAME}
+                alt="Charles et Alexandre, fondateurs de VizioCraft"
+                loading="lazy"
+                decoding="async"
+                className="aspect-[16/10] w-full object-cover"
+              />
+              <div
+                aria-hidden
+                className="absolute inset-0 bg-gradient-to-t from-[#0c0a12]/85 via-[#0c0a12]/15 to-transparent"
+              />
+              <figcaption className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-5 sm:p-7">
+                <span>
+                  <span className="font-label block text-white/75">Charles &amp; Alexandre</span>
+                  <span className="mt-1.5 block max-w-sm font-display text-[17px] font-semibold leading-snug tracking-tight text-white sm:text-xl">
+                    Vos interlocuteurs directs, du premier appel au dernier rendu.
+                  </span>
+                </span>
+                <span className="font-label hidden shrink-0 rounded-full bg-white/15 px-3 py-1.5 text-white backdrop-blur sm:block">
+                  GMT+3
+                </span>
+              </figcaption>
+            </figure>
+          </div>
+
+          <div
+            className="rounded-[24px] border border-ink/10 bg-white p-3 shadow-[0_50px_110px_-60px_rgba(123,45,142,0.55)] sm:rounded-[28px] sm:p-7 lg:col-span-6 lg:p-9"
+            data-reveal="up"
+            style={{ ["--rd" as string]: "160ms" }}
+          >
+            <div className="px-2 pt-3 sm:p-0">
+              <span className="font-label inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-emerald-800">
+                <span className="live-dot h-1.5 w-1.5 rounded-full bg-emerald-500" /> Réponse sous
+                24h
+              </span>
+              <h3 className="mt-5 font-display text-[1.6rem] font-bold leading-none tracking-[-0.04em] text-ink sm:text-[2rem]">
+                Réserver un appel de préparation
+              </h3>
+              <p className="mt-3 text-[15px] leading-relaxed text-ink/70">
+                Choisissez votre créneau : on discute de votre projet et on répond à toutes vos
+                questions. 30 minutes, sans engagement.
+              </p>
+            </div>
+            <div className="mt-6">
+              <CalendlyWidget />
             </div>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------- PAGE ------------------------- */
+
+function Index() {
+  return (
+    <>
+      <Atmosphere />
+      <IntroLoader />
+
+      <main className="relative z-[2] overflow-x-clip">
+        <Hero />
+        <FormatsTicker />
+        <WorkGallery />
+        <Manifeste />
+        <Process />
+        <Tarifs />
+        <FaqSection />
+        <KineticBand />
+        <Contact />
+      </main>
 
       <Footer />
-    </main>
+      <VideoLightbox />
+    </>
   );
 }
-
-/* ——— atoms ——— */
-function Stat({ k, v }: { k: string; v: string }) {
-  return (
-    <div>
-      <dt className="font-display text-xl sm:text-3xl text-white">{k}</dt>
-      <dd className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs text-white/60">{v}</dd>
-    </div>
-  );
-}
-function BigStat({ k, v }: { k: string; v: string }) {
-  return (
-    <div className="rounded-2xl border border-foreground/10 bg-card p-5">
-      <p className="font-display text-3xl text-brand-gradient">{k}</p>
-      <p className="mt-1 text-xs uppercase tracking-wider text-muted-foreground">{v}</p>
-    </div>
-  );
-}
-function Dot() { return <span className="h-1 w-1 rounded-full bg-foreground/30" />; }
-function Eyebrow({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <span className={`text-xs font-semibold uppercase tracking-[0.22em] text-primary ${className}`}>{children}</span>;
-}
-function Check() {
-  return <span className="mt-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-brand-gradient text-[9px] text-white">✓</span>;
-}
-function CheckLight() {
-  return <span className="mt-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-white/20 text-[9px] text-white">✓</span>;
-}
-
-// Silence unused import warning if Link not used
-void Link;

@@ -1,5 +1,4 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 
 const CDN2 = "https://cdn.prod.website-files.com/6996b2b29f614702ad210f72";
@@ -28,11 +27,20 @@ const ETAPES: Record<string, Etape> = {
     tagline: "On analyse ton besoin, ton positionnement, ta DA.",
     img: step1,
     intro:
-      "Avant toute production, on prend le temps de comprendre — ton activité, ton audience, ton image actuelle et ce que tu cherches à transformer. C'est l'étape qui conditionne tout le reste.",
+      "Avant toute production, on prend le temps de comprendre - ton activité, ton audience, ton image actuelle et ce que tu cherches à transformer. C'est l'étape qui conditionne tout le reste.",
     blocks: [
-      { h: "Comprendre ton business", p: "On parle branding, performance, audience, cohérence. Pas juste « tu veux quel style ? » — on cherche d'abord ce que la vidéo doit accomplir pour toi." },
-      { h: "Cadrer ta DA", p: "Ton univers visuel, ta typographie, tes références, tes refus. On construit un cadre clair pour garantir une cohérence sur l'ensemble des livrables." },
-      { h: "Définir le workflow", p: "Volume, formats, délais, points de validation, canaux de communication. Tout est posé dès le départ pour éviter les frictions plus tard." },
+      {
+        h: "Comprendre ton business",
+        p: "On parle branding, performance, audience, cohérence. Pas juste « tu veux quel style ? » - on cherche d'abord ce que la vidéo doit accomplir pour toi.",
+      },
+      {
+        h: "Cadrer ta DA",
+        p: "Ton univers visuel, ta typographie, tes références, tes refus. On construit un cadre clair pour garantir une cohérence sur l'ensemble des livrables.",
+      },
+      {
+        h: "Définir le workflow",
+        p: "Volume, formats, délais, points de validation, canaux de communication. Tout est posé dès le départ pour éviter les frictions plus tard.",
+      },
     ],
     next: { slug: "video-test", title: "Démarrage du projet" },
   },
@@ -43,11 +51,20 @@ const ETAPES: Record<string, Etape> = {
     tagline: "On monte une première vidéo pour valider le rendu, le rythme, le style.",
     img: step2,
     intro:
-      "Plutôt que de te demander de te fier à des mots, on produit. Une vraie vidéo, sur ton vrai contenu, dans ton vrai style. Tu vois exactement ce que tu vas recevoir — semaine après semaine.",
+      "Plutôt que de te demander de te fier à des mots, on produit. Une vraie vidéo, sur ton vrai contenu, dans ton vrai style. Tu vois exactement ce que tu vas recevoir - semaine après semaine.",
     blocks: [
-      { h: "Une preuve, pas une promesse", p: "On monte une vidéo complète avec ton DA, ton rythme, tes codes. Si quelque chose ne te plaît pas, on ajuste avant de lancer la production en volume." },
-      { h: "Calibrage du style", p: "Tu valides : ton de voix, choix de b-rolls, niveau de motion, traitement des sous-titres, format des intros. On verrouille les standards." },
-      { h: "Aucun engagement", p: "Tu décides après si on continue. Pas de surprise, pas de qualité aléatoire en cours de route." },
+      {
+        h: "Une preuve, pas une promesse",
+        p: "On monte une vidéo complète avec ton DA, ton rythme, tes codes. Si quelque chose ne te plaît pas, on ajuste avant de lancer la production en volume.",
+      },
+      {
+        h: "Calibrage du style",
+        p: "Tu valides : ton de voix, choix de b-rolls, niveau de motion, traitement des sous-titres, format des intros. On verrouille les standards.",
+      },
+      {
+        h: "Aucun engagement",
+        p: "Tu décides après si on continue. Pas de surprise, pas de qualité aléatoire en cours de route.",
+      },
     ],
     prev: { slug: "appel-de-preparation", title: "L'appel de préparation" },
     next: { slug: "production", title: "La production" },
@@ -59,11 +76,20 @@ const ETAPES: Record<string, Etape> = {
     tagline: "Si tu as plusieurs vidéos, on déploie plusieurs monteurs.",
     img: step3,
     intro:
-      "Une fois la DA validée, on passe en mode production continue. Le secret : tu n'es jamais bloqué par la dispo d'un seul monteur. On dimensionne l'équipe selon ton volume — pas l'inverse.",
+      "Une fois la DA validée, on passe en mode production continue. Le secret : tu n'es jamais bloqué par la dispo d'un seul monteur. On dimensionne l'équipe selon ton volume - pas l'inverse.",
     blocks: [
-      { h: "Scalable", p: "+20 monteurs disponibles. 5 vidéos cette semaine, 30 la semaine prochaine — on absorbe. Pas de freelance débordé, pas de ghosting." },
-      { h: "Chef de projet attitré", p: "Un seul interlocuteur côté VizioCraft. Il connaît ton univers, ton historique, tes préférences. Communication fluide et continue." },
-      { h: "Qualité constante", p: "Standards verrouillés à l'étape précédente. Chaque monteur travaille avec les mêmes guides — la cohérence reste impeccable même en volume." },
+      {
+        h: "Scalable",
+        p: "+20 monteurs disponibles. 5 vidéos cette semaine, 30 la semaine prochaine - on absorbe. Pas de freelance débordé, pas de ghosting.",
+      },
+      {
+        h: "Chef de projet attitré",
+        p: "Un seul interlocuteur côté VizioCraft. Il connaît ton univers, ton historique, tes préférences. Communication fluide et continue.",
+      },
+      {
+        h: "Qualité constante",
+        p: "Standards verrouillés à l'étape précédente. Chaque monteur travaille avec les mêmes guides - la cohérence reste impeccable même en volume.",
+      },
     ],
     prev: { slug: "video-test", title: "La vidéo test" },
     next: { slug: "communiquer", title: "Communiquer" },
@@ -77,9 +103,18 @@ const ETAPES: Record<string, Etape> = {
     intro:
       "On reste accessible. WhatsApp pour l'échange rapide et humain, Frame.io pour la review précise sur chaque seconde de la vidéo. Pas d'aller-retour confus par email.",
     blocks: [
-      { h: "WhatsApp pour la fluidité", p: "Pour les briefs rapides, les ajustements, les demandes urgentes. Conversation directe avec ton chef de projet — pas de ticket, pas d'attente." },
-      { h: "Frame.io pour la review", p: "Tu commentes directement sur la timeline, à la seconde près. Le monteur voit exactement où ajuster — fini les « à 0:34 environ »." },
-      { h: "Drive pour les rushs", p: "Tu déposes tes fichiers, on prend la suite. Si tu mets tes rushs un vendredi, ta vidéo est prête pour une mise en ligne le lundi." },
+      {
+        h: "WhatsApp pour la fluidité",
+        p: "Pour les briefs rapides, les ajustements, les demandes urgentes. Conversation directe avec ton chef de projet - pas de ticket, pas d'attente.",
+      },
+      {
+        h: "Frame.io pour la review",
+        p: "Tu commentes directement sur la timeline, à la seconde près. Le monteur voit exactement où ajuster - fini les « à 0:34 environ ».",
+      },
+      {
+        h: "Drive pour les rushs",
+        p: "Tu déposes tes fichiers, on prend la suite. Si tu mets tes rushs un vendredi, ta vidéo est prête pour une mise en ligne le lundi.",
+      },
     ],
     prev: { slug: "production", title: "La production" },
   },
@@ -98,13 +133,11 @@ function EtapePage() {
   const { etape } = Route.useLoaderData() as { etape: Etape };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <Nav />
-
+    <div className="min-h-screen bg-paper text-ink">
       {/* HERO */}
       <section className="relative overflow-hidden pt-32 pb-12 lg:pt-44 lg:pb-20">
         <div className="absolute inset-0 -z-10">
-          <div className="absolute left-1/2 top-20 h-[500px] w-[800px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(123,45,142,0.3),transparent)] blur-3xl" />
+          <div className="absolute left-1/2 top-20 h-[500px] w-[800px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(198,156,238,0.5),transparent)] blur-3xl" />
         </div>
         <div className="mx-auto max-w-6xl px-6 lg:px-10">
           <Link to="/" className="text-xs text-muted-foreground hover:text-foreground">
@@ -162,21 +195,29 @@ function EtapePage() {
               params={{ slug: etape.prev.slug }}
               className="group rounded-2xl border border-foreground/10 bg-card p-6 transition hover:border-foreground/20 sm:w-1/2"
             >
-              <p className="text-xs uppercase tracking-wider text-muted-foreground">Étape précédente</p>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                Étape précédente
+              </p>
               <p className="mt-2 text-lg font-semibold">
-                <span className="transition group-hover:-translate-x-1 inline-block">←</span> {etape.prev.title}
+                <span className="transition group-hover:-translate-x-1 inline-block">←</span>{" "}
+                {etape.prev.title}
               </p>
             </Link>
-          ) : <div className="sm:w-1/2" />}
+          ) : (
+            <div className="sm:w-1/2" />
+          )}
           {etape.next ? (
             <Link
               to="/etapes/$slug"
               params={{ slug: etape.next.slug }}
               className="group rounded-2xl border border-foreground/10 bg-card p-6 transition hover:border-foreground/20 sm:w-1/2 sm:text-right"
             >
-              <p className="text-xs uppercase tracking-wider text-muted-foreground">Étape suivante</p>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                Étape suivante
+              </p>
               <p className="mt-2 text-lg font-semibold">
-                {etape.next.title} <span className="transition group-hover:translate-x-1 inline-block">→</span>
+                {etape.next.title}{" "}
+                <span className="transition group-hover:translate-x-1 inline-block">→</span>
               </p>
             </Link>
           ) : (
@@ -187,7 +228,8 @@ function EtapePage() {
             >
               <p className="text-xs uppercase tracking-wider text-white/80">On démarre ?</p>
               <p className="mt-2 text-lg font-semibold">
-                Parlons de votre projet <span className="transition group-hover:translate-x-1 inline-block">→</span>
+                Parlons de votre projet{" "}
+                <span className="transition group-hover:translate-x-1 inline-block">→</span>
               </p>
             </Link>
           )}

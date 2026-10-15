@@ -11,8 +11,8 @@ export function VideoEmbed({ title, client, format, driveId, youtubeId, vertical
   const src = driveId
     ? `https://drive.google.com/file/d/${driveId}/preview`
     : youtubeId
-    ? `https://www.youtube.com/embed/${youtubeId}?rel=0`
-    : "";
+      ? `https://www.youtube.com/embed/${youtubeId}?rel=0`
+      : "";
   return (
     <div className="group">
       <div
@@ -30,7 +30,11 @@ export function VideoEmbed({ title, client, format, driveId, youtubeId, vertical
       </div>
       <div className="mt-3 flex items-baseline justify-between gap-3">
         <h3 className="text-sm font-semibold tracking-tight">{title}</h3>
-        {format && <span className="text-[11px] uppercase tracking-wider text-muted-foreground">{format}</span>}
+        {format && (
+          <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
+            {format}
+          </span>
+        )}
       </div>
       {client && <p className="text-xs text-muted-foreground">{client}</p>}
     </div>

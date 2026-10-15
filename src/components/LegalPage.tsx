@@ -15,9 +15,15 @@ export function LegalPage({
         <div className="absolute left-1/2 top-20 h-[500px] w-[800px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(123,45,142,0.18),transparent)] blur-3xl" />
       </div>
       <div className="mx-auto max-w-3xl px-5 sm:px-6 lg:px-10">
-        <Link to="/" className="text-xs text-muted-foreground hover:text-foreground">← Retour à l'accueil</Link>
-        <h1 className="mt-6 sm:mt-8 font-display text-3xl tracking-tight sm:text-4xl lg:text-5xl">{title}</h1>
-        {updated && <p className="mt-3 text-sm text-muted-foreground">Dernière mise à jour : {updated}</p>}
+        <Link to="/" className="text-xs text-muted-foreground hover:text-foreground">
+          ← Retour à l'accueil
+        </Link>
+        <h1 className="mt-6 sm:mt-8 font-display text-3xl tracking-tight sm:text-4xl lg:text-5xl">
+          {title}
+        </h1>
+        {updated && (
+          <p className="mt-3 text-sm text-muted-foreground">Dernière mise à jour : {updated}</p>
+        )}
         <div className="legal mt-8 sm:mt-10 space-y-5 text-foreground/85 leading-relaxed">
           {children}
         </div>

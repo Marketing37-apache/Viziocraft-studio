@@ -33,14 +33,14 @@ const EXPRESS_RATE = 0.35;
  *   30 shorts → +10×33+1×27 = 1186€ (one-shot) → ×0.85 = 1008€ multishoot ✓
  */
 const SHORT_TIERS: { from: number; to: number; ref: number }[] = [
-  { from: 1,   to: 9,        ref: 45   },
-  { from: 10,  to: 19,       ref: 38   },
-  { from: 20,  to: 29,       ref: 33   },
-  { from: 30,  to: 49,       ref: 27   },
-  { from: 50,  to: 79,       ref: 25   },
-  { from: 80,  to: 119,      ref: 23   },
-  { from: 120, to: 149,      ref: 22   },
-  { from: 150, to: Infinity, ref: 21   },
+  { from: 1, to: 9, ref: 45 },
+  { from: 10, to: 19, ref: 38 },
+  { from: 20, to: 29, ref: 33 },
+  { from: 30, to: 49, ref: 27 },
+  { from: 50, to: 79, ref: 25 },
+  { from: 80, to: 119, ref: 23 },
+  { from: 120, to: 149, ref: 22 },
+  { from: 150, to: Infinity, ref: 21 },
 ];
 
 /**
@@ -55,9 +55,7 @@ function calcShortTotal(basePrice: number, qty: number): { total: number; unitAv
   let remaining = qty;
   for (const tier of SHORT_TIERS) {
     if (remaining <= 0) break;
-    const count = tier.to === Infinity
-      ? remaining
-      : Math.min(remaining, tier.to - tier.from + 1);
+    const count = tier.to === Infinity ? remaining : Math.min(remaining, tier.to - tier.from + 1);
     const unitPrice = Math.round(basePrice * (tier.ref / anchor) * 100) / 100;
     total += unitPrice * count;
     remaining -= count;
@@ -78,10 +76,10 @@ function calcShortTotal(basePrice: number, qty: number): { total: number; unitAv
  * 16+   -> -14%
  */
 const LONG_TIERS: { from: number; to: number; ratio: number }[] = [
-  { from: 1,  to: 2,        ratio: 1.00 },
-  { from: 3,  to: 5,        ratio: 0.95 },
-  { from: 6,  to: 10,       ratio: 0.92 },
-  { from: 11, to: 15,       ratio: 0.89 },
+  { from: 1, to: 2, ratio: 1.0 },
+  { from: 3, to: 5, ratio: 0.95 },
+  { from: 6, to: 10, ratio: 0.92 },
+  { from: 11, to: 15, ratio: 0.89 },
   { from: 16, to: Infinity, ratio: 0.86 },
 ];
 
@@ -91,17 +89,13 @@ function calcLongTotal(basePrice: number, qty: number): { total: number; unitAvg
   let remaining = qty;
   for (const tier of LONG_TIERS) {
     if (remaining <= 0) break;
-    const count = tier.to === Infinity
-      ? remaining
-      : Math.min(remaining, tier.to - tier.from + 1);
+    const count = tier.to === Infinity ? remaining : Math.min(remaining, tier.to - tier.from + 1);
     total += Math.round(basePrice * tier.ratio) * count;
     remaining -= count;
   }
   total = Math.round(total);
   return { total, unitAvg: Math.round((total / qty) * 100) / 100 };
 }
-
-
 
 /** 2 familles distinctes */
 const FORMAT_CATEGORIES = [
@@ -110,7 +104,12 @@ const FORMAT_CATEGORIES = [
     title: "Formats Courts",
     subtitle: "Reels, TikTok, Ads",
     formats: [
-      { key: "short", name: "Short", desc: "Contenu vertical - Reels, TikTok, facecam, UGC", dur: "" },
+      {
+        key: "short",
+        name: "Short",
+        desc: "Contenu vertical - Reels, TikTok, facecam, UGC",
+        dur: "",
+      },
       { key: "ads", name: "Ads", desc: "Spot publicitaire - hook, CTA, rythme serré", dur: "" },
     ],
   },
@@ -122,7 +121,12 @@ const FORMAT_CATEGORIES = [
       { key: "podcast", name: "Podcast", desc: "Épisode podcast filmé", dur: "0-15 min" },
       { key: "interview", name: "Interview", desc: "Entretien filmé", dur: "0-15 min" },
       { key: "vlog", name: "Vlog", desc: "Vlog personnel ou lifestyle", dur: "0-15 min" },
-      { key: "documentaire", name: "Documentaire", desc: "Contenu documentaire court", dur: "0-15 min" },
+      {
+        key: "documentaire",
+        name: "Documentaire",
+        desc: "Contenu documentaire court",
+        dur: "0-15 min",
+      },
     ],
   },
 ] as const;
@@ -155,8 +159,14 @@ function useHoldCounter(
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const stop = useCallback(() => {
-    if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
-    if (timeoutRef.current) { clearTimeout(timeoutRef.current); timeoutRef.current = null; }
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
   }, []);
 
   const start = useCallback(() => {
@@ -206,20 +216,38 @@ function StepperButton({
 const CatIcon = ({ id, className }: { id: string; className?: string }) => {
   if (id === "short") {
     return (
-      <svg className={className} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+      <svg
+        className={className}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        viewBox="0 0 24 24"
+      >
         <rect width="10" height="16" x="7" y="4" rx="2" ry="2" />
       </svg>
     );
   }
   if (id === "long") {
     return (
-      <svg className={className} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+      <svg
+        className={className}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        viewBox="0 0 24 24"
+      >
         <rect width="18" height="12" x="3" y="6" rx="2" ry="2" />
       </svg>
     );
   }
   return (
-    <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+    <svg
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      viewBox="0 0 24 24"
+    >
       <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
       <path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3" />
     </svg>
@@ -231,45 +259,49 @@ type Theme = ReturnType<typeof buildTheme>;
 function buildTheme(isDark: boolean) {
   return {
     isDark,
-    containerBg: isDark ? "bg-[#110922] border-white/[0.08] text-white" : "bg-white border-foreground/10 text-[#1a1410]",
-    textPrimary: isDark ? "text-white" : "text-[#1a1410]",
-    textSecondary: isDark ? "text-white/70" : "text-[#1a1410]/70",
-    textMuted: isDark ? "text-white/40" : "text-[#1a1410]/40",
-    textMutedHover: isDark ? "hover:text-white/70" : "hover:text-[#1a1410]",
+    containerBg: isDark
+      ? "bg-[#110922] border-white/[0.08] text-white"
+      : "bg-white border-foreground/10 text-[#0c0a12]",
+    textPrimary: isDark ? "text-white" : "text-[#0c0a12]",
+    textSecondary: isDark ? "text-white/70" : "text-[#0c0a12]/70",
+    textMuted: isDark ? "text-white/40" : "text-[#0c0a12]/40",
+    textMutedHover: isDark ? "hover:text-white/70" : "hover:text-[#0c0a12]",
     mutedText: isDark ? "text-white/60" : "text-muted-foreground",
-    badgeText: isDark ? "text-[#c4b5fd]" : "text-[#a8632d]",
+    badgeText: isDark ? "text-[#c4b5fd]" : "text-[#7b2d8e]",
     stepNumBg: isDark
       ? "bg-gradient-to-r from-[#a78bfa] to-[#ec4899] text-white"
-      : "bg-[#a8632d] text-white",
+      : "bg-[#7b2d8e] text-white",
     btnActive: isDark
       ? "border-[#a78bfa] bg-[#221344]/80 text-[#c4b5fd] shadow-[0_0_20px_-6px_rgba(167,139,250,0.45)]"
-      : "border-[#a8632d] bg-[#a8632d]/8 text-[#a8632d]",
+      : "border-[#7b2d8e] bg-[#7b2d8e]/8 text-[#7b2d8e]",
     btnInactive: isDark
       ? "border-white/10 bg-transparent text-white/80 hover:border-[#a78bfa]/35 hover:bg-white/[0.04]"
-      : "border-foreground/12 bg-transparent text-foreground/75 hover:border-[#a8632d]/35 hover:bg-[#f7f5f0]/80",
+      : "border-foreground/12 bg-transparent text-foreground/75 hover:border-[#7b2d8e]/35 hover:bg-[#f4f2ed]/80",
     catBg: isDark ? "bg-white/[0.02] border-white/10" : "bg-white border-foreground/10",
-    catHeadHover: isDark ? "hover:bg-white/[0.04]" : "hover:bg-[#f7f5f0]/60",
+    catHeadHover: isDark ? "hover:bg-white/[0.04]" : "hover:bg-[#f4f2ed]/60",
     formatRow: isDark
       ? "border-white/[0.08] bg-transparent hover:border-white/15"
       : "border-foreground/10 bg-transparent hover:border-foreground/20",
     formatRowActive: isDark
       ? "border-[#a78bfa]/45 bg-[#221344]/40"
-      : "border-[#a8632d]/35 bg-[#a8632d]/[0.04]",
+      : "border-[#7b2d8e]/35 bg-[#7b2d8e]/[0.04]",
     nestedBorder: isDark ? "border-white/10" : "border-foreground/10",
     inputBg: isDark
       ? "bg-white/5 border-white/10 focus:border-[#a78bfa] text-white focus:bg-white/10"
-      : "bg-[#f7f5f0] border-foreground/15 focus:border-[#a8632d] text-[#1a1410] focus:bg-white",
+      : "bg-[#f4f2ed] border-foreground/15 focus:border-[#7b2d8e] text-[#0c0a12] focus:bg-white",
     optActive: isDark
       ? "border-[#a78bfa] bg-[#221344]/60 text-white shadow-[0_0_15px_rgba(167,139,250,0.15)]"
-      : "border-[#a8632d] bg-[#a8632d]/[0.05] text-[#a8632d]",
+      : "border-[#7b2d8e] bg-[#7b2d8e]/[0.05] text-[#7b2d8e]",
     optInactive: isDark
       ? "border-white/10 bg-transparent text-white/80 hover:border-[#a78bfa]/30"
-      : "border-foreground/12 bg-white text-foreground/80 hover:border-[#a8632d]/30",
-    optCheck: isDark ? "border-[#a78bfa] bg-[#a78bfa] text-white" : "border-[#a8632d] bg-[#a8632d] text-white",
+      : "border-foreground/12 bg-white text-foreground/80 hover:border-[#7b2d8e]/30",
+    optCheck: isDark
+      ? "border-[#a78bfa] bg-[#a78bfa] text-white"
+      : "border-[#7b2d8e] bg-[#7b2d8e] text-white",
     submit: isDark
       ? "bg-gradient-to-r from-[#a78bfa] to-[#ec4899] text-white hover:opacity-90 shadow-[0_40px_80px_-30px_rgba(123,45,142,0.3)] glow-brand"
-      : "bg-[#1a1410] text-white hover:bg-[#2e2620] shadow-md",
-    recapBg: isDark ? "bg-white/[0.03]" : "bg-[#f7f5f0]/80",
+      : "bg-[#0c0a12] text-white hover:bg-[#2a1f3d] shadow-md",
+    recapBg: isDark ? "bg-white/[0.03]" : "bg-[#f4f2ed]/80",
     panelGlow: isDark ? "ring-1 ring-white/10" : "ring-1 ring-foreground/5",
     iconShort: isDark ? "bg-[#221344] text-[#c4b5fd]" : "bg-brand-soft text-primary",
     iconLong: isDark ? "bg-amber-500/15 text-amber-300" : "bg-amber-100 text-amber-700",
@@ -283,11 +315,11 @@ function getCardStyle(active: boolean, isDark: boolean) {
   if (active) {
     return isDark
       ? "border-[#a78bfa] bg-[#221344]/30 shadow-[0_0_25px_-5px_rgba(167,139,250,0.25)] ring-1 ring-[#a78bfa]/20 scale-[1.01]"
-      : "border-[#a8632d] bg-[#a8632d]/[0.04] shadow-[0_8px_20px_-6px_rgba(168,99,45,0.08)] ring-1 ring-[#a8632d]/10 scale-[1.01]";
+      : "border-[#7b2d8e] bg-[#7b2d8e]/[0.04] shadow-[0_8px_20px_-6px_rgba(168,99,45,0.08)] ring-1 ring-[#7b2d8e]/10 scale-[1.01]";
   }
   return isDark
     ? "border-white/[0.08] bg-white/[0.01] hover:border-white/20 hover:bg-white/[0.02]"
-    : "border-foreground/10 bg-white hover:border-[#a8632d]/10 hover:border-foreground/20 hover:shadow-xs";
+    : "border-foreground/10 bg-white hover:border-[#7b2d8e]/10 hover:border-foreground/20 hover:shadow-xs";
 }
 
 function catIconClass(theme: Theme, catId: string): string {
@@ -301,7 +333,7 @@ function catIconClass(theme: Theme, catId: string): string {
  * (logique par famille de contenu, goulot d'étranglement = le max)
  */
 function calcDeliveryStandard(quantities: Record<string, number>): number {
-  const short = (quantities["short"] ?? 0);
+  const short = quantities["short"] ?? 0;
   const ads = quantities["ads"] ?? 0;
   const podcast = quantities["podcast"] ?? 0;
   const interview = quantities["interview"] ?? 0;
@@ -312,57 +344,54 @@ function calcDeliveryStandard(quantities: Record<string, number>): number {
   let dShort = 0;
   const totalShorts = short + ads;
   if (totalShorts > 0) {
-    if      (totalShorts <= 8)   dShort = 2;
-    else if (totalShorts <= 20)  dShort = 3;
-    else if (totalShorts <= 35)  dShort = 4;
-    else if (totalShorts <= 50)  dShort = 5;
-    else if (totalShorts <= 70)  dShort = 6;
-    else                         dShort = 8 + Math.floor((totalShorts - 70) / 15);
+    if (totalShorts <= 8) dShort = 2;
+    else if (totalShorts <= 20) dShort = 3;
+    else if (totalShorts <= 35) dShort = 4;
+    else if (totalShorts <= 50) dShort = 5;
+    else if (totalShorts <= 70) dShort = 6;
+    else dShort = 8 + Math.floor((totalShorts - 70) / 15);
   }
 
   // Délais pour podcasts
   let dPodcast = 0;
   if (podcast > 0) {
-    if      (podcast <= 2)   dPodcast = 3;
-    else if (podcast <= 6)   dPodcast = 5;
-    else if (podcast <= 12)  dPodcast = 7;
-    else                     dPodcast = 8 + Math.ceil((podcast - 12) / 2);
+    if (podcast <= 2) dPodcast = 3;
+    else if (podcast <= 6) dPodcast = 5;
+    else if (podcast <= 12) dPodcast = 7;
+    else dPodcast = 8 + Math.ceil((podcast - 12) / 2);
   }
 
   // Délais pour interviews
   let dInterview = 0;
   if (interview > 0) {
-    if      (interview <= 2)   dInterview = 3;
-    else if (interview <= 6)   dInterview = 5;
-    else if (interview <= 12)  dInterview = 7;
-    else                       dInterview = 8 + Math.ceil((interview - 12) / 2);
+    if (interview <= 2) dInterview = 3;
+    else if (interview <= 6) dInterview = 5;
+    else if (interview <= 12) dInterview = 7;
+    else dInterview = 8 + Math.ceil((interview - 12) / 2);
   }
 
   // Délais pour vlogs
   let dVlog = 0;
   if (vlog > 0) {
-    if      (vlog <= 3)   dVlog = 2;
-    else if (vlog <= 8)   dVlog = 4;
-    else if (vlog <= 12)  dVlog = 6;
-    else                  dVlog = 6 + Math.ceil((vlog - 12) / 3);
+    if (vlog <= 3) dVlog = 2;
+    else if (vlog <= 8) dVlog = 4;
+    else if (vlog <= 12) dVlog = 6;
+    else dVlog = 6 + Math.ceil((vlog - 12) / 3);
   }
 
   // Délais pour documentaires
   let dDoc = 0;
   if (documentaire > 0) {
-    if      (documentaire === 1)  dDoc = 6;
-    else if (documentaire <= 4)   dDoc = 10;
-    else if (documentaire <= 8)   dDoc = 14;
-    else                          dDoc = 14 + Math.ceil((documentaire - 8) * 2);
+    if (documentaire === 1) dDoc = 6;
+    else if (documentaire <= 4) dDoc = 10;
+    else if (documentaire <= 8) dDoc = 14;
+    else dDoc = 14 + Math.ceil((documentaire - 8) * 2);
   }
 
   return Math.max(dShort, dPodcast, dInterview, dVlog, dDoc);
 }
 
-function calcDeliveryDays(
-  quantities: Record<string, number>,
-  isExpress: boolean,
-): string {
+function calcDeliveryDays(quantities: Record<string, number>, isExpress: boolean): string {
   const standard = calcDeliveryStandard(quantities);
   if (standard === 0) return "-";
 
@@ -425,29 +454,31 @@ function FormatCard({
   const active = qty > 0;
   const hint = FORMAT_HINTS[fmt.key as string] ?? "";
 
-  const activeAccent = variant === "surmesure" ? "text-[#c4b5fd]" : "text-[#a8632d]";
-  const activeDurBadge = variant === "surmesure"
+  const activeAccent = theme.isDark ? "text-[#c4b5fd]" : "text-[#7b2d8e]";
+  const activeDurBadge = theme.isDark
     ? "bg-[#a78bfa]/20 border-[#a78bfa]/35 text-[#c4b5fd]"
-    : "bg-[#a8632d]/10 border-[#a8632d]/25 text-[#a8632d]";
+    : "bg-[#7b2d8e]/10 border-[#7b2d8e]/25 text-[#7b2d8e]";
   const inactiveDurBadge = theme.isDark
     ? "bg-white/5 border-white/10 text-white/45"
-    : "bg-foreground/5 border-foreground/10 text-[#1a1410]/45";
+    : "bg-foreground/5 border-foreground/10 text-[#0c0a12]/45";
 
   const durBadge = active ? activeDurBadge : inactiveDurBadge;
 
   const stepperBtnBase = theme.isDark
     ? "bg-white/5 text-white hover:bg-white/10"
-    : "bg-white border border-foreground/10 text-[#1a1410] hover:bg-foreground/5 shadow-xs";
+    : "bg-white border border-foreground/10 text-[#0c0a12] hover:bg-foreground/5 shadow-xs";
   const stepperBtnPlus = theme.isDark
     ? "bg-white/10 text-white hover:bg-white/20"
-    : "bg-white border border-foreground/10 text-[#1a1410] hover:bg-foreground/5 shadow-xs";
+    : "bg-white border border-foreground/10 text-[#0c0a12] hover:bg-foreground/5 shadow-xs";
 
   function Stepper({ size }: { size: "sm" | "lg" }) {
     const h = size === "lg" ? "h-9 w-9" : "h-8 w-8";
     const textSz = size === "lg" ? "text-sm" : "text-xs";
     const numW = size === "lg" ? "w-10 text-sm sm:text-base" : "w-8 text-xs sm:text-sm";
     return (
-      <div className={`flex items-center gap-2 rounded-full p-1 border ${theme.isDark ? "bg-white/5 border-white/5" : "bg-foreground/[0.03] border-foreground/5"}`}>
+      <div
+        className={`flex items-center gap-2 rounded-full p-1 border ${theme.isDark ? "bg-white/5 border-white/5" : "bg-foreground/[0.03] border-foreground/5"}`}
+      >
         <StepperButton
           delta={-1}
           onTick={onTick}
@@ -483,29 +514,46 @@ function FormatCard({
 
   if (solo) {
     return (
-      <div className={`flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 rounded-2xl border p-4 sm:p-6 transition-all duration-300 ${getCardStyle(active, theme.isDark)}`}>
+      <div
+        className={`flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 rounded-2xl border p-4 sm:p-6 transition-all duration-300 ${getCardStyle(active, theme.isDark)}`}
+      >
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2.5 mb-2">
             <h4 className={`text-base font-bold font-display ${theme.textPrimary}`}>{fmt.name}</h4>
             {"dur" in fmt && fmt.dur && (
-              <span className={`rounded-full px-2.5 py-0.5 text-[9px] font-bold border whitespace-nowrap ${durBadge}`}>
+              <span
+                className={`rounded-full px-2.5 py-0.5 text-[9px] font-bold border whitespace-nowrap ${durBadge}`}
+              >
                 {fmt.dur}
               </span>
             )}
           </div>
           <p className={`text-xs leading-relaxed mb-3 ${theme.textSecondary}`}>{fmt.desc}</p>
-          <p className={`text-[10px] font-semibold tracking-wide ${active ? activeAccent : theme.textMuted}`}>{hint}</p>
+          <p
+            className={`text-[10px] font-semibold tracking-wide ${active ? activeAccent : theme.textMuted}`}
+          >
+            {hint}
+          </p>
           <div className="mt-3 flex flex-wrap gap-1.5">
             {["Multi-cam", "Sync audio", "Chapitrage", "Long format"].map((tag) => (
-              <span key={tag} className={`rounded-full border px-2.5 py-0.5 text-[10px] font-medium ${
-                theme.isDark ? "border-white/10 text-white/50" : "border-foreground/12 text-foreground/50"
-              }`}>{tag}</span>
+              <span
+                key={tag}
+                className={`rounded-full border px-2.5 py-0.5 text-[10px] font-medium ${
+                  theme.isDark
+                    ? "border-white/10 text-white/50"
+                    : "border-foreground/12 text-foreground/50"
+                }`}
+              >
+                {tag}
+              </span>
             ))}
           </div>
         </div>
-        <div className={`flex flex-col items-center gap-2 shrink-0 pt-4 sm:pt-0 sm:pl-6 border-t sm:border-t-0 sm:border-l ${
-          theme.isDark ? "border-white/[0.07]" : "border-foreground/8"
-        }`}>
+        <div
+          className={`flex flex-col items-center gap-2 shrink-0 pt-4 sm:pt-0 sm:pl-6 border-t sm:border-t-0 sm:border-l ${
+            theme.isDark ? "border-white/[0.07]" : "border-foreground/8"
+          }`}
+        >
           <span className={`text-[10px] uppercase tracking-wider font-bold ${theme.textMuted}`}>
             {"unitLabel" in fmt && fmt.unitLabel ? fmt.unitLabel : "Quantité"}
           </span>
@@ -516,18 +564,32 @@ function FormatCard({
   }
 
   return (
-    <div className={`flex flex-col justify-between rounded-2xl border p-4 sm:p-5 lg:p-6 transition-all duration-300 ${getCardStyle(active, theme.isDark)} min-h-[180px] sm:min-h-[200px]`}>
+    <div
+      className={`flex flex-col justify-between rounded-2xl border p-4 sm:p-5 lg:p-6 transition-all duration-300 ${getCardStyle(active, theme.isDark)} min-h-[180px] sm:min-h-[200px]`}
+    >
       <div className="space-y-3">
         <div className="flex items-start justify-between gap-3">
-          <h4 className={`text-sm sm:text-base font-bold leading-tight font-display ${theme.textPrimary}`}>{fmt.name}</h4>
+          <h4
+            className={`text-sm sm:text-base font-bold leading-tight font-display ${theme.textPrimary}`}
+          >
+            {fmt.name}
+          </h4>
           {"dur" in fmt && fmt.dur && (
-            <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-[9px] sm:text-[10px] font-bold border whitespace-nowrap ${durBadge}`}>
+            <span
+              className={`shrink-0 rounded-full px-2.5 py-0.5 text-[9px] sm:text-[10px] font-bold border whitespace-nowrap ${durBadge}`}
+            >
               {fmt.dur}
             </span>
           )}
         </div>
-        <p className={`text-[10px] sm:text-[11px] font-semibold tracking-wide ${active ? activeAccent : theme.textMuted}`}>{hint}</p>
-        <p className={`text-[11px] sm:text-xs leading-relaxed ${theme.textSecondary}`}>{fmt.desc}</p>
+        <p
+          className={`text-[10px] sm:text-[11px] font-semibold tracking-wide ${active ? activeAccent : theme.textMuted}`}
+        >
+          {hint}
+        </p>
+        <p className={`text-[11px] sm:text-xs leading-relaxed ${theme.textSecondary}`}>
+          {fmt.desc}
+        </p>
       </div>
       <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-foreground/5 pt-4">
         <span className={`text-[10px] uppercase tracking-wider font-bold ${theme.textMuted}`}>
@@ -559,10 +621,10 @@ export function DevisBuilder({
     initial["short"] = 1; // Default: short = 1, everything else = 0
     return initial;
   });
-  
+
   // Load from localStorage after mount (client-side only)
   useEffect(() => {
-    const saved = localStorage.getItem('devis-quantities');
+    const saved = localStorage.getItem("devis-quantities");
     if (saved) {
       try {
         setQuantities(JSON.parse(saved));
@@ -571,43 +633,43 @@ export function DevisBuilder({
       }
     }
   }, []);
-  
+
   // Shorts dérivés du podcast (section spéciale) - SUPPRIMÉ
 
   const [activeTab, setActiveTab] = useState<string>("short");
-  
+
   useEffect(() => {
-    const saved = localStorage.getItem('devis-activeTab');
+    const saved = localStorage.getItem("devis-activeTab");
     if (saved) setActiveTab(saved);
   }, []);
-  
+
   // Niveau supprimé - plus utilisé
-  
+
   const [opts, setOpts] = useState<Record<string, boolean>>({});
-  
+
   useEffect(() => {
-    const saved = localStorage.getItem('devis-opts');
+    const saved = localStorage.getItem("devis-opts");
     if (saved) setOpts(JSON.parse(saved));
   }, []);
-  
+
   const [express, setExpress] = useState(false);
-  
+
   useEffect(() => {
-    const saved = localStorage.getItem('devis-express');
-    if (saved) setExpress(saved === 'true');
+    const saved = localStorage.getItem("devis-express");
+    if (saved) setExpress(saved === "true");
   }, []);
-  
+
   const [duration, setDuration] = useState<"one-shot" | "multishoot">("multishoot");
-  
+
   useEffect(() => {
-    const saved = localStorage.getItem('devis-duration');
-    if (saved === 'one-shot' || saved === 'multishoot') setDuration(saved);
+    const saved = localStorage.getItem("devis-duration");
+    if (saved === "one-shot" || saved === "multishoot") setDuration(saved);
   }, []);
-  
+
   const [frequency, setFrequency] = useState(MULTISHOOT_FREQUENCIES[0]);
-  
+
   useEffect(() => {
-    const saved = localStorage.getItem('devis-frequency');
+    const saved = localStorage.getItem("devis-frequency");
     if (saved && MULTISHOOT_FREQUENCIES.includes(saved)) setFrequency(saved);
   }, []);
   const [name, setName] = useState("");
@@ -625,36 +687,36 @@ export function DevisBuilder({
 
   // Save form state to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem('devis-quantities', JSON.stringify(quantities));
+    localStorage.setItem("devis-quantities", JSON.stringify(quantities));
   }, [quantities]);
 
   useEffect(() => {
-    localStorage.setItem('devis-activeTab', activeTab);
+    localStorage.setItem("devis-activeTab", activeTab);
   }, [activeTab]);
 
   useEffect(() => {
-    localStorage.setItem('devis-opts', JSON.stringify(opts));
+    localStorage.setItem("devis-opts", JSON.stringify(opts));
   }, [opts]);
 
   useEffect(() => {
-    localStorage.setItem('devis-express', express.toString());
+    localStorage.setItem("devis-express", express.toString());
   }, [express]);
 
   useEffect(() => {
-    localStorage.setItem('devis-duration', duration);
+    localStorage.setItem("devis-duration", duration);
   }, [duration]);
 
   useEffect(() => {
-    localStorage.setItem('devis-frequency', frequency);
+    localStorage.setItem("devis-frequency", frequency);
   }, [frequency]);
 
   // Track when user starts filling the form
   useEffect(() => {
     if (!formStarted && (name || email)) {
       setFormStarted(true);
-      if (typeof window !== 'undefined' && (window as any).dataLayer) {
+      if (typeof window !== "undefined" && (window as any).dataLayer) {
         (window as any).dataLayer.push({
-          event: 'devis_form_start',
+          event: "devis_form_start",
           form_variant: variant,
         });
       }
@@ -672,7 +734,8 @@ export function DevisBuilder({
     }
   }, [quantities, express]);
 
-  const theme = useMemo(() => buildTheme(variant === "surmesure"), [variant]);
+  /* thème clair unique pour tous les configurateurs */
+  const theme = useMemo(() => buildTheme(false), []);
 
   const pricing = useMemo(() => {
     const lineItems = ALL_KEYS.filter((k) => quantities[k] > 0).map((key) => {
@@ -682,7 +745,12 @@ export function DevisBuilder({
       let calcResult: { total: number; unitAvg: number };
       if (key === "short" || key === "ads") {
         calcResult = calcShortTotal(basePrice, qty);
-      } else if (key === "podcast" || key === "interview" || key === "vlog" || key === "documentaire") {
+      } else if (
+        key === "podcast" ||
+        key === "interview" ||
+        key === "vlog" ||
+        key === "documentaire"
+      ) {
         calcResult = calcLongTotal(basePrice, qty);
       } else {
         calcResult = { total: basePrice * qty, unitAvg: basePrice };
@@ -882,14 +950,14 @@ export function DevisBuilder({
     setMessage("");
     setStatus("idle");
     setFormStarted(false);
-    
+
     // Clear localStorage
-    localStorage.removeItem('devis-quantities');
-    localStorage.removeItem('devis-activeTab');
-    localStorage.removeItem('devis-opts');
-    localStorage.removeItem('devis-express');
-    localStorage.removeItem('devis-duration');
-    localStorage.removeItem('devis-frequency');
+    localStorage.removeItem("devis-quantities");
+    localStorage.removeItem("devis-activeTab");
+    localStorage.removeItem("devis-opts");
+    localStorage.removeItem("devis-express");
+    localStorage.removeItem("devis-duration");
+    localStorage.removeItem("devis-frequency");
   }
 
   async function submit(e: React.FormEvent) {
@@ -897,9 +965,9 @@ export function DevisBuilder({
     if (!name || !email || pricing.totalVideos === 0) return;
     setStatus("loading");
 
-    if (typeof window !== 'undefined' && (window as any).dataLayer) {
+    if (typeof window !== "undefined" && (window as any).dataLayer) {
       (window as any).dataLayer.push({
-        event: 'devis_form_submit',
+        event: "devis_form_submit",
         form_variant: variant,
         total_videos: pricing.totalVideos,
         total_price: pricing.total,
@@ -920,7 +988,7 @@ export function DevisBuilder({
         // et le prix final restent strictement inchanges.
         unitBase: l.unitBase, // Prix unitaire de base AVANT remises
         baseTotal: Math.round(l.unitBase * l.qty), // Total au prix de base
-        discount: Math.round((l.unitBase * l.qty) - l.total), // Remise appliquée
+        discount: Math.round(l.unitBase * l.qty - l.total), // Remise appliquée
       })),
       options: pricing.selectedOptions.map((o) => o.k),
       totalVideos: pricing.totalVideos,
@@ -942,9 +1010,9 @@ export function DevisBuilder({
       });
 
       setStatus("success");
-      if (typeof window !== 'undefined' && (window as any).dataLayer) {
+      if (typeof window !== "undefined" && (window as any).dataLayer) {
         (window as any).dataLayer.push({
-          event: 'devis_form_success',
+          event: "devis_form_success",
           form_variant: variant,
           total_videos: pricing.totalVideos,
           total_price: pricing.total,
@@ -954,8 +1022,8 @@ export function DevisBuilder({
     } catch (error) {
       console.error("Erreur envoi:", error);
       setStatus("error");
-      if (typeof window !== 'undefined' && (window as any).dataLayer) {
-        (window as any).dataLayer.push({ event: 'devis_form_error', form_variant: variant });
+      if (typeof window !== "undefined" && (window as any).dataLayer) {
+        (window as any).dataLayer.push({ event: "devis_form_error", form_variant: variant });
       }
     }
   }
@@ -971,8 +1039,13 @@ export function DevisBuilder({
 
   return (
     <div id="devis-builder" className="w-full pb-24 lg:pb-0 max-w-[100rem] mx-auto px-4 sm:px-6">
-      <form onSubmit={submit} className="grid gap-6 sm:gap-8 lg:grid-cols-[1.3fr_1fr] xl:grid-cols-[1.4fr_1fr] items-start">
-        <div className={`rounded-2xl sm:rounded-[2rem] border ${theme.containerBg} p-6 sm:p-8 lg:p-12 xl:p-14 space-y-8 sm:space-y-12 shadow-xl relative`}>
+      <form
+        onSubmit={submit}
+        className="grid gap-6 sm:gap-8 lg:grid-cols-[1.3fr_1fr] xl:grid-cols-[1.4fr_1fr] items-start"
+      >
+        <div
+          className={`rounded-2xl sm:rounded-[2rem] border ${theme.containerBg} p-6 sm:p-8 lg:p-12 xl:p-14 space-y-8 sm:space-y-12 shadow-xl relative`}
+        >
           {onClose && (
             <button
               type="button"
@@ -987,11 +1060,15 @@ export function DevisBuilder({
           <header>
             <div className="flex items-start justify-between gap-4">
               <div>
-                <span className={`inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.22em] ${theme.badgeText}`}>
+                <span
+                  className={`inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.22em] ${theme.badgeText}`}
+                >
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   {variant === "surmesure" ? "Production sur mesure" : "Montage essentiel"}
                 </span>
-                <h3 className="mt-2 font-display text-2xl sm:text-3xl font-bold">Configurez votre production</h3>
+                <h3 className="mt-2 font-display text-2xl sm:text-3xl font-bold">
+                  Configurez votre production
+                </h3>
               </div>
               <button
                 type="button"
@@ -999,18 +1076,26 @@ export function DevisBuilder({
                 className={`p-2 rounded-full border ${theme.isDark ? "border-white/10 text-white/60 hover:text-white hover:bg-white/5" : "border-foreground/10 text-foreground/60 hover:text-foreground hover:bg-foreground/5"} transition`}
                 aria-label="Réinitialiser"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
                 </svg>
               </button>
             </div>
           </header>
 
           <div className="space-y-8 sm:space-y-12 border-t border-foreground/10 pt-6 sm:pt-10">
-
             {/* ── STEP 1 : Formats & quantités ── */}
             <Step n="1" title="Formats & quantités" theme={theme}>
-
               {adminMode ? (
                 /* Mode Admin : Tous les formats affichés dans une grille complète */
                 <div className="space-y-8">
@@ -1021,7 +1106,7 @@ export function DevisBuilder({
                         const qty = quantities[fmt.key] ?? 0;
                         const basePrice = BASE_PRICES[fmt.key] ?? 0;
                         const tickFn = (d: number) => setQty(fmt.key, d);
-                        
+
                         return (
                           <div key={fmt.key} className="relative">
                             <FormatCard
@@ -1037,7 +1122,7 @@ export function DevisBuilder({
                             </div>
                           </div>
                         );
-                      })
+                      }),
                     )}
                   </div>
 
@@ -1047,7 +1132,9 @@ export function DevisBuilder({
                 /* Mode Normal : Navigation par onglets */
                 <>
                   {/* Onglets */}
-                  <div className={`flex p-1.5 rounded-full border mb-6 sm:mb-8 ${theme.isDark ? "bg-white/5 border-white/10" : "bg-foreground/[0.03] border-foreground/5"}`}>
+                  <div
+                    className={`flex p-1.5 rounded-full border mb-6 sm:mb-8 ${theme.isDark ? "bg-white/5 border-white/10" : "bg-foreground/[0.03] border-foreground/5"}`}
+                  >
                     {FORMAT_CATEGORIES.map((cat) => {
                       const isActive = activeTab === cat.id;
                       const count = cat.formats.reduce((s, f) => s + (quantities[f.key] ?? 0), 0);
@@ -1058,12 +1145,12 @@ export function DevisBuilder({
                           onClick={() => setActiveTab(cat.id)}
                           className={`flex-1 flex items-center justify-center gap-2 sm:gap-2.5 py-2 sm:py-2.5 px-3 sm:px-4 rounded-full text-sm font-semibold transition-all duration-200 cursor-pointer ${
                             isActive
-                              ? variant === "surmesure"
+                              ? theme.isDark
                                 ? "bg-gradient-to-r from-[#a78bfa] to-[#ec4899] text-white shadow-md"
-                                : "bg-[#a8632d] text-white shadow-md"
+                                : "bg-[#7b2d8e] text-white shadow-md"
                               : theme.isDark
                                 ? "text-white/60 hover:text-white"
-                                : "text-[#1a1410]/60 hover:text-[#1a1410]"
+                                : "text-[#0c0a12]/60 hover:text-[#0c0a12]"
                           }`}
                         >
                           <CatIcon id={cat.id} className="w-4 h-4 shrink-0" />
@@ -1072,13 +1159,15 @@ export function DevisBuilder({
                             {cat.id === "short" ? "Courts" : "Longs"}
                           </span>
                           {count > 0 && (
-                            <span className={`min-w-[1.25rem] px-1.5 inline-flex items-center justify-center rounded-full text-[10px] font-extrabold ${
-                              isActive
-                                ? "bg-white text-black"
-                                : variant === "surmesure"
-                                  ? "bg-[#a78bfa]/20 text-[#c4b5fd]"
-                                  : "bg-[#a8632d]/10 text-[#a8632d]"
-                            }`}>
+                            <span
+                              className={`min-w-[1.25rem] px-1.5 inline-flex items-center justify-center rounded-full text-[10px] font-extrabold ${
+                                isActive
+                                  ? "bg-white text-black"
+                                  : theme.isDark
+                                    ? "bg-[#a78bfa]/20 text-[#c4b5fd]"
+                                    : "bg-[#7b2d8e]/10 text-[#7b2d8e]"
+                              }`}
+                            >
                               {count}
                             </span>
                           )}
@@ -1093,12 +1182,15 @@ export function DevisBuilder({
                     if (!activeCategory) return null;
                     const isSolo = false; // Plus de formats solo maintenant
                     // Optimisation des grilles pour une meilleure utilisation de l'espace
-                    const gridCols = activeCategory.id === "long" 
-                      ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2" 
-                      : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2";
+                    const gridCols =
+                      activeCategory.id === "long"
+                        ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2"
+                        : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2";
                     return (
                       <div key={activeTab}>
-                        <p className={`text-sm mb-6 ${theme.mutedText}`}>{activeCategory.subtitle}</p>
+                        <p className={`text-sm mb-6 ${theme.mutedText}`}>
+                          {activeCategory.subtitle}
+                        </p>
                         <div className={`grid ${gridCols} gap-5 sm:gap-6`}>
                           {activeCategory.formats.map((fmt) => {
                             const qty = quantities[fmt.key] ?? 0;
@@ -1137,17 +1229,25 @@ export function DevisBuilder({
                       onClick={() => setOpts((p) => ({ ...p, [o.k]: !p[o.k] }))}
                       className={`flex items-center gap-3 sm:gap-4 rounded-xl border px-4 py-3.5 text-left transition duration-300 ${getCardStyle(on, theme.isDark)}`}
                     >
-                      <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border text-[9px] ${
-                        on
-                          ? theme.isDark ? "bg-[#a78bfa] border-[#a78bfa] text-[#110922]" : "bg-[#a8632d] border-[#a8632d] text-white"
-                          : "border-foreground/25"
-                      }`}>
+                      <span
+                        className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border text-[9px] ${
+                          on
+                            ? theme.isDark
+                              ? "bg-[#a78bfa] border-[#a78bfa] text-[#110922]"
+                              : "bg-[#7b2d8e] border-[#7b2d8e] text-white"
+                            : "border-foreground/25"
+                        }`}
+                      >
                         {on ? "✓" : ""}
                       </span>
-                      <span className={`flex-1 text-xs font-semibold ${theme.textPrimary}`}>{o.k}</span>
+                      <span className={`flex-1 text-xs font-semibold ${theme.textPrimary}`}>
+                        {o.k}
+                      </span>
                       {/* SHOW_PRICES: prix option - masqué si false */}
                       {showPrices && (
-                        <span className={`text-[11px] font-bold ${theme.isDark ? "text-[#c4b5fd]" : "text-[#a8632d]"}`}>
+                        <span
+                          className={`text-[11px] font-bold ${theme.isDark ? "text-[#c4b5fd]" : "text-[#7b2d8e]"}`}
+                        >
                           +{o.p}€
                         </span>
                       )}
@@ -1184,17 +1284,23 @@ export function DevisBuilder({
                         -15% sur le total
                       </span>
                     )}
-                    <p className={`text-xs mt-2 leading-relaxed ${theme.textSecondary}`}>{d.hint}</p>
+                    <p className={`text-xs mt-2 leading-relaxed ${theme.textSecondary}`}>
+                      {d.hint}
+                    </p>
                   </button>
                 ))}
               </div>
 
               {/* Fréquence de livraison (multishoot seulement) */}
-              <div className={`overflow-hidden transition-all duration-300 ${
-                duration === "multishoot" ? "max-h-[200px] opacity-100 mt-5" : "max-h-0 opacity-0"
-              }`}>
+              <div
+                className={`overflow-hidden transition-all duration-300 ${
+                  duration === "multishoot" ? "max-h-[200px] opacity-100 mt-5" : "max-h-0 opacity-0"
+                }`}
+              >
                 <div className={`rounded-xl border ${theme.nestedBorder} p-4 sm:p-5`}>
-                  <p className={`text-[10px] font-bold uppercase tracking-wider mb-3 ${theme.textMuted}`}>
+                  <p
+                    className={`text-[10px] font-bold uppercase tracking-wider mb-3 ${theme.textMuted}`}
+                  >
                     Fréquence des livraisons
                   </p>
                   <div className="flex flex-wrap gap-2">
@@ -1217,83 +1323,98 @@ export function DevisBuilder({
 
             {/* ── STEP 5 : Délai de livraison ── MASQUÉ */}
             {false && (
-            <Step n="5" title="Délai de livraison" theme={theme}>
-              {(() => {
-                const totalShorts = (quantities["short"] ?? 0) + (quantities["ads"] ?? 0);
-                const documentaire = quantities["documentaire"] ?? 0;
-                const podcast = quantities["podcast"] ?? 0;
-                const expressBlocked = totalShorts > 70 || documentaire > 4 || podcast > 6;
+              <Step n="5" title="Délai de livraison" theme={theme}>
+                {(() => {
+                  const totalShorts = (quantities["short"] ?? 0) + (quantities["ads"] ?? 0);
+                  const documentaire = quantities["documentaire"] ?? 0;
+                  const podcast = quantities["podcast"] ?? 0;
+                  const expressBlocked = totalShorts > 70 || documentaire > 4 || podcast > 6;
 
-                // Si express était sélectionné mais que la commande est devenue trop lourde, on reset
-                if (expressBlocked && express) {
-                  // On ne peut pas appeler setExpress ici directement (render), on gère visuellement
-                }
+                  // Si express était sélectionné mais que la commande est devenue trop lourde, on reset
+                  if (expressBlocked && express) {
+                    // On ne peut pas appeler setExpress ici directement (render), on gère visuellement
+                  }
 
-                return (
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    {[
-                      {
-                        e: false,
-                        t: "Standard",
-                        s: pricing.delivery,
-                        sub: "Inclus",
-                        blocked: false,
-                      },
-                      {
-                        e: true,
-                        t: "Express prioritaire",
-                        s: expressBlocked
-                          ? "Non disponible pour ce volume"
-                          : calcDeliveryDays(quantities, true),
-                        sub: expressBlocked
-                          ? "Volume trop important pour ce délai"
-                          : `+${Math.round(EXPRESS_RATE * 100)}% du total`,
-                        blocked: expressBlocked,
-                      },
-                    ].map((d) => {
-                      const on = express === d.e && !d.blocked;
-                      return (
-                        <button
-                          type="button"
-                          key={d.t}
-                          disabled={d.blocked}
-                          onClick={() => !d.blocked && setExpress(d.e)}
-                          className={`rounded-2xl border p-4 text-left transition-all duration-300 ${
-                            d.blocked
-                              ? theme.isDark
-                                ? "border-white/5 bg-white/[0.01] opacity-40 cursor-not-allowed"
-                                : "border-foreground/5 bg-foreground/[0.02] opacity-40 cursor-not-allowed"
-                              : getCardStyle(on, theme.isDark)
-                          }`}
-                        >
-                          <div className={`font-semibold text-sm ${theme.textPrimary}`}>{d.t}</div>
-                          <div className={`text-sm mt-1 font-semibold ${theme.textPrimary}`}>{d.s}</div>
-                          <div className={`text-xs mt-0.5 ${theme.textSecondary} opacity-90`}>{d.sub}</div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                );
-              })()}
-            </Step>
+                  return (
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {[
+                        {
+                          e: false,
+                          t: "Standard",
+                          s: pricing.delivery,
+                          sub: "Inclus",
+                          blocked: false,
+                        },
+                        {
+                          e: true,
+                          t: "Express prioritaire",
+                          s: expressBlocked
+                            ? "Non disponible pour ce volume"
+                            : calcDeliveryDays(quantities, true),
+                          sub: expressBlocked
+                            ? "Volume trop important pour ce délai"
+                            : `+${Math.round(EXPRESS_RATE * 100)}% du total`,
+                          blocked: expressBlocked,
+                        },
+                      ].map((d) => {
+                        const on = express === d.e && !d.blocked;
+                        return (
+                          <button
+                            type="button"
+                            key={d.t}
+                            disabled={d.blocked}
+                            onClick={() => !d.blocked && setExpress(d.e)}
+                            className={`rounded-2xl border p-4 text-left transition-all duration-300 ${
+                              d.blocked
+                                ? theme.isDark
+                                  ? "border-white/5 bg-white/[0.01] opacity-40 cursor-not-allowed"
+                                  : "border-foreground/5 bg-foreground/[0.02] opacity-40 cursor-not-allowed"
+                                : getCardStyle(on, theme.isDark)
+                            }`}
+                          >
+                            <div className={`font-semibold text-sm ${theme.textPrimary}`}>
+                              {d.t}
+                            </div>
+                            <div className={`text-sm mt-1 font-semibold ${theme.textPrimary}`}>
+                              {d.s}
+                            </div>
+                            <div className={`text-xs mt-0.5 ${theme.textSecondary} opacity-90`}>
+                              {d.sub}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
+              </Step>
             )}
           </div>
         </div>
 
         {/* ── PANNEAU RÉCAP ── */}
-        <div id="devis-recap" className={`rounded-2xl sm:rounded-[2rem] border ${theme.containerBg} p-6 sm:p-8 lg:p-10 xl:p-12 space-y-5 sm:space-y-6 shadow-xl lg:sticky lg:top-28 ${theme.panelGlow}`}>
+        <div
+          id="devis-recap"
+          className={`rounded-2xl sm:rounded-[2rem] border ${theme.containerBg} p-6 sm:p-8 lg:p-10 xl:p-12 space-y-5 sm:space-y-6 shadow-xl lg:sticky lg:top-28 ${theme.panelGlow}`}
+        >
           <div>
-            <h4 className={`font-display text-xl sm:text-2xl font-bold ${theme.textPrimary}`}>Votre estimation</h4>
+            <h4 className={`font-display text-xl sm:text-2xl font-bold ${theme.textPrimary}`}>
+              Votre estimation
+            </h4>
             <p className={`text-xs mt-1 ${theme.mutedText}`}>{summaryLine}</p>
           </div>
 
-          <div className={`rounded-2xl border ${theme.nestedBorder} ${theme.recapBg} overflow-hidden`}>
+          <div
+            className={`rounded-2xl border ${theme.nestedBorder} ${theme.recapBg} overflow-hidden`}
+          >
             <div className="px-5 py-4 border-b border-foreground/10">
               <p className={`text-sm font-semibold ${theme.textPrimary}`}>Récapitulatif du devis</p>
             </div>
             <div className="p-5 space-y-1 text-sm">
               {pricing.lineItems.length === 0 ? (
-                <p className={`opacity-50 py-3 text-center ${theme.textSecondary}`}>Aucun format sélectionné.</p>
+                <p className={`opacity-50 py-3 text-center ${theme.textSecondary}`}>
+                  Aucun format sélectionné.
+                </p>
               ) : (
                 <>
                   {pricing.lineItems.map((l) => (
@@ -1323,7 +1444,12 @@ export function DevisBuilder({
                   )}
                   {/* SHOW_PRICES: supplément express - masqué si false */}
                   {SHOW_PRICES && pricing.expressAdd > 0 && (
-                    <RecapRow label="Supplément express prioritaire" value={`+${pricing.expressAdd}€`} accent="warn" theme={theme} />
+                    <RecapRow
+                      label="Supplément express prioritaire"
+                      value={`+${pricing.expressAdd}€`}
+                      accent="warn"
+                      theme={theme}
+                    />
                   )}
                 </>
               )}
@@ -1331,9 +1457,11 @@ export function DevisBuilder({
             <div className="border-t border-foreground/10 px-5 py-5 flex items-end justify-between gap-4">
               <div className={`text-xs space-y-1 ${theme.textSecondary}`}>
                 {/* SHOW_PRICES: sous-total barré - masqué si false */}
-                {SHOW_PRICES && pricing.subtotal > 0 && pricing.discAmt + pricing.expressAdd > 0 && (
-                  <span className="line-through block opacity-60">{pricing.subtotal}€</span>
-                )}
+                {SHOW_PRICES &&
+                  pricing.subtotal > 0 &&
+                  pricing.discAmt + pricing.expressAdd > 0 && (
+                    <span className="line-through block opacity-60">{pricing.subtotal}€</span>
+                  )}
                 {pricing.totalVideos > 0 && (
                   <span>
                     {pricing.totalVideos} vidéo{pricing.totalVideos > 1 ? "s" : ""}
@@ -1342,14 +1470,18 @@ export function DevisBuilder({
               </div>
               <div className="text-right">
                 {/* SHOW_PRICES: badges collab/express et total animé - masqués si false */}
-                {showPrices && (pricing.discAmt > 0 || pricing.expressAdd > 0) && pricing.subtotal > 0 && (
-                  <p className="text-xs text-emerald-600 dark:text-emerald-400 mb-1 font-medium">
-                    {[
-                      pricing.discAmt > 0 ? "Collab -15%" : "",
-                      pricing.expressAdd > 0 ? "Express +35%" : "",
-                    ].filter(Boolean).join(" · ")}
-                  </p>
-                )}
+                {showPrices &&
+                  (pricing.discAmt > 0 || pricing.expressAdd > 0) &&
+                  pricing.subtotal > 0 && (
+                    <p className="text-xs text-emerald-600 dark:text-emerald-400 mb-1 font-medium">
+                      {[
+                        pricing.discAmt > 0 ? "Collab -15%" : "",
+                        pricing.expressAdd > 0 ? "Express +35%" : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </p>
+                  )}
                 {showPrices && <AnimatedPrice total={pricing.total} />}
               </div>
             </div>
@@ -1359,7 +1491,11 @@ export function DevisBuilder({
           {!adminMode && (
             <>
               <div className="space-y-4">
-                <p className={`text-[10px] font-bold uppercase tracking-[0.2em] ${theme.textMuted}`}>Vos coordonnées</p>
+                <p
+                  className={`text-[10px] font-bold uppercase tracking-[0.2em] ${theme.textMuted}`}
+                >
+                  Vos coordonnées
+                </p>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
                   <Inp theme={theme} v={name} set={setName} ph="Nom complet *" />
                   <Inp theme={theme} v={email} set={setEmail} ph="Email *" type="email" />
@@ -1384,9 +1520,12 @@ export function DevisBuilder({
               {status === "success" && (
                 <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-6 text-center">
                   <div className="mb-3 text-3xl">✓</div>
-                  <p className="font-semibold text-emerald-700 mb-2 text-base">Votre devis a bien été envoyé</p>
+                  <p className="font-semibold text-emerald-700 mb-2 text-base">
+                    Votre devis a bien été envoyé
+                  </p>
                   <p className="text-sm text-emerald-600 leading-relaxed">
-                    Vous recevrez votre devis détaillé par email d'ici quelques instants. Nous reviendrons vers vous sous 24 heures pour échanger sur votre projet.
+                    Vous recevrez votre devis détaillé par email d'ici quelques instants. Nous
+                    reviendrons vers vous sous 24 heures pour échanger sur votre projet.
                   </p>
                 </div>
               )}
@@ -1401,10 +1540,10 @@ export function DevisBuilder({
           {/* Mode admin - Message informatif */}
           {adminMode && (
             <div className="rounded-xl border border-purple-500/30 bg-purple-500/10 p-5 text-center">
-              <p className="font-semibold text-purple-300 mb-2 text-base">Prix unitaires affichés</p>
-              <p className="text-sm text-purple-400">
-                Tarifs de base sans réductions appliquées.
+              <p className="font-semibold text-purple-300 mb-2 text-base">
+                Prix unitaires affichés
               </p>
+              <p className="text-sm text-purple-400">Tarifs de base sans réductions appliquées.</p>
             </div>
           )}
         </div>
@@ -1413,9 +1552,7 @@ export function DevisBuilder({
       {pricing.totalVideos > 0 && status !== "success" && (
         <div
           className={`lg:hidden fixed bottom-0 inset-x-0 z-50 border-t backdrop-blur-xl flex items-center justify-between gap-4 px-5 py-4 shadow-[0_-4px_20px_-8px_rgba(0,0,0,0.2)] ${
-            variant === "surmesure"
-              ? "bg-[#0d0a1a]/95 border-white/10"
-              : "bg-white/95 border-foreground/10"
+            theme.isDark ? "bg-[#0d0a1a]/95 border-white/10" : "bg-white/95 border-foreground/10"
           }`}
         >
           <div className="flex flex-col min-w-0">
@@ -1424,18 +1561,22 @@ export function DevisBuilder({
             </span>
             {/* SHOW_PRICES: total barre mobile - masqué si false */}
             {showPrices && (
-              <span className={`font-display text-2xl font-bold tabular-nums ${theme.isDark ? "text-[#c4b5fd]" : "text-[#a8632d]"}`}>
+              <span
+                className={`font-display text-2xl font-bold tabular-nums ${theme.isDark ? "text-[#c4b5fd]" : "text-[#7b2d8e]"}`}
+              >
                 {pricing.total}€
               </span>
             )}
           </div>
           <button
             type="button"
-            onClick={() => document.getElementById("devis-recap")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+            onClick={() =>
+              document
+                .getElementById("devis-recap")
+                ?.scrollIntoView({ behavior: "smooth", block: "start" })
+            }
             className={`shrink-0 rounded-full px-5 py-3 text-sm font-semibold text-white ${
-              variant === "surmesure"
-                ? "bg-gradient-to-r from-[#a78bfa] to-[#ec4899]"
-                : "bg-[#1a1410]"
+              theme.isDark ? "bg-gradient-to-r from-[#a78bfa] to-[#ec4899]" : "bg-[#0c0a12]"
             }`}
           >
             Voir le récap →
@@ -1457,11 +1598,12 @@ function RecapRow({
   accent?: "disc" | "warn";
   theme: Theme;
 }) {
-  const textColor = accent === "disc"
-    ? "text-emerald-600 dark:text-emerald-400"
-    : accent === "warn"
-      ? "text-amber-600 dark:text-amber-400"
-      : theme.textSecondary;
+  const textColor =
+    accent === "disc"
+      ? "text-emerald-600 dark:text-emerald-400"
+      : accent === "warn"
+        ? "text-amber-600 dark:text-amber-400"
+        : theme.textSecondary;
   return (
     <div className={`flex justify-between gap-3 sm:gap-4 py-1.5 sm:py-2 ${textColor}`}>
       <span className="opacity-90 min-w-0 flex-1 leading-snug">{label}</span>
@@ -1493,12 +1635,22 @@ function Step({
 }) {
   return (
     <section className="space-y-5 sm:space-y-6">
-      <p className={`text-xs sm:text-sm font-bold uppercase tracking-[0.18em] flex items-center gap-3 flex-wrap ${theme.textPrimary}`}>
-        <span className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-black ${theme.stepNumBg}`}>
+      <p
+        className={`text-xs sm:text-sm font-bold uppercase tracking-[0.18em] flex items-center gap-3 flex-wrap ${theme.textPrimary}`}
+      >
+        <span
+          className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-black ${theme.stepNumBg}`}
+        >
           {n}
         </span>
         {title}
-        {hint && <span className={`text-[10px] sm:text-[11px] normal-case font-medium opacity-75 ${theme.textSecondary}`}>{hint}</span>}
+        {hint && (
+          <span
+            className={`text-[10px] sm:text-[11px] normal-case font-medium opacity-75 ${theme.textSecondary}`}
+          >
+            {hint}
+          </span>
+        )}
       </p>
       <div>{children}</div>
     </section>

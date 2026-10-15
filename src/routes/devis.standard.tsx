@@ -1,5 +1,4 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { DevisBuilder } from "@/components/DevisBuilder";
 
@@ -7,8 +6,12 @@ export const Route = createFileRoute("/devis/standard")({
   component: DevisStandardPage,
   head: () => ({
     meta: [
-      { title: "Devis standard — VizioCraft" },
-      { name: "description", content: "Configurez votre devis vidéo personnalisé en quelques clics. Résultat immédiat, aucun engagement." },
+      { title: "Devis standard - VizioCraft" },
+      {
+        name: "description",
+        content:
+          "Configurez votre devis vidéo personnalisé en quelques clics. Résultat immédiat, aucun engagement.",
+      },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -16,11 +19,9 @@ export const Route = createFileRoute("/devis/standard")({
 
 function DevisStandardPage() {
   return (
-    <main className="bg-[#f0f2f5] text-[#0f172a] min-h-screen">
-      <Nav />
-
+    <main className="min-h-screen bg-paper text-ink">
       {/* HERO */}
-      <section className="relative overflow-hidden pt-24 pb-10 sm:pt-32 sm:pb-12 lg:pt-44 lg:pb-16">
+      <section className="relative overflow-hidden pb-10 pt-28 sm:pb-12 sm:pt-36 lg:pb-16 lg:pt-44">
         {/* Subtle geometric accent */}
         <div className="absolute right-0 top-0 h-full w-1/2 overflow-hidden pointer-events-none">
           <div className="absolute -right-32 -top-32 h-[600px] w-[600px] rounded-full border border-[#1e3a5f]/8" />
@@ -34,7 +35,7 @@ function DevisStandardPage() {
             hash="tarifs"
             className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.22em] text-[#1e3a5f]/60 hover:text-[#1e3a5f] transition"
           >
-            ← Retour aux formules
+            Retour aux formules
           </Link>
 
           <div className="mt-6 sm:mt-8">
@@ -43,25 +44,37 @@ function DevisStandardPage() {
               Configurateur · Devis personnalisé
             </span>
             <h1 className="mt-5 sm:mt-6 font-display text-[1.9rem] leading-[1.07] tracking-tight sm:text-4xl lg:text-6xl text-[#0f172a]">
-              Votre devis,{" "}
-              <span className="text-[#1e3a5f]">calculé en direct.</span>
+              Votre devis, <span className="text-[#1e3a5f]">calculé en direct.</span>
             </h1>
             <p className="mt-4 sm:mt-5 max-w-2xl text-[15px] sm:text-lg leading-relaxed text-[#0f172a]/65">
-              Sélectionnez vos formats, ajustez les options, obtenez une estimation précise — le tout en moins d'une minute. Aucun engagement, récapitulatif envoyé par mail.
+              Sélectionnez vos formats, ajustez les options, obtenez une estimation précise - le
+              tout en moins d'une minute. Aucun engagement, récapitulatif envoyé par mail.
             </p>
           </div>
 
           {/* Trust band */}
           <div className="mt-7 sm:mt-10 flex flex-wrap gap-4 sm:gap-6">
             {[
-              { icon: "⚡", label: "Réponse sous 24h" },
-              { icon: "🔒", label: "Aucun engagement" },
-              { icon: "📋", label: "Récap détaillé par mail" },
-              { icon: "🎯", label: "Prix fermes, sans surprise" },
-            ].map((item) => (
-              <div key={item.label} className="flex items-center gap-2 text-[13px] sm:text-sm text-[#0f172a]/60">
-                <span>{item.icon}</span>
-                <span>{item.label}</span>
+              "Réponse sous 24h",
+              "Aucun engagement",
+              "Récap détaillé par mail",
+              "Prix fermes, sans surprise",
+            ].map((label) => (
+              <div
+                key={label}
+                className="flex items-center gap-2 text-[13px] text-[#0f172a]/70 sm:text-sm"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  className="h-4 w-4 text-brand"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  aria-hidden
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.5l5 5 10-11" />
+                </svg>
+                <span>{label}</span>
               </div>
             ))}
           </div>
@@ -95,9 +108,15 @@ function DevisBuilderStandardWrapper() {
       <div className="rounded-2xl sm:rounded-[2rem] border border-[#1e3a5f]/12 bg-white shadow-[0_8px_40px_-12px_rgba(30,58,95,0.18)] overflow-hidden">
         <div className="border-b border-[#1e3a5f]/8 bg-[#f8fafc] px-6 py-4 sm:px-8 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1e3a5f] text-white text-xs font-bold">✦</span>
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1e3a5f] text-white">
+              <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor" aria-hidden>
+                <path d="M12 2l2.4 7.6H22l-6.2 4.6 2.4 7.8L12 17.3 5.8 22l2.4-7.8L2 9.6h7.6z" />
+              </svg>
+            </span>
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#1e3a5f]">Configurateur standard</p>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#1e3a5f]">
+                Configurateur standard
+              </p>
               <p className="text-[11px] text-[#0f172a]/50">Tous formats · Calcul en temps réel</p>
             </div>
           </div>
@@ -115,8 +134,8 @@ function DevisBuilderStandardWrapper() {
 
       {/* Bottom note */}
       <p className="mt-6 text-center text-xs text-[#0f172a]/40">
-        Les estimations sont indicatives et peuvent varier selon les détails finaux du projet.
-        Un devis ferme vous est envoyé après validation de votre brief.
+        Les estimations sont indicatives et peuvent varier selon les détails finaux du projet. Un
+        devis ferme vous est envoyé après validation de votre brief.
       </p>
     </div>
   );

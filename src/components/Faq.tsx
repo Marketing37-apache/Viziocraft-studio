@@ -1,48 +1,87 @@
-import { useEffect, useRef, useState } from "react";
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
+import { useState } from "react";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/components/ui/accordion";
 
 export type FaqItem = { q: string; a: string };
 
-export function Faq({ items }: { items: FaqItem[] }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
+function Row({ item, value }: { item: FaqItem; value: string }) {
+  return (
+    <AccordionItem value={value} className="border-b border-ink/10">
+      <AccordionTrigger className="group cursor-pointer gap-4 py-4 text-left hover:no-underline sm:py-[18px] [&>svg]:hidden">
+        <span className="font-display text-[16px] font-semibold leading-snug tracking-[-0.02em] text-ink transition-colors duration-300 group-hover:text-brand sm:text-[18px]">
+          {item.q}
+        </span>
+        <span
+          aria-hidden
+          className="faq-icon flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-ink/15 text-ink group-hover:border-ink group-hover:bg-ink group-hover:text-white group-data-[state=open]:border-ink group-data-[state=open]:bg-ink group-data-[state=open]:text-white"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            className="h-3.5 w-3.5"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+          >
+            <path strokeLinecap="round" d="M12 5v14M5 12h14" />
+          </svg>
+        </span>
+      </AccordionTrigger>
+      <AccordionContent className="pb-5 pt-0">
+        <p className="max-w-2xl text-[15px] leading-relaxed text-ink/70">{item.a}</p>
+      </AccordionContent>
+    </AccordionItem>
+  );
+}
 
-  useEffect(() => {
-    if (!ref.current) return;
-    const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } },
-      { threshold: 0.1 }
-    );
-    obs.observe(ref.current);
-    return () => obs.disconnect();
-  }, []);
+/* FAQ compacte : les questions qui comptent d'abord, le reste à la demande. */
+export function Faq({ featured, more }: { featured: FaqItem[]; more: FaqItem[] }) {
+  const [showAll, setShowAll] = useState(false);
 
   return (
-    <div ref={ref} className="mt-12">
-      <Accordion type="single" collapsible className="overflow-hidden rounded-3xl border border-foreground/10 bg-card divide-y divide-foreground/10">
-        {items.map((f, i) => (
-          <AccordionItem
-            key={i}
-            value={`item-${i}`}
-            className="border-b-0 transition-all"
-            style={{
-              opacity: visible ? 1 : 0,
-              transform: visible ? "translateY(0)" : "translateY(16px)",
-              transition: `opacity 600ms ease ${i * 80}ms, transform 600ms cubic-bezier(.2,.7,.2,1) ${i * 80}ms`,
-            }}
-          >
-            <AccordionTrigger className="px-5 py-4 sm:px-8 sm:py-6 text-[15px] sm:text-base lg:text-lg font-display hover:no-underline hover:bg-muted/40 [&[data-state=open]]:bg-brand-soft text-left">
-              <span className="flex items-center gap-3 sm:gap-4">
-                <span className="shrink-0 text-xs font-semibold text-primary">{String(i + 1).padStart(2, "0")}</span>
-                <span>{f.q}</span>
-              </span>
-            </AccordionTrigger>
-            <AccordionContent className="px-5 pb-5 sm:px-8 sm:pb-7 pt-0">
-              <p className="ml-0 sm:ml-10 max-w-3xl text-[14px] sm:text-base text-muted-foreground leading-relaxed">{f.a}</p>
-            </AccordionContent>
-          </AccordionItem>
+    <div>
+      <Accordion type="single" collapsible className="border-t border-ink/10">
+        {featured.map((f, i) => (
+          <Row key={f.q} item={f} value={`f-${i}`} />
         ))}
+        {/* les autres questions restent dans la page (référencement), simplement repliées */}
+        <div
+          id="faq-more"
+          hidden={!showAll}
+          className={showAll ? "animate-in fade-in slide-in-from-top-2 duration-500" : ""}
+        >
+          {more.map((f, i) => (
+            <Row key={f.q} item={f} value={`m-${i}`} />
+          ))}
+        </div>
       </Accordion>
+
+      <button
+        type="button"
+        onClick={() => setShowAll((v) => !v)}
+        aria-expanded={showAll}
+        aria-controls="faq-more"
+        className="group mt-5 inline-flex min-h-11 items-center gap-3 text-[14px] font-semibold text-ink"
+      >
+        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-ink text-white transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-110">
+          <svg
+            viewBox="0 0 24 24"
+            className={`h-3.5 w-3.5 transition-transform duration-500 ${showAll ? "rotate-180" : ""}`}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            aria-hidden
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 9l6 6 6-6" />
+          </svg>
+        </span>
+        <span className="link-sweep">
+          {showAll ? "Réduire la liste" : `Voir les ${more.length} autres questions`}
+        </span>
+      </button>
     </div>
   );
 }

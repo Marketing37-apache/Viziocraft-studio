@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { useSpotlight } from "@/lib/motion";
 
 type Service = {
   t: string;
@@ -7,56 +7,70 @@ type Service = {
   tag: string;
   slug?: string;
   href?: string;
-  // SVG path for the icon
+  img?: string;
+  span: string;
   svgPath: string;
 };
+
+const CDNS = "https://cdn.prod.website-files.com/6996b2b29f614702ad210f72";
 
 const SERVICES: Service[] = [
   {
     t: "Shorts & Reels",
-    sub: "TikTok · Reels · YouTube Shorts",
-    tag: "Format court",
+    sub: "Le format qui décide de votre croissance. Hook en moins d'une seconde, rythme millimétré, sous-titres incrustés et b-rolls qui tiennent l'attention jusqu'à la dernière frame.",
+    tag: "9:16 · TikTok · Reels · Shorts",
     href: "#showreel",
-    svgPath: "M7 4h10a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zm5 3v10l5-5-5-5z",
+    img: "https://i.ytimg.com/vi/fYZlCGaTZZQ/hqdefault.jpg",
+    span: "lg:col-span-3 lg:row-span-2",
+    svgPath:
+      "M7 4h10a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zm5 3v10l5-5-5-5z",
   },
   {
     t: "Publicités vidéo",
-    sub: "Ads pensées pour convertir",
+    sub: "Ads pensées pour convertir : objectif, cible, itération. On monte pour la performance, pas pour le portfolio.",
     tag: "Performance",
     slug: "publicites-video",
+    span: "lg:col-span-3",
     svgPath: "M3 3h18v4H3zM3 10h11v4H3zM3 17h7v4H3zM17 10l4 7h-8l4-7z",
   },
   {
+    t: "Formats longs",
+    sub: "YouTube, vlogs, documentaires : une narration qui ne laisse pas tomber à la troisième minute.",
+    tag: "Long format",
+    slug: "contenu-educatif",
+    span: "lg:col-span-3",
+    svgPath:
+      "M15 10l-8 4.5V5.5L15 10zm6-7H3a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1z",
+  },
+  {
     t: "Podcast vidéo",
-    sub: "Multi-cam · clips · chapitrage",
+    sub: "Multi-cam, chapitrage, clips verticaux extraits de chaque épisode.",
     tag: "Multi-cam",
     slug: "podcast-video",
-    svgPath: "M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3zm-1 17.93V22h2v-2.07A8 8 0 0 0 20 12h-2a6 6 0 0 1-12 0H4a8 8 0 0 0 7 7.93z",
+    span: "lg:col-span-2",
+    svgPath:
+      "M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3zm-1 17.93V22h2v-2.07A8 8 0 0 0 20 12h-2a6 6 0 0 1-12 0H4a8 8 0 0 0 7 7.93z",
   },
   {
     t: "Volume quotidien",
-    sub: "9:16 natif · cohérence · scalable",
+    sub: "Une équipe de monteurs déployée en parallèle pour tenir 30 vidéos par mois.",
     tag: "Continu",
     slug: "corporate-evenementiel",
-    svgPath: "M4 4h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 10h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 16h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4z",
+    span: "lg:col-span-2",
+    svgPath:
+      "M4 4h4v4H4zm6 0h4v4h-4zm6 0h4v4H4zM4 10h4v4H4zm6 0h4v4H4zm6 0h4v4H4zM4 16h4v4H4zm6 0h4v4H4zm6 0h4v4H4z",
   },
   {
     t: "Motion design",
-    sub: "Logos animés · kinetic type",
+    sub: "Logos animés, kinetic type, habillages sonores pour exister sans visage.",
     tag: "Animation",
     slug: "motion-design",
+    span: "lg:col-span-2",
     svgPath: "M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5",
-  },
-  {
-    t: "Formats longs",
-    sub: "YouTube · vlogs · documentaires",
-    tag: "Long format",
-    slug: "contenu-educatif",
-    svgPath: "M15 10l-8 4.5V5.5L15 10zm6-7H3a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1z",
   },
 ];
 
-function ServiceIcon({ path }: { path: string }) {
+function ServiceIcon({ path, className = "h-5 w-5" }: { path: string; className?: string }) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -65,201 +79,107 @@ function ServiceIcon({ path }: { path: string }) {
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="h-5 w-5"
+      className={className}
+      aria-hidden
     >
       <path d={path} />
     </svg>
   );
 }
 
-function ServiceButton({ s, i }: { s: Service; i: number }) {
-  const ref = useRef<HTMLElement>(null);
-  const [visible, setVisible] = useState(false);
-  const [hovered, setHovered] = useState(false);
-  const [mousePosition, setMousePosition] = useState({ x: 50, y: 50 });
-  const rafRef = useRef<number | undefined>(undefined);
+function ServiceCard({ s, i }: { s: Service; i: number }) {
+  const ref = useSpotlight<HTMLDivElement>();
 
-  // Generate unique particles for each button instance
-  const particles = useRef<Array<{
-    id: number;
-    startX: number;
-    startY: number;
-    vx: number;
-    vy: number;
-    size: number;
-    color: 'primary' | 'pink';
-    delay: number;
-  }>>([]);
-
-  useEffect(() => {
-    particles.current = [...Array(10)].map((_, idx) => ({
-      id: idx,
-      startX: 10 + Math.random() * 80,
-      startY: 10 + Math.random() * 80,
-      vx: (Math.random() - 0.5) * 6,
-      vy: (Math.random() - 0.5) * 6 - 1.5,
-      size: 2 + Math.random() * 3,
-      color: Math.random() > 0.5 ? 'primary' : 'pink',
-      delay: idx * 50,
-    }));
-  }, []);
-
-  useEffect(() => {
-    if (!ref.current) return;
-    const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect(); } },
-      { threshold: 0.08 }
-    );
-    obs.observe(ref.current);
-    return () => obs.disconnect();
-  }, []);
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!ref.current) return;
-    const rect = ref.current.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    
-    if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    rafRef.current = requestAnimationFrame(() => {
-      setMousePosition({ x, y });
-    });
-  };
-
-  const Wrapper: any = s.slug ? Link : "a";
-  const wrapperProps = s.slug
-    ? { to: `/univers/${s.slug}` }
-    : { href: s.href ?? "#contact" };
-
-  return (
-    <Wrapper
-      ref={ref}
-      {...wrapperProps}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      onMouseMove={handleMouseMove}
-      className="group relative overflow-hidden rounded-2xl bg-card transition-all duration-500"
-      style={{
-        opacity: visible ? 1 : 0,
-        transform: visible
-          ? "translateY(0) scale(1)"
-          : "translateY(28px) scale(0.97)",
-        transition: `opacity 650ms ease ${i * 70}ms, transform 650ms cubic-bezier(.16,.9,.3,1) ${i * 70}ms`,
-      }}
-    >
-      {/* Optimized gradient background using CSS variables */}
-      <div
-        className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-        style={{
-          background: `radial-gradient(circle at ${mousePosition.x}% ${mousePosition.y}%, rgba(123,45,142,0.12) 0%, rgba(236,72,153,0.06) 40%, transparent 70%)`,
-        }}
-      />
-
-      {/* Simplified border glow */}
-      <div className="absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-gradient-to-br from-primary/10 via-transparent to-pink-500/10" />
-
-      {/* Corner accents - simplified */}
-      <div className="absolute top-0 left-0 w-6 h-6 border-l-2 border-t-2 border-primary/0 transition-all duration-500 group-hover:border-primary/30 rounded-tl-xl" />
-      <div className="absolute top-0 right-0 w-6 h-6 border-r-2 border-t-2 border-primary/0 transition-all duration-500 group-hover:border-primary/30 rounded-tr-xl" />
-      <div className="absolute bottom-0 left-0 w-6 h-6 border-l-2 border-b-2 border-primary/0 transition-all duration-500 group-hover:border-primary/30 rounded-bl-xl" />
-      <div className="absolute bottom-0 right-0 w-6 h-6 border-r-2 border-b-2 border-primary/0 transition-all duration-500 group-hover:border-primary/30 rounded-br-xl" />
-
-      {/* Contenu principal */}
-      <div className="relative p-5">
-        <div className="flex items-start gap-4">
-          {/* Icône avec effet simplifié */}
-          <div className="relative">
-            <div className="absolute inset-0 rounded-xl bg-brand-gradient opacity-0 blur-lg transition-all duration-500 group-hover:opacity-30" />
-            <div className="relative flex h-12 w-12 items-center justify-center rounded-xl border border-foreground/10 bg-background text-primary transition-all duration-500 group-hover:border-primary/40 group-hover:scale-105 group-hover:-translate-y-0.5">
-              <ServiceIcon path={s.svgPath} />
-            </div>
+  const content = (
+    <>
+      <div className="relative z-10 flex h-full flex-col p-5 sm:p-6">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/12 bg-white/[0.04] text-white/90 transition-colors duration-500 group-hover:border-white/30 group-hover:bg-white group-hover:text-[#0a0812]">
+            <ServiceIcon path={s.svgPath} />
           </div>
+          <span className="font-label pt-1 text-white/30 transition-colors duration-500 group-hover:text-white/70">
+            {String(i + 1).padStart(2, "0")}
+          </span>
+        </div>
 
-          <div className="flex-1 min-w-0">
-            {/* Titre - gardé visible avec changement de couleur */}
-            <p className="font-display text-[16px] font-bold leading-tight text-foreground transition-colors duration-500 group-hover:text-primary">
-              {s.t}
-            </p>
+        <div className="mt-6 sm:mt-8">
+          <span className="font-label inline-block rounded-full border border-white/15 bg-white/[0.04] px-2.5 py-1 text-white/60">
+            {s.tag}
+          </span>
+          <h3 className="mt-4 font-display text-xl tracking-tight text-white sm:text-2xl">{s.t}</h3>
+          <p className="mt-2.5 max-w-md text-[13.5px] leading-relaxed text-white/55 sm:text-sm">
+            {s.sub}
+          </p>
+        </div>
 
-            {/* Tag et sous-titre - révélés avec animation */}
-            <div
-              className="overflow-hidden transition-all duration-500 ease-out"
-              style={{
-                maxHeight: hovered ? "70px" : "0px",
-                opacity: hovered ? 1 : 0,
-              }}
+        <div className="mt-auto flex items-center justify-between pt-6">
+          <span className="font-label text-white/40 transition-colors duration-500 group-hover:text-white">
+            Explorer
+          </span>
+          <span className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-white/70 transition-all duration-500 group-hover:translate-x-1 group-hover:border-white group-hover:bg-white group-hover:text-[#0a0812]">
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+              aria-hidden
             >
-              <div className="pt-3 space-y-2">
-                <span className="inline-block rounded-full bg-primary/10 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.18em] text-primary border border-primary/20">
-                  {s.tag}
-                </span>
-                <p className="text-[12px] leading-relaxed text-muted-foreground">
-                  {s.sub}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Flèche optimisée */}
-          <div className="shrink-0 relative">
-            <div className="absolute inset-0 rounded-full bg-brand-gradient opacity-0 blur-sm transition-all duration-500 group-hover:opacity-40" />
-            <div className="relative flex h-10 w-10 items-center justify-center rounded-full border border-foreground/10 text-muted-foreground transition-all duration-500 group-hover:border-primary/50 group-hover:bg-primary group-hover:text-white group-hover:scale-105 group-hover:shadow-[0_0_20px_rgba(123,45,142,0.4)]">
-              <svg
-                className="w-4 h-4 transition-transform duration-500 group-hover:translate-x-0.5"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-          </div>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </span>
         </div>
       </div>
 
-      {/* Ligne animée en bas */}
-      <div
-        className="absolute bottom-0 left-0 h-[3px] bg-gradient-to-r from-primary via-pink-500 to-primary transition-all duration-500 ease-out"
-        style={{ width: hovered ? "100%" : "0%" }}
-      />
-
-      {/* Particules avancées avec système de physique */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {particles.current.map((particle) => (
-          <div
-            key={particle.id}
-            className={`absolute rounded-full transition-all duration-1200 ease-out ${
-              particle.color === 'primary' ? 'bg-primary/70' : 'bg-pink-500/70'
-            }`}
-            style={{
-              left: `${particle.startX}%`,
-              top: `${particle.startY}%`,
-              width: hovered ? `${particle.size}px` : '0px',
-              height: hovered ? `${particle.size}px` : '0px',
-              opacity: hovered ? 0.9 : 0,
-              transform: hovered 
-                ? `translate(${particle.vx * 20}px, ${particle.vy * 20}px) scale(${1 + Math.random() * 0.3})` 
-                : 'translate(0, 0) scale(0)',
-              transitionDelay: `${particle.delay}ms`,
-              boxShadow: hovered 
-                ? particle.color === 'primary' 
-                  ? '0 0 8px rgba(123,45,142,0.6)' 
-                  : '0 0 8px rgba(236,72,153,0.6)'
-                : 'none',
-            }}
+      {s.img && (
+        <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+          <img
+            src={s.img}
+            alt=""
+            aria-hidden
+            loading="lazy"
+            className="h-full w-full scale-105 object-cover opacity-[0.16] transition-all duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-110 group-hover:opacity-30"
+            style={{ objectPosition: "50% 35%" }}
           />
-        ))}
-      </div>
-    </Wrapper>
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0a0812] via-[#0a0812]/85 to-[#0a0812]/40" />
+        </div>
+      )}
+    </>
+  );
+
+  const inner =
+    "group spotlight relative flex h-full min-h-[230px] w-full overflow-hidden rounded-3xl border border-white/10 bg-[#100d1a] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1.5 focus-visible:-translate-y-1.5";
+
+  return (
+    <div
+      ref={ref}
+      data-reveal="up"
+      className={`${s.span} h-full`}
+      style={{ ["--rd" as string]: `${i * 60}ms` }}
+    >
+      {s.slug ? (
+        <Link
+          to="/univers/$slug"
+          params={{ slug: s.slug! }}
+          className={inner}
+          aria-label={`${s.t} - en savoir plus`}
+        >
+          {content}
+        </Link>
+      ) : (
+        <a href={s.href ?? "#contact"} className={inner}>
+          {content}
+        </a>
+      )}
+    </div>
   );
 }
 
 export function ServicesShowcase() {
   return (
-    <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-6 lg:auto-rows-[minmax(230px,auto)]">
       {SERVICES.map((s, i) => (
-        <ServiceButton key={(s.slug ?? s.href ?? "") + i} s={s} i={i} />
+        <ServiceCard key={(s.slug ?? s.href ?? "") + i} s={s} i={i} />
       ))}
     </div>
   );

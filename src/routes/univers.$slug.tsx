@@ -1,5 +1,4 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { useState, useEffect } from "react";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
@@ -20,33 +19,33 @@ type Univers = {
   hero: string;
   introTitle: string;
   intro: string;
-  manifesto: string[];          // 3 short pillars
-  blocks: Block[];               // 3-4 narrative blocks
-  gallery: Tile[];               // 6-8 tiles (gif/images)
-  stats: Stat[];                 // 3 numbers
+  manifesto: string[]; // 3 short pillars
+  blocks: Block[]; // 3-4 narrative blocks
+  gallery: Tile[]; // 6-8 tiles (gif/images)
+  stats: Stat[]; // 3 numbers
   process: { n: string; t: string; p: string }[]; // 4-5 steps
-  tools: string[];               // chips
-  deliverables: string[];        // bullet list
+  tools: string[]; // chips
+  deliverables: string[]; // bullet list
   quote: Quote;
   // Per-universe visual theme
   theme: {
-    pageBg: string;             // bg of page
-    pageInk: string;            // base text class
-    accent: string;             // accent text (used by helpers)
-    accentBg: string;           // accent surface
+    pageBg: string; // bg of page
+    pageInk: string; // base text class
+    accent: string; // accent text (used by helpers)
+    accentBg: string; // accent surface
     chipBg: string;
     chipText: string;
     cardBg: string;
     cardBorder: string;
-    softBg: string;             // soft band background
-    button: string;             // primary CTA classes
+    softBg: string; // soft band background
+    button: string; // primary CTA classes
     quoteBg: string;
     eyebrowColor: string;
-    decorative: string;         // descriptor for decorative shapes
+    decorative: string; // descriptor for decorative shapes
   };
 };
 
-/* ——————————————————————————— DATA ——————————————————————————— */
+/* --------------------------- DATA --------------------------- */
 
 const UNIVERS: Record<string, Univers> = {
   "publicites-video": {
@@ -59,7 +58,7 @@ const UNIVERS: Record<string, Univers> = {
     hero: `${CDN}/699ab9aed3c37eb93d817327_image4.jpeg`,
     introTitle: "L'attention coûte cher. Nous la rentabilisons.",
     intro:
-      "Sur les feeds, vous disposez de moins de deux secondes avant que le viewer passe à autre chose. Notre travail commence à ce moment précis — construire un hook qui arrête le scroll, une promesse qui crédibilise, un call-to-action qui déclenche l'action. Chaque coupe, chaque sous-titre, chaque seconde est au service de votre objectif.",
+      "Sur les feeds, vous disposez de moins de deux secondes avant que le viewer passe à autre chose. Notre travail commence à ce moment précis - construire un hook qui arrête le scroll, une promesse qui crédibilise, un call-to-action qui déclenche l'action. Chaque coupe, chaque sous-titre, chaque seconde est au service de votre objectif.",
     manifesto: [
       "Le brief commence par l'objectif de conversion, pas par la direction artistique.",
       "On itère sur chaque pub jusqu'à ce qu'elle délivre les résultats attendus.",
@@ -68,11 +67,11 @@ const UNIVERS: Record<string, Univers> = {
     blocks: [
       {
         h: "Un hook qui stoppe le scroll",
-        p: "L'ouverture est le seul moment où vous pouvez encore perdre votre audience. On travaille chaque première seconde — image d'accroche, rythme initial, promesse implicite — pour qu'elle soit impossible à ignorer.",
+        p: "L'ouverture est le seul moment où vous pouvez encore perdre votre audience. On travaille chaque première seconde - image d'accroche, rythme initial, promesse implicite - pour qu'elle soit impossible à ignorer.",
       },
       {
         h: "Formats adaptés à chaque plateforme",
-        p: "9:16 pour Reels et TikTok, 1:1 pour le feed Meta, 16:9 pour YouTube — un seul brief, tous les formats livrés, chacun optimisé pour son contexte. Pas de recadrage approximatif, une vraie adaptation.",
+        p: "9:16 pour Reels et TikTok, 1:1 pour le feed Meta, 16:9 pour YouTube - un seul brief, tous les formats livrés, chacun optimisé pour son contexte. Pas de recadrage approximatif, une vraie adaptation.",
       },
       {
         h: "Montage orienté conversion",
@@ -97,21 +96,37 @@ const UNIVERS: Record<string, Univers> = {
       { k: "−40%", v: "Coût par résultat observé après itération" },
     ],
     process: [
-      { n: "01", t: "Brief", p: "Vous transmettez vos fichiers sources, l'objectif de la campagne et la cible visée. On part de là, pas d'un template." },
-      { n: "02", t: "Montage", p: "On construit la pub avec le hook, le rythme et le format adaptés à la plateforme de diffusion." },
-      { n: "03", t: "Livraison", p: "Vous recevez les exports finaux, prêts à diffuser, dans chaque format demandé." },
-      { n: "04", t: "Ajustements", p: "Vos retours sont intégrés rapidement. On ajuste jusqu'à validation complète." },
+      {
+        n: "01",
+        t: "Brief",
+        p: "Vous transmettez vos fichiers sources, l'objectif de la campagne et la cible visée. On part de là, pas d'un template.",
+      },
+      {
+        n: "02",
+        t: "Montage",
+        p: "On construit la pub avec le hook, le rythme et le format adaptés à la plateforme de diffusion.",
+      },
+      {
+        n: "03",
+        t: "Livraison",
+        p: "Vous recevez les exports finaux, prêts à diffuser, dans chaque format demandé.",
+      },
+      {
+        n: "04",
+        t: "Ajustements",
+        p: "Vos retours sont intégrés rapidement. On ajuste jusqu'à validation complète.",
+      },
     ],
     tools: ["After Effects", "Premiere Pro", "DaVinci Resolve"],
     deliverables: [
-      "Exports dans tous les formats demandés — 9:16, 1:1, 16:9",
+      "Exports dans tous les formats demandés - 9:16, 1:1, 16:9",
       "Sous-titres incrustés et synchronisés",
       "Intro ou outro avec votre logo",
       "Miniatures statiques pour vos campagnes",
     ],
     quote: {
       q: "On a consolidé notre production chez VizioCraft après avoir testé deux autres agences. La réactivité et les résultats ne sont pas comparables.",
-      a: "— Direction acquisition, marque SaaS B2B",
+      a: "- Direction acquisition, marque SaaS B2B",
     },
     theme: {
       pageBg: "bg-[#0b0f1a]",
@@ -140,7 +155,7 @@ const UNIVERS: Record<string, Univers> = {
     hero: `${CDN}/699ab9aed3c37eb93d81732a_image8.jpeg`,
     introTitle: "Un tournage, plusieurs semaines de contenu.",
     intro:
-      "Vous enregistrez un épisode. La plupart des équipes en sortent une vidéo. Nous en sortons un long format YouTube structuré, des clips courts reformatés pour les réseaux, et des visuels prêts à publier — le tout issu du même tournage, sans charge supplémentaire de votre côté.",
+      "Vous enregistrez un épisode. La plupart des équipes en sortent une vidéo. Nous en sortons un long format YouTube structuré, des clips courts reformatés pour les réseaux, et des visuels prêts à publier - le tout issu du même tournage, sans charge supplémentaire de votre côté.",
     manifesto: [
       "Plusieurs caméras, une émission cohérente et bien montée.",
       "Chaque moment fort devient un clip court autonome avec sa propre logique narrative.",
@@ -149,7 +164,7 @@ const UNIVERS: Record<string, Univers> = {
     blocks: [
       {
         h: "Synchronisation multi-caméra",
-        p: "Une caméra par intervenant, complétée d'un plan d'ensemble si le tournage s'y prête. On synchronise toutes les sources, on corrige les niveaux audio, on livre une émission finalisée — pas un assemblage brut.",
+        p: "Une caméra par intervenant, complétée d'un plan d'ensemble si le tournage s'y prête. On synchronise toutes les sources, on corrige les niveaux audio, on livre une émission finalisée - pas un assemblage brut.",
       },
       {
         h: "Clips courts extraits de chaque épisode",
@@ -178,11 +193,31 @@ const UNIVERS: Record<string, Univers> = {
       { k: "72h", v: "Délai de livraison standard" },
     ],
     process: [
-      { n: "01", t: "Brief", p: "Vous nous transmettez le contexte de l'épisode et les séquences à valoriser en priorité." },
-      { n: "02", t: "Réception des rushes", p: "Vous uploadez vos fichiers. On synchronise les sources et on calibre les niveaux audio." },
-      { n: "03", t: "Montage long format", p: "Découpage narratif, habillage, étalonnage colorimétrique, mixage audio." },
-      { n: "04", t: "Clips dérivés", p: "On extrait les séquences à fort potentiel et on les reformate en clips verticaux." },
-      { n: "05", t: "Livraison", p: "Long format, clips courts, miniatures et descriptions — tout livré en une seule passe." },
+      {
+        n: "01",
+        t: "Brief",
+        p: "Vous nous transmettez le contexte de l'épisode et les séquences à valoriser en priorité.",
+      },
+      {
+        n: "02",
+        t: "Réception des rushes",
+        p: "Vous uploadez vos fichiers. On synchronise les sources et on calibre les niveaux audio.",
+      },
+      {
+        n: "03",
+        t: "Montage long format",
+        p: "Découpage narratif, habillage, étalonnage colorimétrique, mixage audio.",
+      },
+      {
+        n: "04",
+        t: "Clips dérivés",
+        p: "On extrait les séquences à fort potentiel et on les reformate en clips verticaux.",
+      },
+      {
+        n: "05",
+        t: "Livraison",
+        p: "Long format, clips courts, miniatures et descriptions - tout livré en une seule passe.",
+      },
     ],
     tools: ["Premiere Pro", "DaVinci Resolve", "After Effects"],
     deliverables: [
@@ -193,7 +228,7 @@ const UNIVERS: Record<string, Univers> = {
     ],
     quote: {
       q: "Le volume de contenu publié a triplé à partir du même temps de tournage. Le podcast est devenu une vraie machine à distribution.",
-      a: "— Podcasteur, créateur de contenu B2B",
+      a: "- Podcasteur, créateur de contenu B2B",
     },
     theme: {
       pageBg: "bg-[#fdfaf3]",
@@ -218,11 +253,11 @@ const UNIVERS: Record<string, Univers> = {
     title: "Du scroll stoppé, ",
     highlight: "tous les jours.",
     baseline:
-      "Shorts, Reels, TikToks — montés pour capter l'attention dès la première seconde et convertir en abonnés ou en clients.",
+      "Shorts, Reels, TikToks - montés pour capter l'attention dès la première seconde et convertir en abonnés ou en clients.",
     hero: `${CDN}/699ab9aed3c37eb93d81733d_image6.jpeg`,
     introTitle: "Le format court est le plus exigeant à maîtriser.",
     intro:
-      "En 30 à 60 secondes, chaque choix de montage est visible. Le premier plan, l'enchaînement des coupes, le placement des sous-titres, la dernière image — tout se voit. On monte vos shorts avec le même niveau d'exigence qu'un long format, parce que votre audience, elle, ne fait pas la différence.",
+      "En 30 à 60 secondes, chaque choix de montage est visible. Le premier plan, l'enchaînement des coupes, le placement des sous-titres, la dernière image - tout se voit. On monte vos shorts avec le même niveau d'exigence qu'un long format, parce que votre audience, elle, ne fait pas la différence.",
     manifesto: [
       "Un short mal monté réduit votre crédibilité avant même que le contenu soit vu.",
       "Le rythme est le résultat d'un travail technique, pas d'une intuition.",
@@ -235,11 +270,11 @@ const UNIVERS: Record<string, Univers> = {
       },
       {
         h: "Sous-titres intégrés au montage",
-        p: "Police, couleurs, taille, position, timing — les sous-titres sont traités comme un élément de mise en scène. Ils guident le regard et maintiennent l'engagement, même en lecture silencieuse.",
+        p: "Police, couleurs, taille, position, timing - les sous-titres sont traités comme un élément de mise en scène. Ils guident le regard et maintiennent l'engagement, même en lecture silencieuse.",
       },
       {
         h: "Accroche dès la première image",
-        p: "Chaque short s'ouvre sur une séquence travaillée pour retenir l'attention immédiatement. Pas de générique, pas d'introduction — on entre dans le sujet avant que le viewer ait le temps de scroller.",
+        p: "Chaque short s'ouvre sur une séquence travaillée pour retenir l'attention immédiatement. Pas de générique, pas d'introduction - on entre dans le sujet avant que le viewer ait le temps de scroller.",
       },
       {
         h: "Volume soutenu, qualité constante",
@@ -260,10 +295,26 @@ const UNIVERS: Record<string, Univers> = {
       { k: "30+", v: "Shorts mensuels pour certains clients actifs" },
     ],
     process: [
-      { n: "01", t: "Brief", p: "Vous transmettez vos rushes et vos références visuelles. On définit ensemble le style à appliquer." },
-      { n: "02", t: "Cadrage du style", p: "On livre un premier short. Vous le validez, on verrouille la direction visuelle pour la suite." },
-      { n: "03", t: "Production régulière", p: "On livre selon votre rythme de publication — quotidien, hebdomadaire ou à la demande." },
-      { n: "04", t: "Ajustements", p: "Vos retours sont intégrés rapidement, sans remettre le style en question à chaque fois." },
+      {
+        n: "01",
+        t: "Brief",
+        p: "Vous transmettez vos rushes et vos références visuelles. On définit ensemble le style à appliquer.",
+      },
+      {
+        n: "02",
+        t: "Cadrage du style",
+        p: "On livre un premier short. Vous le validez, on verrouille la direction visuelle pour la suite.",
+      },
+      {
+        n: "03",
+        t: "Production régulière",
+        p: "On livre selon votre rythme de publication - quotidien, hebdomadaire ou à la demande.",
+      },
+      {
+        n: "04",
+        t: "Ajustements",
+        p: "Vos retours sont intégrés rapidement, sans remettre le style en question à chaque fois.",
+      },
     ],
     tools: ["Premiere Pro", "After Effects", "DaVinci Resolve"],
     deliverables: [
@@ -274,7 +325,7 @@ const UNIVERS: Record<string, Univers> = {
     ],
     quote: {
       q: "Pour la première fois, je publie tous les jours sans m'impliquer dans le montage. La régularité a changé mes résultats.",
-      a: "— Créateur de contenu, 80k abonnés",
+      a: "- Créateur de contenu, 80k abonnés",
     },
     theme: {
       pageBg: "bg-[#f4f1eb]",
@@ -303,7 +354,7 @@ const UNIVERS: Record<string, Univers> = {
     hero: `${CDN}/699ab9aed3c37eb93d81734c_image5.jpeg`,
     introTitle: "Un bon motion design ne se remarque pas. Il guide.",
     intro:
-      "Quand l'animation est précisément calibrée, elle devient transparente — on retient l'information, on comprend le propos, on reste attentif. Quand elle ne l'est pas, on ne voit plus que l'animation. Notre rôle est de faire en sorte que chaque élément en mouvement serve votre contenu, et rien d'autre.",
+      "Quand l'animation est précisément calibrée, elle devient transparente - on retient l'information, on comprend le propos, on reste attentif. Quand elle ne l'est pas, on ne voit plus que l'animation. Notre rôle est de faire en sorte que chaque élément en mouvement serve votre contenu, et rien d'autre.",
     manifesto: [
       "Chaque élément animé a une fonction précise. S'il n'en a pas, il disparaît.",
       "La cohérence visuelle sur l'ensemble d'une production vaut plus qu'un effet ponctuel.",
@@ -312,15 +363,15 @@ const UNIVERS: Record<string, Univers> = {
     blocks: [
       {
         h: "Intro et logo animé",
-        p: "Votre identité visuelle mise en mouvement pour ouvrir chaque vidéo. Court, propre, à votre image. On crée un élément réutilisable sur tous vos formats — YouTube, Reels, publicités, podcasts.",
+        p: "Votre identité visuelle mise en mouvement pour ouvrir chaque vidéo. Court, propre, à votre image. On crée un élément réutilisable sur tous vos formats - YouTube, Reels, publicités, podcasts.",
       },
       {
         h: "Typographie et textes animés",
-        p: "Titres, statistiques, phrases clés — mis en scène avec du mouvement pour renforcer la mémorisation. Particulièrement efficace sur les séquences où l'image seule ne suffit pas à porter le message.",
+        p: "Titres, statistiques, phrases clés - mis en scène avec du mouvement pour renforcer la mémorisation. Particulièrement efficace sur les séquences où l'image seule ne suffit pas à porter le message.",
       },
       {
         h: "Habillage et éléments récurrents",
-        p: "Nom des intervenants, annotations, indicateurs de chapitre — les éléments graphiques qui assoient le niveau de finition de vos vidéos et renforcent la cohérence de votre image.",
+        p: "Nom des intervenants, annotations, indicateurs de chapitre - les éléments graphiques qui assoient le niveau de finition de vos vidéos et renforcent la cohérence de votre image.",
       },
       {
         h: "Transitions et kit réutilisable",
@@ -341,10 +392,26 @@ const UNIVERS: Record<string, Univers> = {
       { k: "Réutilisable", v: "Chaque élément livré avec ses fichiers sources" },
     ],
     process: [
-      { n: "01", t: "Brief visuel", p: "Vous partagez vos références, votre charte graphique existante et vos contraintes." },
-      { n: "02", t: "Direction artistique", p: "On vous soumet une orientation visuelle avant de lancer la production." },
-      { n: "03", t: "Production", p: "Animation cadre par cadre, timing soigné, rendu final propre." },
-      { n: "04", t: "Livraison", p: "Fichiers exportés prêts à intégrer dans vos vidéos. Fichiers sources fournis sur demande." },
+      {
+        n: "01",
+        t: "Brief visuel",
+        p: "Vous partagez vos références, votre charte graphique existante et vos contraintes.",
+      },
+      {
+        n: "02",
+        t: "Direction artistique",
+        p: "On vous soumet une orientation visuelle avant de lancer la production.",
+      },
+      {
+        n: "03",
+        t: "Production",
+        p: "Animation cadre par cadre, timing soigné, rendu final propre.",
+      },
+      {
+        n: "04",
+        t: "Livraison",
+        p: "Fichiers exportés prêts à intégrer dans vos vidéos. Fichiers sources fournis sur demande.",
+      },
     ],
     tools: ["After Effects", "Premiere Pro", "DaVinci Resolve"],
     deliverables: [
@@ -355,7 +422,7 @@ const UNIVERS: Record<string, Univers> = {
     ],
     quote: {
       q: "Nos vidéos ont désormais une identité visuelle reconnaissable et cohérente. Le motion design a structuré toute notre production.",
-      a: "— Responsable contenu, marque lifestyle",
+      a: "- Responsable contenu, marque lifestyle",
     },
     theme: {
       pageBg: "bg-[#06061a]",
@@ -380,11 +447,11 @@ const UNIVERS: Record<string, Univers> = {
     title: "Des vidéos longues qui ",
     highlight: "tiennent l'attention.",
     baseline:
-      "YouTube, interviews, vlogs, formats documentaires — montés pour que vos viewers restent jusqu'à la fin.",
+      "YouTube, interviews, vlogs, formats documentaires - montés pour que vos viewers restent jusqu'à la fin.",
     hero: `${CDN}/699ab9aed3c37eb93d81735e_image11.jpeg`,
     introTitle: "Un long format bien construit, c'est de la fidélisation.",
     intro:
-      "Une vidéo longue dont le rythme n'est pas maîtrisé perd son audience après deux minutes. Une vidéo bien montée la retient jusqu'à la fin et la fait revenir la semaine suivante. On prend en charge la structure, le rythme et les finitions — pour que chaque minute de votre contenu soit justifiée.",
+      "Une vidéo longue dont le rythme n'est pas maîtrisé perd son audience après deux minutes. Une vidéo bien montée la retient jusqu'à la fin et la fait revenir la semaine suivante. On prend en charge la structure, le rythme et les finitions - pour que chaque minute de votre contenu soit justifiée.",
     manifesto: [
       "Un bon montage s'efface. Une coupe mal placée, jamais.",
       "Le rythme d'un long format se construit dès les premières décisions de découpage.",
@@ -422,10 +489,26 @@ const UNIVERS: Record<string, Univers> = {
       { k: "7j/7", v: "Production en continu" },
     ],
     process: [
-      { n: "01", t: "Brief", p: "Vous transmettez vos rushes, vos références stylistiques et vos attentes de rendu." },
-      { n: "02", t: "Montage", p: "On structure et monte votre vidéo selon le rythme et l'habillage définis en amont." },
-      { n: "03", t: "Livraison", p: "Vous recevez la vidéo finalisée, prête à publier, dans le format convenu." },
-      { n: "04", t: "Ajustements", p: "Vos retours sont intégrés jusqu'à validation complète de votre part." },
+      {
+        n: "01",
+        t: "Brief",
+        p: "Vous transmettez vos rushes, vos références stylistiques et vos attentes de rendu.",
+      },
+      {
+        n: "02",
+        t: "Montage",
+        p: "On structure et monte votre vidéo selon le rythme et l'habillage définis en amont.",
+      },
+      {
+        n: "03",
+        t: "Livraison",
+        p: "Vous recevez la vidéo finalisée, prête à publier, dans le format convenu.",
+      },
+      {
+        n: "04",
+        t: "Ajustements",
+        p: "Vos retours sont intégrés jusqu'à validation complète de votre part.",
+      },
     ],
     tools: ["Premiere Pro", "DaVinci Resolve", "After Effects"],
     deliverables: [
@@ -436,7 +519,7 @@ const UNIVERS: Record<string, Univers> = {
     ],
     quote: {
       q: "La durée de visionnage de mes vidéos a doublé depuis qu'on travaille ensemble. Le montage change vraiment tout.",
-      a: "— Créateur YouTube, communauté tech",
+      a: "- Créateur YouTube, communauté tech",
     },
     theme: {
       pageBg: "bg-[#eef4ff]",
@@ -456,7 +539,13 @@ const UNIVERS: Record<string, Univers> = {
   },
 };
 
-const ORDER = ["publicites-video", "podcast-video", "corporate-evenementiel", "motion-design", "contenu-educatif"];
+const ORDER = [
+  "publicites-video",
+  "podcast-video",
+  "corporate-evenementiel",
+  "motion-design",
+  "contenu-educatif",
+];
 
 export const Route = createFileRoute("/univers/$slug")({
   component: UniversPage,
@@ -469,23 +558,33 @@ export const Route = createFileRoute("/univers/$slug")({
     <main className="grid min-h-screen place-items-center bg-background">
       <div className="text-center">
         <p className="font-display text-2xl">Univers introuvable</p>
-        <Link to="/" className="mt-4 inline-block text-primary underline">Retour à l'accueil</Link>
+        <Link to="/" className="mt-4 inline-block text-primary underline">
+          Retour à l'accueil
+        </Link>
       </div>
     </main>
   ),
   head: ({ loaderData }) => ({
     meta: loaderData
       ? [
-        { title: `${loaderData.u.title.trim()} ${loaderData.u.highlight} — VizioCraft` },
-        { name: "description", content: loaderData.u.baseline },
-      ]
+          { title: `${loaderData.u.title.trim()} ${loaderData.u.highlight} - VizioCraft` },
+          { name: "description", content: loaderData.u.baseline },
+        ]
       : [],
   }),
 });
 
-/* ——————————————————————————— RENDER ——————————————————————————— */
+/* --------------------------- RENDER --------------------------- */
 
-function GalleryTile({ g, theme, onClick }: { g: Tile; theme: Univers["theme"]; onClick: () => void }) {
+function GalleryTile({
+  g,
+  theme,
+  onClick,
+}: {
+  g: Tile;
+  theme: Univers["theme"];
+  onClick: () => void;
+}) {
   const [error, setError] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
@@ -494,8 +593,9 @@ function GalleryTile({ g, theme, onClick }: { g: Tile; theme: Univers["theme"]; 
   return (
     <div
       onClick={onClick}
-      className={`group relative overflow-hidden rounded-2xl border ${theme.cardBorder} ${g.wide ? "col-span-2 sm:col-span-2 lg:col-span-2" : ""
-        } cursor-zoom-in transition-all duration-300 ${!loaded ? "animate-pulse bg-current/5 min-h-[150px]" : ""}`}
+      className={`group relative overflow-hidden rounded-2xl border ${theme.cardBorder} ${
+        g.wide ? "col-span-2 sm:col-span-2 lg:col-span-2" : ""
+      } cursor-zoom-in transition-all duration-300 ${!loaded ? "animate-pulse bg-current/5 min-h-[150px]" : ""}`}
     >
       <img
         src={g.src}
@@ -503,8 +603,9 @@ function GalleryTile({ g, theme, onClick }: { g: Tile; theme: Univers["theme"]; 
         loading="lazy"
         onLoad={() => setLoaded(true)}
         onError={() => setError(true)}
-        className={`w-full h-auto block transition duration-700 group-hover:scale-105 ${loaded ? "opacity-100" : "opacity-0"
-          }`}
+        className={`w-full h-auto block transition duration-700 group-hover:scale-105 ${
+          loaded ? "opacity-100" : "opacity-0"
+        }`}
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 transition group-hover:opacity-100" />
     </div>
@@ -527,10 +628,14 @@ function UniversPage() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") setActiveImageIndex(null);
       if (e.key === "ArrowRight") {
-        setActiveImageIndex((prevIdx) => (prevIdx !== null ? (prevIdx + 1) % u.gallery.length : null));
+        setActiveImageIndex((prevIdx) =>
+          prevIdx !== null ? (prevIdx + 1) % u.gallery.length : null,
+        );
       }
       if (e.key === "ArrowLeft") {
-        setActiveImageIndex((prevIdx) => (prevIdx !== null ? (prevIdx - 1 + u.gallery.length) % u.gallery.length : null));
+        setActiveImageIndex((prevIdx) =>
+          prevIdx !== null ? (prevIdx - 1 + u.gallery.length) % u.gallery.length : null,
+        );
       }
     };
     window.addEventListener("keydown", handleKeyDown);
@@ -542,8 +647,7 @@ function UniversPage() {
   }, [activeImageIndex, u.gallery.length]);
 
   return (
-    <main className={`${t.pageBg} ${t.pageInk} min-h-screen`}>
-      <Nav />
+    <main className={`${t.pageBg} ${t.pageInk} ink min-h-screen`}>
 
       {/* HERO */}
       <section className="relative overflow-hidden pt-32 pb-20 lg:pt-44 lg:pb-32">
@@ -563,20 +667,32 @@ function UniversPage() {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_30%,rgba(168,99,45,0.08),transparent_60%)]" />
         )}
         {t.decorative === "blueprint" && (
-          <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "linear-gradient(#0b1d3a 1px,transparent 1px),linear-gradient(90deg,#0b1d3a 1px,transparent 1px)", backgroundSize: "32px 32px" }} />
+          <div
+            className="absolute inset-0 opacity-[0.04]"
+            style={{
+              backgroundImage:
+                "linear-gradient(#0b1d3a 1px,transparent 1px),linear-gradient(90deg,#0b1d3a 1px,transparent 1px)",
+              backgroundSize: "32px 32px",
+            }}
+          />
         )}
         {t.decorative === "editorial" && (
           <div className="absolute inset-x-0 top-0 h-px bg-[#0e0e0e]/10" />
         )}
 
         <div className="relative mx-auto max-w-7xl px-6 lg:px-10">
-          <Link to="/" className={`inline-flex items-center gap-2 text-xs uppercase tracking-[0.22em] ${t.eyebrowColor} hover:opacity-80`}>
+          <Link
+            to="/"
+            className={`inline-flex items-center gap-2 text-xs uppercase tracking-[0.22em] ${t.eyebrowColor} hover:opacity-80`}
+          >
             ← Retour au portfolio
           </Link>
 
           <div className="mt-10 grid items-end gap-10 lg:grid-cols-[1.2fr_1fr]">
             <div>
-              <span className={`inline-flex items-center gap-2 rounded-full ${t.chipBg} px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] ${t.chipText}`}>
+              <span
+                className={`inline-flex items-center gap-2 rounded-full ${t.chipBg} px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] ${t.chipText}`}
+              >
                 <span className={`h-1.5 w-1.5 rounded-full ${t.accentBg}`} />
                 {u.eyebrow}
               </span>
@@ -587,10 +703,17 @@ function UniversPage() {
               <p className="mt-6 max-w-xl text-lg leading-relaxed opacity-80">{u.baseline}</p>
 
               <div className="mt-9 flex flex-wrap gap-3">
-                <Link to="/" hash="contact" className={`inline-flex items-center gap-2 rounded-full ${t.button} px-7 py-4 text-sm font-semibold transition`}>
+                <Link
+                  to="/"
+                  hash="contact"
+                  className={`inline-flex items-center gap-2 rounded-full ${t.button} px-7 py-4 text-sm font-semibold transition`}
+                >
                   Démarrer un projet →
                 </Link>
-                <a href="#detail" className={`inline-flex items-center gap-2 rounded-full border ${t.cardBorder} px-7 py-4 text-sm font-semibold opacity-80 hover:opacity-100 transition`}>
+                <a
+                  href="#detail"
+                  className={`inline-flex items-center gap-2 rounded-full border ${t.cardBorder} px-7 py-4 text-sm font-semibold opacity-80 hover:opacity-100 transition`}
+                >
                   Explorer l'univers
                 </a>
               </div>
@@ -598,13 +721,20 @@ function UniversPage() {
 
             <div className="relative">
               <div className="overflow-hidden rounded-[2rem] border border-white/10 shadow-2xl">
-                <img src={u.hero} alt={u.title} className="aspect-[4/3] w-full object-cover" loading="eager" />
+                <img
+                  src={u.hero}
+                  alt={u.title}
+                  className="aspect-[4/3] w-full object-cover"
+                  loading="eager"
+                />
               </div>
             </div>
           </div>
 
           {/* Stats band */}
-          <div className={`mt-16 grid gap-px overflow-hidden rounded-3xl border ${t.cardBorder} ${t.cardBg} sm:grid-cols-3`}>
+          <div
+            className={`mt-16 grid gap-px overflow-hidden rounded-3xl border ${t.cardBorder} ${t.cardBg} sm:grid-cols-3`}
+          >
             {u.stats.map((s) => (
               <div key={s.k} className={`${t.softBg} px-6 py-7 sm:px-8 sm:py-10`}>
                 <p className={`font-display text-4xl sm:text-5xl ${t.accent}`}>{s.k}</p>
@@ -620,11 +750,19 @@ function UniversPage() {
         <div className="mx-auto max-w-6xl px-6 lg:px-10">
           <div className="grid gap-12 lg:grid-cols-[1fr_1.4fr]">
             <div>
-              <span className={`text-xs font-semibold uppercase tracking-[0.22em] ${t.eyebrowColor}`}>Manifeste</span>
+              <span
+                className={`text-xs font-semibold uppercase tracking-[0.22em] ${t.eyebrowColor}`}
+              >
+                Manifeste
+              </span>
               <ul className="mt-6 space-y-5">
                 {u.manifesto.map((m, i) => (
                   <li key={i} className="flex gap-4">
-                    <span className={`mt-2 h-6 w-6 shrink-0 rounded-full ${t.accentBg} text-center text-[11px] font-bold leading-6 text-white`}>{i + 1}</span>
+                    <span
+                      className={`mt-2 h-6 w-6 shrink-0 rounded-full ${t.accentBg} text-center text-[11px] font-bold leading-6 text-white`}
+                    >
+                      {i + 1}
+                    </span>
                     <span className="text-base leading-relaxed opacity-85">{m}</span>
                   </li>
                 ))}
@@ -638,13 +776,20 @@ function UniversPage() {
         </div>
       </section>
 
-      {/* NARRATIVE BLOCKS — alternating layout */}
+      {/* NARRATIVE BLOCKS - alternating layout */}
       <section className={`${t.softBg} py-20 lg:py-28`}>
         <div className="mx-auto max-w-6xl px-6 lg:px-10">
           <div className="grid gap-5 md:grid-cols-2">
             {u.blocks.map((b, i) => (
-              <div key={i} className={`rounded-3xl border ${t.cardBorder} ${t.cardBg} p-7 sm:p-9 transition hover:-translate-y-1 hover:shadow-2xl`}>
-                <span className={`text-[11px] font-semibold uppercase tracking-[0.22em] ${t.eyebrowColor}`}>0{i + 1}</span>
+              <div
+                key={i}
+                className={`rounded-3xl border ${t.cardBorder} ${t.cardBg} p-7 sm:p-9 transition hover:-translate-y-1 hover:shadow-2xl`}
+              >
+                <span
+                  className={`text-[11px] font-semibold uppercase tracking-[0.22em] ${t.eyebrowColor}`}
+                >
+                  0{i + 1}
+                </span>
                 <h3 className="mt-3 font-display text-2xl sm:text-3xl">{b.h}</h3>
                 <p className="mt-3 text-sm leading-relaxed opacity-80">{b.p}</p>
               </div>
@@ -653,14 +798,19 @@ function UniversPage() {
         </div>
       </section>
 
-      {/* GALLERY — adaptive layout */}
+      {/* GALLERY - adaptive layout */}
       <section className="py-20 lg:py-28">
         <div className="mx-auto max-w-7xl px-6 lg:px-10">
           <div className="mb-12 max-w-2xl">
-            <span className={`text-xs font-semibold uppercase tracking-[0.22em] ${t.eyebrowColor}`}>Galerie</span>
-            <h2 className="mt-3 font-display text-3xl tracking-tight sm:text-4xl">L'empreinte visuelle.</h2>
+            <span className={`text-xs font-semibold uppercase tracking-[0.22em] ${t.eyebrowColor}`}>
+              Galerie
+            </span>
+            <h2 className="mt-3 font-display text-3xl tracking-tight sm:text-4xl">
+              L'empreinte visuelle.
+            </h2>
             <p className="mt-4 text-base leading-relaxed opacity-70">
-              L'harmonie des formes, du rythme et de la lumière au service d'une narration singulière.
+              L'harmonie des formes, du rythme et de la lumière au service d'une narration
+              singulière.
             </p>
           </div>
           <div className="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4 items-start">
@@ -674,11 +824,18 @@ function UniversPage() {
       {/* PROCESS */}
       <section className={`${t.softBg} py-20 lg:py-28`}>
         <div className="mx-auto max-w-6xl px-6 lg:px-10">
-          <span className={`text-xs font-semibold uppercase tracking-[0.22em] ${t.eyebrowColor}`}>Notre process</span>
-          <h2 className="mt-3 font-display text-3xl tracking-tight sm:text-4xl">De votre brief au master final.</h2>
+          <span className={`text-xs font-semibold uppercase tracking-[0.22em] ${t.eyebrowColor}`}>
+            Notre process
+          </span>
+          <h2 className="mt-3 font-display text-3xl tracking-tight sm:text-4xl">
+            De votre brief au master final.
+          </h2>
           <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {u.process.map((p) => (
-              <div key={p.n} className={`relative rounded-2xl border ${t.cardBorder} ${t.cardBg} p-6`}>
+              <div
+                key={p.n}
+                className={`relative rounded-2xl border ${t.cardBorder} ${t.cardBg} p-6`}
+              >
                 <span className={`font-display text-5xl ${t.accent} opacity-30`}>{p.n}</span>
                 <h3 className="mt-2 font-display text-xl">{p.t}</h3>
                 <p className="mt-2 text-sm leading-relaxed opacity-75">{p.p}</p>
@@ -693,23 +850,42 @@ function UniversPage() {
         <div className="mx-auto max-w-6xl px-6 lg:px-10">
           <div className="grid gap-10 lg:grid-cols-2">
             <div>
-              <span className={`text-xs font-semibold uppercase tracking-[0.22em] ${t.eyebrowColor}`}>Stack</span>
-              <h3 className="mt-3 font-display text-2xl sm:text-3xl">Les outils que nous maîtrisons.</h3>
+              <span
+                className={`text-xs font-semibold uppercase tracking-[0.22em] ${t.eyebrowColor}`}
+              >
+                Stack
+              </span>
+              <h3 className="mt-3 font-display text-2xl sm:text-3xl">
+                Les outils que nous maîtrisons.
+              </h3>
               <div className="mt-6 flex flex-wrap gap-2">
                 {u.tools.map((tool) => (
-                  <span key={tool} className={`rounded-full ${t.chipBg} ${t.chipText} px-4 py-2 text-xs font-semibold uppercase tracking-wider`}>
+                  <span
+                    key={tool}
+                    className={`rounded-full ${t.chipBg} ${t.chipText} px-4 py-2 text-xs font-semibold uppercase tracking-wider`}
+                  >
                     {tool}
                   </span>
                 ))}
               </div>
             </div>
             <div>
-              <span className={`text-xs font-semibold uppercase tracking-[0.22em] ${t.eyebrowColor}`}>Livrables inclus</span>
-              <h3 className="mt-3 font-display text-2xl sm:text-3xl">Tout ce que vous récupérez.</h3>
+              <span
+                className={`text-xs font-semibold uppercase tracking-[0.22em] ${t.eyebrowColor}`}
+              >
+                Livrables inclus
+              </span>
+              <h3 className="mt-3 font-display text-2xl sm:text-3xl">
+                Tout ce que vous récupérez.
+              </h3>
               <ul className="mt-6 space-y-3">
                 {u.deliverables.map((d) => (
                   <li key={d} className="flex items-start gap-3 text-sm opacity-85">
-                    <span className={`mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full ${t.accentBg} text-[10px] text-white`}>✓</span>
+                    <span
+                      className={`mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full ${t.accentBg} text-[10px] text-white`}
+                    >
+                      ✓
+                    </span>
                     {d}
                   </li>
                 ))}
@@ -721,7 +897,9 @@ function UniversPage() {
 
       {/* QUOTE */}
       <section className="px-6 pb-20 lg:px-10 lg:pb-28">
-        <div className={`mx-auto max-w-5xl rounded-[2rem] border ${t.cardBorder} ${t.quoteBg} p-10 sm:p-14 text-center`}>
+        <div
+          className={`mx-auto max-w-5xl rounded-[2rem] border ${t.cardBorder} ${t.quoteBg} p-10 sm:p-14 text-center`}
+        >
           <p className={`font-display text-2xl leading-snug sm:text-3xl`}>« {u.quote.q} »</p>
           <p className="mt-5 text-sm opacity-70">{u.quote.a}</p>
         </div>
@@ -730,7 +908,9 @@ function UniversPage() {
       {/* NAV NEXT/PREV */}
       <section className="px-6 pb-24 lg:px-10">
         <div className="mx-auto max-w-6xl">
-          <p className={`mb-5 text-center text-xs font-semibold uppercase tracking-[0.22em] opacity-50 ${t.pageInk}`}>
+          <p
+            className={`mb-5 text-center text-xs font-semibold uppercase tracking-[0.22em] opacity-50 ${t.pageInk}`}
+          >
             Explorer nos autres services
           </p>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -740,30 +920,52 @@ function UniversPage() {
                 params={{ slug: prev.slug }}
                 className={`group flex items-center gap-4 rounded-2xl border-2 ${t.cardBorder} ${t.cardBg} px-6 py-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:border-current/30 cursor-pointer`}
               >
-                <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${t.accentBg} text-white text-lg font-bold transition group-hover:scale-110`}>
+                <span
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${t.accentBg} text-white text-lg font-bold transition group-hover:scale-110`}
+                >
                   ←
                 </span>
                 <div className="min-w-0">
-                  <p className={`text-[10px] font-semibold uppercase tracking-[0.2em] ${t.eyebrowColor}`}>Service précédent</p>
-                  <p className="mt-0.5 font-display text-base leading-tight truncate">{prev.title}{prev.highlight}</p>
+                  <p
+                    className={`text-[10px] font-semibold uppercase tracking-[0.2em] ${t.eyebrowColor}`}
+                  >
+                    Service précédent
+                  </p>
+                  <p className="mt-0.5 font-display text-base leading-tight truncate">
+                    {prev.title}
+                    {prev.highlight}
+                  </p>
                 </div>
               </Link>
-            ) : <div />}
+            ) : (
+              <div />
+            )}
             {next ? (
               <Link
                 to="/univers/$slug"
                 params={{ slug: next.slug }}
                 className={`group flex items-center justify-between gap-4 rounded-2xl border-2 ${t.cardBorder} ${t.cardBg} px-6 py-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:border-current/30 cursor-pointer sm:flex-row-reverse sm:text-right`}
               >
-                <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${t.accentBg} text-white text-lg font-bold transition group-hover:scale-110`}>
+                <span
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${t.accentBg} text-white text-lg font-bold transition group-hover:scale-110`}
+                >
                   →
                 </span>
                 <div className="min-w-0">
-                  <p className={`text-[10px] font-semibold uppercase tracking-[0.2em] ${t.eyebrowColor}`}>Service suivant</p>
-                  <p className="mt-0.5 font-display text-base leading-tight truncate">{next.title}{next.highlight}</p>
+                  <p
+                    className={`text-[10px] font-semibold uppercase tracking-[0.2em] ${t.eyebrowColor}`}
+                  >
+                    Service suivant
+                  </p>
+                  <p className="mt-0.5 font-display text-base leading-tight truncate">
+                    {next.title}
+                    {next.highlight}
+                  </p>
                 </div>
               </Link>
-            ) : <div />}
+            ) : (
+              <div />
+            )}
           </div>
         </div>
       </section>
@@ -790,7 +992,9 @@ function UniversPage() {
             className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 z-55 text-white/70 hover:text-white transition p-3.5 rounded-full hover:bg-white/10 cursor-pointer"
             onClick={(e) => {
               e.stopPropagation();
-              setActiveImageIndex((prevIdx) => (prevIdx !== null ? (prevIdx - 1 + u.gallery.length) % u.gallery.length : null));
+              setActiveImageIndex((prevIdx) =>
+                prevIdx !== null ? (prevIdx - 1 + u.gallery.length) % u.gallery.length : null,
+              );
             }}
             aria-label="Image précédente"
           >
@@ -802,7 +1006,9 @@ function UniversPage() {
             className="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 z-55 text-white/70 hover:text-white transition p-3.5 rounded-full hover:bg-white/10 cursor-pointer"
             onClick={(e) => {
               e.stopPropagation();
-              setActiveImageIndex((prevIdx) => (prevIdx !== null ? (prevIdx + 1) % u.gallery.length : null));
+              setActiveImageIndex((prevIdx) =>
+                prevIdx !== null ? (prevIdx + 1) % u.gallery.length : null,
+              );
             }}
             aria-label="Image suivante"
           >
