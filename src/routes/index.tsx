@@ -204,7 +204,7 @@ function Hero() {
                   Votre équipe
                   <span
                     aria-hidden
-                    className="inline-flex shrink-0 items-center rounded-full bg-white/70 p-[0.045em] shadow-[0_10px_30px_-14px_rgba(12,10,18,0.5)] ring-1 ring-ink/10"
+                    className="hidden inline-flex shrink-0 items-center rounded-full bg-white/70 p-[0.045em] shadow-[0_10px_30px_-14px_rgba(12,10,18,0.5)] ring-1 ring-ink/10"
                   >
                     <img
                       src={FOUNDER_A}
@@ -334,11 +334,12 @@ function Hero() {
               />
               <span className="pointer-events-none absolute inset-x-0 bottom-0 z-[4] flex items-end justify-between gap-4 p-4 sm:p-6">
                 <span className="flex items-center gap-3 sm:gap-4">
-                  <span className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white text-ink shadow-[0_14px_36px_-12px_rgba(12,10,18,0.7)] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/hv:scale-110 sm:h-14 sm:w-14">
+                  <span className="relative flex h-12 w-12 shrink-0 items-center justify-center transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/hv:scale-110 sm:h-14 sm:w-14">
                     <svg
                       viewBox="0 0 24 24"
-                      className="h-[38%] w-[38%] translate-x-[6%]"
-                      fill="currentColor"
+                      className="h-9 w-9 sm:h-10 sm:w-10"
+                      fill="white"
+                      style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.55))" }}
                       aria-hidden
                     >
                       <path d="M8 5v14l11-7z" />
@@ -408,12 +409,11 @@ function FormatsTicker() {
 /* ------------------------- MANIFESTE ------------------------- */
 
 const MANIFESTE: { t: string; em?: boolean }[] = [
-  ..."Nous ne vendons pas des heures de montage. Nous vendons des".split(" ").map((t) => ({ t })),
-  { t: "secondes", em: true },
-  { t: "d'attention,", em: true },
-  ..."et nous les défendons, une par une, jusqu'à ce que votre audience ne puisse plus regarder ailleurs."
-    .split(" ")
-    .map((t) => ({ t })),
+  ..."Vous gagnez".split(" ").map((t) => ({ t })),
+  { t: "du", em: true },
+  { t: "temps.", em: true },
+  ..."On s'occupe du reste : qualité, rapidité, suivi, motion,".split(" ").map((t) => ({ t })),
+  { t: "ia.", em: true },
 ];
 
 function Manifeste() {
@@ -453,6 +453,9 @@ function Manifeste() {
               </span>{" "}
             </span>
           ))}
+        </p>
+        <p className="mt-5 max-w-[38ch] text-[clamp(0.85rem,1.4vw,1.1rem)] leading-relaxed text-ink/50 tracking-[-0.01em]" data-reveal="up">
+          Toujours à jour sur l'IA, pour donner à nos monteurs les moyens d'aller plus vite et plus loin.
         </p>
 
         <div className="mt-12 grid gap-10 border-t border-ink/10 pt-8 sm:mt-16 lg:grid-cols-12 lg:gap-10 lg:pt-10">
@@ -864,8 +867,7 @@ function Contact() {
               data-reveal="up"
               style={{ ["--rd" as string]: "200ms" }}
             >
-              VizioCraft est une société basée à Madagascar, fondée par deux frères passionnés par
-              la création de contenu. Notre mission : offrir une solution concrète aux pros qui
+              VizioCraft est une société basée à Madagascar, spécialisée dans le montage vidéo professionnel. Notre mission : offrir une solution concrète aux pros qui
               veulent produire vite et bien, sans compromis sur la qualité.
             </p>
 

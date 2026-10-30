@@ -8,7 +8,6 @@ import {
 } from "@tanstack/react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Nav } from "@/components/Nav";
-import { Cursor } from "@/components/Cursor";
 import { useRevealObserver } from "@/lib/motion";
 
 import appCss from "../styles.css?url";
@@ -174,7 +173,6 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <Nav />
-      <Cursor />
       <GlobalEffects />
       <Outlet />
       <CookieBannerLazy />

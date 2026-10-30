@@ -154,11 +154,11 @@ export function WorkTile({
         </span>
         <span
           aria-hidden
-          className={`flex shrink-0 items-center justify-center rounded-full bg-white text-ink transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/tile:scale-110 ${
+          className={`flex shrink-0 items-center justify-center transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/tile:scale-110 ${
             compact ? "h-8 w-8" : "h-9 w-9 sm:h-10 sm:w-10"
           } ${playing ? "scale-75 opacity-0" : ""}`}
         >
-          <svg viewBox="0 0 24 24" className="h-[38%] w-[38%] translate-x-[6%]" fill="currentColor">
+          <svg viewBox="0 0 24 24" className={compact ? "h-6 w-6" : "h-7 w-7 sm:h-8 sm:h-8"} fill="white" style={{ filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.5))" }}>
             <path d="M8 5v14l11-7z" />
           </svg>
         </span>

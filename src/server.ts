@@ -73,7 +73,7 @@ type AssetsEnv = { ASSETS?: { fetch: (request: Request) => Promise<Response> } }
    Pour /work/*.mp4, on relit le fichier et on répond nous-mêmes aux requêtes partielles. */
 async function serveVideo(request: Request, env: AssetsEnv): Promise<Response | null> {
   const url = new URL(request.url);
-  if (!env.ASSETS || !url.pathname.startsWith("/work/")) return null;
+  if (!env || !env.ASSETS || !url.pathname.startsWith("/work/")) return null;
   /* miniatures et autres fichiers : servis tels quels par Cloudflare */
   if (!url.pathname.endsWith(".mp4")) return env.ASSETS.fetch(request);
   if (request.method !== "GET" && request.method !== "HEAD") return null;
