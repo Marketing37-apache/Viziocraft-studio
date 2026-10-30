@@ -145,13 +145,13 @@ export function Footer() {
           </ul>
 
           <div className="flex items-center justify-between gap-5">
-            <p className="font-label text-ink/55">
+            <p className="font-label text-[10px] text-ink/25">
               Dev &amp; intégration par{" "}
               <a
                 href="https://lumina-canvapro-mt.pages.dev/"
                 target="_blank"
                 rel="noreferrer"
-                className="text-ink/80 transition-colors hover:text-brand"
+                className="text-ink/30 transition-colors hover:text-ink/50"
               >
                 teamviziocraft
               </a>
