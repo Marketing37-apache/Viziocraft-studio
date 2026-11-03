@@ -302,7 +302,7 @@ function Hero() {
           <WarmContext.Provider value={warm}>
             <div className="hero-sat hero-sat--left hidden lg:block">
               <WorkTile
-                work={bySlug("ugc-boutique")}
+                work={bySlug("pub-jeep-ia")}
                 compact
                 className="rounded-[20px] shadow-[0_40px_80px_-40px_rgba(12,10,18,0.75)] ring-1 ring-ink/10"
               />
@@ -650,8 +650,8 @@ function Tarifs() {
           <div className="lg:col-span-8" data-reveal="up">
             <SectionLabel>Tarifs</SectionLabel>
             <h2 className="mt-5 font-display text-[clamp(2.5rem,7.4vw,6.2rem)] font-bold leading-[0.9] tracking-[-0.05em] text-ink">
-              {SHOW_MONTAGE_CONTINU ? "Trois" : "Deux"} manières de travailler{" "}
-              <em className="font-em pr-[0.06em] text-[1.06em] text-brand-gradient">ensemble.</em>
+              Trois formules pour{" "}
+              <em className="font-em pr-[0.06em] text-[1.06em] text-brand-gradient">tous les besoins.</em>
             </h2>
           </div>
           <div
@@ -660,8 +660,7 @@ function Tarifs() {
             style={{ ["--rd" as string]: "120ms" }}
           >
             <p className="max-w-md text-[15.5px] leading-relaxed text-ink/70 sm:text-[17px]">
-              Pas de surprises, pas de frais cachés. Le devis se construit en direct, à la minute
-              près.
+              Des forfaits mensuels clairs, sans surprise. Choisissez le rythme qui correspond à vos objectifs.
             </p>
             <ul className="mt-4 flex flex-wrap gap-2">
               {["Sans engagement", "Facture pro", "Réponse < 24h"].map((t) => (
@@ -676,67 +675,62 @@ function Tarifs() {
           </div>
         </div>
 
-        <div
-          className={`mt-10 grid gap-4 sm:mt-14 sm:gap-5 ${
-            SHOW_MONTAGE_CONTINU ? "lg:grid-cols-3" : "lg:grid-cols-2"
-          }`}
-        >
+        <div className="mt-10 grid gap-4 sm:mt-14 sm:gap-5 lg:grid-cols-3">
           <PriceCard
             index={0}
-            badge="À la vidéo"
-            title="Montage essentiel"
-            sub="Pour tester sans engagement"
-            price="30 à 250 €"
-            priceUnit="/ vidéo"
-            note="Selon le type et la durée"
+            badge="Pack découverte"
+            title="5 vidéos"
+            sub="Idéal pour démarrer"
+            price="300 €"
+            priceUnit="HT / mois"
+            note="5 vidéos courtes par mois"
             features={[
-              "Short, long format, podcast, pub",
-              "Niveau de montage au choix",
-              "Options à la carte",
+              "Shorts, Reels, TikToks",
+              "Montage dynamique et rythmé",
               "Révisions incluses",
+              "Livraison sous 48-72h",
             ]}
-            to="/devis/$variant"
-            cta="Calculer mon devis"
+            href="#contact"
+            cta="Démarrer"
           />
 
-          {SHOW_MONTAGE_CONTINU && (
-            <PriceCard
-              index={1}
-              badge="Le plus populaire · Abonnement"
-              title="Montage continu"
-              sub="Production sans interruption"
-              price="850 €"
-              priceUnit="/ mois"
-              note="Jusqu'à 20 shorts ou 4 longs formats"
-              features={[
-                "Tous formats inclus",
-                "Support prioritaire",
-                "Révisions illimitées",
-                "Livraison continue",
-                "Au-delà : tarif préférentiel",
-              ]}
-              href="#contact"
-              cta="Démarrer"
-            />
-          )}
+          <PriceCard
+            index={1}
+            badge="Le plus populaire"
+            title="10 vidéos"
+            sub="Pour une présence régulière"
+            price="450 €"
+            priceUnit="HT / mois"
+            note="10 vidéos courtes par mois"
+            features={[
+              "Tous formats courts inclus",
+              "Montage premium",
+              "Révisions illimitées",
+              "Support prioritaire",
+              "Livraison sous 48h",
+            ]}
+            href="#contact"
+            cta="Choisir cette formule"
+          />
 
           <PriceCard
-            index={SHOW_MONTAGE_CONTINU ? 2 : 1}
+            index={2}
             dark
             badge="Sur mesure"
-            title="Production personnalisée"
-            sub="Entièrement à la carte"
-            price="Prix"
-            priceUnit="calculé en direct"
-            note="One shot ou multishoot mensuel"
+            title="Créa illimitée"
+            sub="Production sans limite"
+            price="À partir de 1400 €"
+            priceUnit="HT / mois"
+            note="Vidéos illimitées, équipe dédiée"
             features={[
-              "Chaque type + quantité au choix",
-              "Réduction multishoot disponible",
-              "Devis détaillé par mail",
-              "Un chef de projet attitré",
+              "Nombre de vidéos illimité",
+              "Tous formats (courts & longs)",
+              "Chef de projet attitré",
+              "Motion design & IA inclus",
+              "Livraison continue",
             ]}
-            to="/devis/$variant"
-            cta="Configurer mon devis"
+            href="#contact"
+            cta="Parlons-en"
           />
         </div>
 

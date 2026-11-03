@@ -128,14 +128,7 @@ export const WORKS: Work[] = [
     o: "v",
     duration: 20,
   },
-  {
-    slug: "ugc-boutique",
-    title: "UGC en boutique",
-    label: "UGC",
-    categories: ["shorts", "ads"],
-    o: "v",
-    duration: 64,
-  },
+  // UGC boutique retiré à la demande du client
   {
     slug: "reel-sport",
     title: "Reel sport",
