@@ -302,7 +302,7 @@ function Hero() {
           <WarmContext.Provider value={warm}>
             <div className="hero-sat hero-sat--left hidden lg:block">
               <WorkTile
-                work={bySlug("pub-jeep-ia")}
+                work={bySlug("reel-ferrari-ia")}
                 compact
                 className="rounded-[20px] shadow-[0_40px_80px_-40px_rgba(12,10,18,0.75)] ring-1 ring-ink/10"
               />
