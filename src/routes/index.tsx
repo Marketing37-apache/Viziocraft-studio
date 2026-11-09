@@ -680,37 +680,42 @@ function Tarifs() {
             index={0}
             badge="Pack découverte"
             title="5 vidéos"
-            sub="Idéal pour démarrer"
+            sub="Prix fixe par mois"
             price="300 €"
             priceUnit="HT / mois"
-            note="5 vidéos courtes par mois"
+            note="Prix fixe"
             features={[
-              "Shorts, Reels, TikToks",
-              "Montage dynamique et rythmé",
-              "Révisions incluses",
-              "Livraison sous 48-72h",
+              "Analyse de votre marque et univers visuel",
+              "Réception du brief et des rushs",
+              "Dérushage et montage",
+              "Sous-titrage",
+              "Habillage graphique",
+              "Sound design et mixage",
+              "Colorimétrie",
             ]}
             href="#contact"
-            cta="Démarrer"
+            cta="Prendre rendez-vous"
           />
 
           <PriceCard
             index={1}
             badge="Le plus populaire"
             title="10 vidéos"
-            sub="Pour une présence régulière"
+            sub="Prix fixe par mois"
             price="450 €"
             priceUnit="HT / mois"
-            note="10 vidéos courtes par mois"
+            note="Prix fixe"
             features={[
-              "Tous formats courts inclus",
-              "Montage premium",
-              "Révisions illimitées",
-              "Support prioritaire",
-              "Livraison sous 48h",
+              "Analyse de votre marque et univers visuel",
+              "Réception du brief et des rushs",
+              "Dérushage et montage",
+              "Sous-titrage",
+              "Habillage graphique",
+              "Sound design et mixage",
+              "Colorimétrie",
             ]}
             href="#contact"
-            cta="Choisir cette formule"
+            cta="Prendre rendez-vous"
           />
 
           <PriceCard
@@ -718,19 +723,17 @@ function Tarifs() {
             dark
             badge="Sur mesure"
             title="Créa illimitée"
-            sub="Production sans limite"
-            price="À partir de 1400 €"
+            sub="À partir de, pour un mois de contenu"
+            price="1 400 €"
             priceUnit="HT / mois"
-            note="Vidéos illimitées, équipe dédiée"
+            note="À partir de"
             features={[
-              "Nombre de vidéos illimité",
-              "Tous formats (courts & longs)",
-              "Chef de projet attitré",
-              "Motion design & IA inclus",
-              "Livraison continue",
+              "Disponibilité et réactivité immédiates",
+              "Chef de projet dédié",
+              "Montage illimité de vos vidéos",
             ]}
             href="#contact"
-            cta="Parlons-en"
+            cta="Prendre rendez-vous"
           />
         </div>
 
