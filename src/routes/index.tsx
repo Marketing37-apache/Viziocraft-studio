@@ -155,8 +155,8 @@ function Arrow({ className = "h-4 w-4" }: { className?: string }) {
 
 function Hero() {
   const magnetic = useMagnetic<HTMLAnchorElement>(0.25);
-  const [warm, setWarm] = useState(false);
-  const warmed = useRef(false);
+  const [warm, setWarm] = useState(true); // activé dès le début pour l'autoplay
+  const warmed = useRef(true); // déjà warmed
 
   /* La scène vidéo grandit à mesure qu'elle entre dans l'écran. */
   const stageRef = useViewProgress<HTMLDivElement>(
@@ -304,6 +304,7 @@ function Hero() {
               <WorkTile
                 work={bySlug("reel-ferrari-ia")}
                 compact
+                autoplay
                 className="rounded-[20px] shadow-[0_40px_80px_-40px_rgba(12,10,18,0.75)] ring-1 ring-ink/10"
               />
             </div>
@@ -311,6 +312,7 @@ function Hero() {
               <WorkTile
                 work={bySlug("reel-sport")}
                 compact
+                autoplay
                 className="rounded-[20px] shadow-[0_40px_80px_-40px_rgba(12,10,18,0.75)] ring-1 ring-ink/10"
               />
             </div>

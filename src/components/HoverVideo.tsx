@@ -204,7 +204,11 @@ export function HoverVideo({
     if (backstage) {
       window.clearTimeout(t.pause);
       window.clearTimeout(t.unmount);
-      if (!mounted) setMounted(true);
+      if (!mounted) {
+        setMounted(true);
+        // Si warm, on simule un hover permanent pour l'autoplay
+        if (warm) hovering.current = true;
+      }
       else if (ready.current && !clean.current) command("playVideo");
       return;
     }
@@ -249,7 +253,7 @@ export function HoverVideo({
         /* YouTube active les sous-titres quand le son est coupé : on les retire */
         command("unloadModule", ["captions"]);
         command("setOption", ["captions", "track", {}]);
-        if (!hovering.current) {
+        if (!hovering.current && !warm) {
           command("setPlaybackRate", [BACKSTAGE_RATE]);
           /* personne ne survole : on ne tourne pas en coulisse indéfiniment */
           window.clearTimeout(t.pause);
@@ -257,14 +261,23 @@ export function HoverVideo({
             if (!hovering.current) command("pauseVideo");
           }, 60000);
         }
-        if (clean.current) return;
+        if (clean.current) {
+          // Si c'est une vidéo hero avec warm=true, on démarre automatiquement
+          if (warm && !hovering.current) {
+            hovering.current = true;
+            command("setPlaybackRate", [1]);
+            setState("playing");
+          }
+          return;
+        }
         window.clearTimeout(t.clean);
         t.clean = window.setTimeout(() => {
           clean.current = true;
           command("unloadModule", ["captions"]);
-          if (hovering.current) {
+          if (hovering.current || warm) {
             command("setPlaybackRate", [1]);
             setState("playing");
+            if (warm) hovering.current = true;
           }
         }, CHROME_MS);
         return;
@@ -324,6 +337,8 @@ export function HoverVideo({
     window.clearTimeout(t.pause);
     window.clearTimeout(t.unmount);
     window.clearTimeout(t.intent);
+    // Si warm, pas de délai d'intention - on démarre tout de suite
+    const delay = warm ? 0 : intent;
     t.intent = window.setTimeout(() => {
       if (!hovering.current) return;
       if (clean.current) {
@@ -340,10 +355,12 @@ export function HoverVideo({
       t.giveUp = window.setTimeout(() => {
         setState((s) => (s === "warming" ? "idle" : s));
       }, 12000);
-    }, intent);
-  }, [mounted, command, intent]);
+    }, delay);
+  }, [mounted, command, intent, warm]);
 
   const stop = useCallback(() => {
+    // Si warm=true (vidéo hero), on ne stoppe jamais l'autoplay
+    if (warm) return;
     if (!hovering.current) return;
     hovering.current = false;
     const t = timers.current;
@@ -367,6 +384,13 @@ export function HoverVideo({
       }, 40000);
     }
   }, [mounted, command, warm]);
+
+  /* Si warm=true, on démarre automatiquement au montage */
+  useEffect(() => {
+    if (warm && !hovering.current) {
+      start();
+    }
+  }, [warm, start]);
 
   const src =
     `${YT_ORIGIN}/embed/${id}?autoplay=1&mute=1&controls=0&playsinline=1&rel=0&modestbranding=1` +

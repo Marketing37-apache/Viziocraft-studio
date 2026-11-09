@@ -20,6 +20,7 @@ export function WorkTile({
   style,
   eager = false,
   compact = false,
+  autoplay = false,
 }: {
   work: Work;
   className?: string;
@@ -27,19 +28,21 @@ export function WorkTile({
   eager?: boolean;
   /** vignette réduite (hero) : textes allégés */
   compact?: boolean;
+  /** lecture automatique dès que la vidéo est prête (hero) */
+  autoplay?: boolean;
 }) {
   const files = workFiles(work);
   const warm = useContext(WarmContext);
   const videoRef = useRef<HTMLVideoElement>(null);
   const hovering = useRef(false);
-  const [armed, setArmed] = useState(false);
+  const [armed, setArmed] = useState(autoplay); // armed dès le début si autoplay
   const [playing, setPlaying] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
-  /* préchargement de l'extrait quand la souris entre dans la section */
+  /* préchargement de l'extrait quand la souris entre dans la section ou si autoplay */
   useEffect(() => {
-    if (warm) setArmed(true);
-  }, [warm]);
+    if (warm || autoplay) setArmed(true);
+  }, [warm, autoplay]);
 
   const play = () => {
     hovering.current = true;
@@ -117,10 +120,10 @@ export function WorkTile({
           aria-hidden
           tabIndex={-1}
           onPlaying={() => {
-            if (hovering.current) setPlaying(true);
+            if (hovering.current || autoplay) setPlaying(true);
           }}
           onCanPlay={(e) => {
-            if (hovering.current) e.currentTarget.play().catch(() => {});
+            if (hovering.current || autoplay) e.currentTarget.play().catch(() => {});
           }}
           className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${
             playing ? "opacity-100" : "opacity-0"
